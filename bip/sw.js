@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bip-pwa-v1-20261007';
+const CACHE_NAME = 'bip-pwa-v121-endless-20261007';
 const CACHE_PREFIX = 'bip-pwa-';
 const APP_PREFIX = '/agis-learning-games/bip/';
 const CORE = [

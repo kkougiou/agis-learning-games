@@ -630,6 +630,20 @@ button.pedestal{position:relative;display:block;margin:0 auto;padding:0;border:0
 .adaptive .signal-bag i.red{background:var(--red)}
 .adaptive .mission svg{max-width:100%}
 .ad-note{color:var(--ink);background:var(--panel);border:3px solid var(--line);padding:10px;border-radius:8px;font-size:.95rem}
+.shape-reference{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;width:100%}
+.shape-reference figure{margin:0;width:min(40%,160px)}
+.shape-reference figcaption{font-size:.85rem;text-align:center;margin-bottom:8px}
+.shape-reference svg{width:100%;border:3px solid var(--line);border-radius:8px;color:var(--ink);background:var(--cell)}
+.shape-reference rect:not([fill]){fill:var(--blue);stroke:var(--line);stroke-width:.04}
+.shape-reference rect.trace{fill:var(--yellow);stroke:var(--ink);stroke-width:.08}
+.turn-arrow{font-size:3rem;color:var(--blue);text-align:center}
+.turn-arrow small{display:block;font-size:.85rem;color:var(--ink)}
+.turn-cue{animation:turn-cue 1.2s ease-in-out infinite}
+.worked-turn{transform-origin:2px 2px;animation:worked-turn 2.5s ease-in-out forwards}
+.adaptive .pad button.ad-ghost{border-style:dashed;box-shadow:inset 0 0 0 3px var(--blue)}
+@keyframes worked-turn{from{transform:rotate(0)}to{transform:rotate(var(--turn))}}
+@keyframes turn-cue{50%{transform:rotate(15deg)}}
+@media(prefers-reduced-motion:reduce){.worked-turn{animation:none;transform:rotate(var(--turn))}.turn-cue{animation:none}}
 @media(max-height:450px){.home{overflow-y:auto;justify-content:flex-start}.home .hero{width:70px}.home h1.logo{width:190px}.home{gap:8px}.adaptive .mission{padding:10px;gap:10px}}
 
 </style>
@@ -646,13 +660,13 @@ const tail = (a, v, n = 10) => [...a, v].slice(-n);
 const unique = (a, v, n = 10) => tail(a.filter(x => x !== v), v, n);
 const ids = a => [...new Set(list(a, 1000))].filter(x => !['__proto__','constructor','prototype'].includes(x));
 function emptySkill() {
- return {band:1,band_streak:0,band_misses:0,retrieval_anchor_time:null,mastery_state:0,evidence:0,confidence:0,observations:0,independent_success_count:0,assisted_success_count:0,retry_success_count:0,failure_count:0,flexible_success_count:0,delayed_success_count:0,recent:[],recent_successes:[],recent_failures:[],session_ids:[],independent_session_ids:[],last_seen:null,last_independent_success:null,last_independent_item:null,last_independent_surface:null,last_retrieval_session:null,next_retrieval_due:null,retrieval_interval_ms:DAY,last_hint_level:0,error_tags:[],representations:[],contexts:[],response_times:[]};
+ return {prior_mastery:0,band:1,band_streak:0,band_misses:0,retrieval_anchor_time:null,mastery_state:0,evidence:0,confidence:0,observations:0,independent_success_count:0,assisted_success_count:0,retry_success_count:0,failure_count:0,flexible_success_count:0,delayed_success_count:0,recent:[],recent_successes:[],recent_failures:[],session_ids:[],independent_session_ids:[],last_seen:null,last_independent_success:null,last_independent_item:null,last_independent_surface:null,last_retrieval_session:null,next_retrieval_due:null,retrieval_interval_ms:DAY,last_hint_level:0,error_tags:[],representations:[],contexts:[],response_times:[]};
 }
 function createState(skillIds = []) {
- return {schema_version:1,skills:Object.fromEntries(ids(skillIds).map(id=>[id,emptySkill()])),events:[],sessions:[]};
+ return {schema_version:2,skills:Object.fromEntries(ids(skillIds).map(id=>[id,emptySkill()])),events:[],raw_events:[],sessions:[]};
 }
 function sanitizeState(raw, skillIds = []) {
- const s=createState(skillIds);if(!raw || typeof raw!=='object' || (raw.schema_version!==undefined && raw.schema_version!==1))return s;
+ const s=createState(skillIds);if(!raw || typeof raw!=='object' || (raw.schema_version!==undefined && ![1,2].includes(raw.schema_version)))return s;
  for(const id of Object.keys(s.skills)) {
   const old=raw.skills?.[id];if(!old || typeof old!=='object')continue;const r=s.skills[id];
   for(const key of Object.keys(r)) {
@@ -663,18 +677,23 @@ function sanitizeState(raw, skillIds = []) {
   }
   for(const key of ['observations','independent_success_count','assisted_success_count','retry_success_count','failure_count','flexible_success_count','delayed_success_count','band_streak','band_misses'])r[key]=Math.min(1e9,Math.floor(r[key]));
   r.band=Math.max(1,Math.min(5,Math.floor(r.band)));r.band_streak=Math.min(2,r.band_streak);r.band_misses=Math.min(1,r.band_misses);r.retrieval_interval_ms=Math.max(DAY/2,Math.min(60*DAY,r.retrieval_interval_ms));
+  r.prior_mastery=Math.min(4,Math.floor(raw.schema_version===1?num(old.mastery_state):r.prior_mastery));
   r.evidence=Math.min(1,r.evidence);r.confidence=Math.min(1,r.confidence);r.last_hint_level=Math.min(5,r.last_hint_level);r.mastery_state=mastery(r);
  }
  s.events=Array.isArray(raw.events)?raw.events.filter(e=>e && typeof e==='object' && Number.isFinite(e.timestamp)).slice(-500).map(normalizeEvent):[];
  s.sessions=Array.isArray(raw.sessions)?raw.sessions.filter(e=>e && typeof e.session_id==='string').slice(-60).map(sanitizeSession):[];
+ s.raw_events=Array.isArray(raw.raw_events)?raw.raw_events.filter(e=>e&&Number.isFinite(e.timestamp)).slice(-1000).map(normalizeEvent):[];
  return s;
 }
 function normalizeEvent(event = {}) {
  // Keep reproducibility/content extensions, but strip camelCase keys from stored events.
  const e=Object.fromEntries(Object.entries(event).filter(([k])=>/^[a-z][a-z0-9_]*$/.test(k)));
- return {...e,schema_version:1,session_id:String(e.session_id??'unknown'),timestamp:num(e.timestamp),skills:ids(e.skills),response_time:num(e.response_time),attempts:Math.max(1,num(e.attempts,1)),first_attempt:e.first_attempt!==false,hint_level_used:Math.min(5,num(e.hint_level_used)),reset_count:num(e.reset_count),voluntary_replay:e.voluntary_replay===true,error_tags:list(e.error_tags,8)};
+ return {...e,schema_version:e.schema_version===2?2:1,session_id:String(e.session_id??'unknown'),timestamp:num(e.timestamp),skills:ids(e.skills),response_time:num(e.active_response_time??e.response_time),attempts:Math.max(1,num(e.attempts,1)),first_attempt:e.first_attempt!==false,hint_level_used:Math.min(5,num(e.hint_level_used)),reset_count:num(e.reset_count),voluntary_replay:e.voluntary_replay===true,error_tags:list(e.error_tags,8)};
 }
 function mastery(r) {
+ return Math.max(num(r?.prior_mastery),currentMastery(r));
+}
+function currentMastery(r) {
  if(!r || !r.observations)return 0;const recent=r.recent??[];const rate=recent.filter(x=>x==='I').length/Math.max(1,recent.length);
  if(r.independent_success_count>=4 && rate>=.8 && (r.independent_session_ids?.length??0)>=2 && r.flexible_success_count>=1 && r.delayed_success_count>=1)return 4;
  if(r.independent_success_count>=3 && rate>=.75 && (r.independent_session_ids?.length??0)>=2)return 3;
@@ -682,6 +701,7 @@ function mastery(r) {
  return 1;
 }
 function recordTrial(state, event) {
+ if(event?.event_kind==='interaction')return recordInteraction(state,event);
  const s=sanitizeState(state,Object.keys(state?.skills??{}));const e=normalizeEvent(event);
  const success=e.result==='success'||e.result==='correct';
  const independent=success && e.hint_level_used===0 && e.attempts===1 && e.first_attempt && e.reset_count===0;
@@ -717,19 +737,20 @@ function recordTrial(state, event) {
  session=recordSessionTrial(session,e);if(index<0)s.sessions.push(session);else s.sessions[index]=session;s.sessions=s.sessions.slice(-60);return s;
 }
 function createSession(id, now=0) {
- return {schema_version:1,session_id:String(id),start_time:num(now),end_time:num(now),active_ms:0,trial_count:0,success_count:0,mode_ms:{},recent:[],baseline:[],recent_families:[],recent_items:[]};
+ return {schema_version:2,session_id:String(id),start_time:num(now),end_time:num(now),last_activity_time:num(now),active_ms:0,trial_count:0,success_count:0,mode_ms:{},category_ms:{},recent:[],baseline:[],recent_families:[],recent_items:[]};
 }
 function sanitizeSession(raw) {
- const s={...createSession(raw.session_id,num(raw.start_time)),end_time:num(raw.end_time),active_ms:num(raw.active_ms),trial_count:num(raw.trial_count),success_count:num(raw.success_count)};
+ const s={...createSession(raw.session_id,num(raw.start_time)),end_time:num(raw.end_time),last_activity_time:num(raw.last_activity_time,num(raw.end_time)),active_ms:num(raw.active_ms),trial_count:num(raw.trial_count),success_count:num(raw.success_count)};
  const marks=(arr,n)=>Array.isArray(arr)?arr.filter(x=>x&&typeof x==='object').slice(-n).map(x=>({response_time:num(x.response_time),failure:x.failure===true,hint:Math.min(5,num(x.hint)),reset:num(x.reset)})):[];
  s.baseline=marks(raw.baseline,10);s.recent=marks(raw.recent,5);s.recent_families=list(raw.recent_families);s.recent_items=list(raw.recent_items);
- s.mode_ms=Object.fromEntries(Object.entries(raw.mode_ms&&typeof raw.mode_ms==='object'?raw.mode_ms:{}).filter(([k])=>/^[a-z][a-z0-9_]*$/.test(k)).slice(0,32).map(([k,v])=>[k,num(v)]));return s;
+ for(const key of ['mode_ms','category_ms'])s[key]=Object.fromEntries(Object.entries(raw[key]&&typeof raw[key]==='object'?raw[key]:{}).filter(([k])=>/^[a-z][a-z0-9_]*$/.test(k)).slice(0,32).map(([k,v])=>[k,num(v)]));return s;
 }
 function recordSessionTrial(session,event) {
  const e=normalizeEvent(event);const s={...session,mode_ms:{...session.mode_ms},recent:[...(session.recent??[])],baseline:[...(session.baseline??[])],recent_families:[...(session.recent_families??[])],recent_items:[...(session.recent_items??[])]};
  const mark={response_time:e.response_time,failure:e.result!=='success'&&e.result!=='correct',hint:e.hint_level_used,reset:e.reset_count};
  if(s.baseline.length<10)s.baseline.push(mark);s.recent=tail(s.recent,mark,5);s.trial_count=num(s.trial_count)+1;s.success_count=num(s.success_count)+(mark.failure?0:1);s.end_time=Math.max(num(s.end_time),e.timestamp);
- const mode=String(e.mode??'reasoning');s.mode_ms[mode]=num(s.mode_ms[mode])+e.response_time;if(e.family)s.recent_families=tail(s.recent_families,String(e.family));if(e.item_id)s.recent_items=tail(s.recent_items,String(e.item_id));return s;
+ // The active clock owns time. Outcome latency must never be added again.
+ if(e.family)s.recent_families=tail(s.recent_families,String(e.family));if(e.item_id)s.recent_items=tail(s.recent_items,String(e.item_id));return s;
 }
 const mean=(arr,key)=>arr.reduce((n,x)=>n+Number(x[key]??0),0)/Math.max(1,arr.length);
 function sessionPlan(session, now=0) {
@@ -769,7 +790,58 @@ function eventsCSV(events=[]) {
  const cell=v=>{const text=v==null?'':typeof v==='object'?JSON.stringify(v):String(v);return /[",\r\n]/.test(text)?'"'+text.replaceAll('"','""')+'"':text;};return [cols.join(','),...rows.map(e=>cols.map(k=>cell(e[k])).join(','))].join('\r\n');
 }
 
-return {createState,sanitizeState,recordTrial,mastery,selectCandidate,createSession,sessionPlan,recordSessionTrial,eventsCSV};})();
+// Interaction signals are engineering heuristics, never learner labels.
+function createEpisode(meta,sessionId,now=0) {
+ const origin=meta.challenge_origin||'new_challenge';
+ return {meta:{...meta},session_id:sessionId,start:num(now),lastAttempt:null,active_ms:0,hint:0,hint_openings:0,attempts:0,meaningful_attempts:0,resets:0,rapid_guess_episodes:0,rapid_streak:0,rapid_open:false,error_tags:[],done:false,challenge_origin:origin,replay:['child_requested_repeat','story_replay'].includes(origin)};
+}
+function episodeInteraction(ep,event) {
+ if(!ep||ep.done)return;
+ const now=num(event.timestamp);
+ if(event.kind==='hint'){ep.hint_openings++;ep.hint=Math.max(ep.hint,Math.min(5,num(event.level,1)));}
+ if(event.kind==='reset')ep.resets++;
+ if(event.kind==='attempt'){
+  const gap=ep.lastAttempt===null?Infinity:now-ep.lastAttempt;
+  ep.attempts++;if(gap>=1000||event.ok)ep.meaningful_attempts++;
+  ep.rapid_streak=event.ok?0:gap<=500?ep.rapid_streak+1:1;
+  if(gap>500||event.ok)ep.rapid_open=false;
+  if(ep.rapid_streak>=3&&!ep.rapid_open){ep.rapid_guess_episodes++;ep.rapid_open=true;}
+  ep.lastAttempt=now;
+ }
+ for(const tag of list(event.error_tags,8))ep.error_tags=unique(ep.error_tags,tag,8);
+}
+function summarizeEpisode(ep,result,now=0,extra={}) {
+ if(!ep||ep.done)return null;ep.done=true;
+ if(!ep.attempts)return null;const m=ep.meta,success=result==='success';
+ const independent=success&&ep.attempts===1&&!ep.hint&&!ep.resets&&!ep.prior_attempts;
+ return {schema_version:2,event_kind:'task_summary',session_id:ep.session_id,timestamp:num(now),item_id:m.item_id,domain:m.domain||'unknown',skills:[m.primary_skill,...(m.secondary_skills||[])].filter(Boolean),primary_skill:m.primary_skill,start_time:ep.start,response_time:ep.active_ms,active_response_time:ep.active_ms,wall_duration:Math.max(0,num(now)-ep.start),result,first_attempt:ep.attempts===1&&!ep.prior_attempts,attempts:ep.attempts,previous_episode_attempts:ep.prior_attempts||0,meaningful_attempts:ep.meaningful_attempts,hint_openings:ep.hint_openings,hint_level_used:ep.hint,assistance_used:ep.hint>0,success_after_help:success&&ep.hint>0,reset_count:ep.resets,rapid_guess_episodes:ep.rapid_guess_episodes,solved_independently:independent,solved_after_retry:success&&(ep.attempts>1||!!ep.prior_attempts),abandoned:result==='abandoned',voluntary_replay:ep.replay,challenge_origin:ep.challenge_origin,mastery_evidence_type:m.cognitive_demand==='recall'?'retrieval':m.cognitive_demand,context:m.family,modality:'touch',representation:m.representation,family:m.family,mode:m.mode,content_version:m.content_version||'1.2.1',generator_version:m.generator_version,validator_version:m.validator_version,seed:m.seed,surface_id:m.surface_id||m.item_id,parameters:m.parameters,error_tags:ep.error_tags,...extra};
+}
+function recordInteraction(state,event) {
+ return {...state,raw_events:tail(state.raw_events||[],normalizeEvent({...event,schema_version:2,event_kind:'interaction'}),1000)};
+}
+function continueSession(sessions,now,id,gap=30*60000) {
+ const prior=(sessions||[]).at(-1);const last=prior?.last_activity_time??prior?.end_time;
+ return prior&&Number.isFinite(last)&&now>=last&&now-last<=gap?sanitizeSession(prior):createSession(id,now);
+}
+function activeDelta(last,now,lastInput,hidden,idle=90000) {
+ const dt=now-last;if(hidden||dt<0||dt>15000)return 0;
+ return Math.max(0,Math.min(now,lastInput+idle)-last);
+}
+function accountTime(session,dt,category,mode,now) {
+ const s=sanitizeSession(session);dt=num(dt);s.active_ms+=dt;s.end_time=Math.max(s.end_time,num(now));
+ const key=k=>typeof k==='string'&&/^[a-z][a-z0-9_]*$/.test(k)?k:'uncategorised';
+ category=key(category);mode=key(mode);s.category_ms[category]=num(s.category_ms[category])+dt;s.mode_ms[mode]=num(s.mode_ms[mode])+dt;return s;
+}
+function timeSummary(sessions=[]) {
+ const category_ms={};let total_ms=0;
+ for(const raw of sessions){const s=sanitizeSession(raw);total_ms+=s.active_ms;let remaining=s.active_ms;
+  for(const [key,value] of Object.entries(s.category_ms)){const used=Math.min(remaining,value);category_ms[key]=num(category_ms[key])+used;remaining-=used;}
+  category_ms.uncategorised=num(category_ms.uncategorised)+remaining;
+ }
+ return {total_ms,category_ms};
+}
+
+return {createState,sanitizeState,recordTrial,mastery,selectCandidate,createSession,sessionPlan,recordSessionTrial,eventsCSV,createEpisode,recordInteraction,episodeInteraction,summarizeEpisode,continueSession,activeDelta,accountTime,timeSummary};})();
 const LEGACY_SCAFFOLDS={"1-1":{"prog":[{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"}],"fn":[]},"1-2":{"prog":[{"t":"cmd","c":"D"},{"t":"cmd","c":"D"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"}],"fn":[]},"1-4":{"prog":[{"t":"cmd","c":"D"},{"t":"cmd","c":"D"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"U"},{"t":"cmd","c":"U"}],"fn":[]},"1-5":{"prog":[{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"cmd","c":"D"},{"t":"cmd","c":"R"}],"fn":[]},"1-7":{"prog":[{"t":"cmd","c":"D"},{"t":"cmd","c":"D"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"U"},{"t":"cmd","c":"R"}],"fn":[]},"2-1":{"prog":[{"t":"loop","n":5,"body":[{"t":"cmd","c":"R"}]}],"fn":[]},"2-2":{"prog":[{"t":"loop","n":3,"body":[{"t":"cmd","c":"D"}]},{"t":"loop","n":4,"body":[{"t":"cmd","c":"R"}]}],"fn":[]},"2-4":{"prog":[{"t":"loop","n":3,"body":[{"t":"cmd","c":"R"},{"t":"cmd","c":"D"}]}],"fn":[]},"2-5":{"prog":[{"t":"loop","n":4,"body":[{"t":"cmd","c":"R"}]},{"t":"cmd","c":"D"},{"t":"cmd","c":"D"}],"fn":[]},"2-7":{"prog":[{"t":"loop","n":3,"body":[{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"D"}]}],"fn":[]},"3-1":{"prog":[{"t":"loop","n":4,"body":[{"t":"cmd","c":"R"}]}],"fn":[]},"3-2":{"prog":[{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"cmd","c":"D"},{"t":"cmd","c":"L"},{"t":"cmd","c":"L"},{"t":"cmd","c":"U"},{"t":"cmd","c":"U"}],"fn":[]},"3-4":{"prog":[{"t":"loop","n":3,"body":[{"t":"cmd","c":"R"},{"t":"cmd","c":"D"}]}],"fn":[]},"3-5":{"prog":[{"t":"loop","n":4,"body":[{"t":"cmd","c":"R"}]},{"t":"cmd","c":"D"},{"t":"cmd","c":"D"},{"t":"loop","n":4,"body":[{"t":"cmd","c":"L"}]},{"t":"cmd","c":"U"},{"t":"cmd","c":"U"}],"fn":[]},"3-7":{"prog":[{"t":"loop","n":3,"body":[{"t":"cmd","c":"U"},{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"cmd","c":"R"}]}],"fn":[]},"4-1":{"prog":[{"t":"loop","n":5,"body":[{"t":"cmd","c":"R"}]}],"fn":[]},"4-2":{"prog":[{"t":"loop","n":5,"body":[{"t":"cmd","c":"R"}]},{"t":"cmd","c":"D"},{"t":"cmd","c":"D"}],"fn":[]},"4-4":{"prog":[{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"loop","n":4,"body":[{"t":"cmd","c":"D"}]},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"}],"fn":[]},"4-6":{"prog":[{"t":"loop","n":3,"body":[{"t":"cmd","c":"R"}]},{"t":"cmd","c":"D"},{"t":"cmd","c":"D"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"D"}],"fn":[]},"4-8":{"prog":[{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"cmd","c":"D"},{"t":"cmd","c":"L"},{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"cmd","c":"D"},{"t":"loop","n":3,"body":[{"t":"cmd","c":"R"}]}],"fn":[]},"5-1":{"prog":[{"t":"call"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"call"}],"fn":[{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"cmd","c":"L"},{"t":"cmd","c":"U"}]},"5-2":{"prog":[{"t":"cmd","c":"R"},{"t":"call"},{"t":"cmd","c":"R"},{"t":"call"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"call"},{"t":"cmd","c":"R"}],"fn":[{"t":"cmd","c":"U"},{"t":"cmd","c":"U"},{"t":"cmd","c":"D"},{"t":"cmd","c":"D"}]},"5-4":{"prog":[{"t":"call"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"call"},{"t":"cmd","c":"D"},{"t":"cmd","c":"D"},{"t":"call"}],"fn":[{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"cmd","c":"L"},{"t":"cmd","c":"U"}]},"5-5":{"prog":[{"t":"loop","n":3,"body":[{"t":"call"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"}]}],"fn":[{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"cmd","c":"L"},{"t":"cmd","c":"U"}]},"5-7":{"prog":[{"t":"loop","n":2,"body":[{"t":"call"},{"t":"cmd","c":"R"}]},{"t":"cmd","c":"R"},{"t":"call"}],"fn":[{"t":"cmd","c":"U"},{"t":"cmd","c":"U"},{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"cmd","c":"D"}]},"6-1":{"prog":[{"t":"loop","n":6,"body":[{"t":"cmd","c":"R"},{"t":"ifc","col":"red","c":"D"}]}],"fn":[]},"6-2":{"prog":[{"t":"loop","n":6,"body":[{"t":"cmd","c":"R"},{"t":"ifc","col":"red","c":"D"},{"t":"ifc","col":"green","c":"U"}]}],"fn":[]},"6-4":{"prog":[{"t":"loop","n":0,"body":[{"t":"ifc","col":"blue","c":"R"},{"t":"ifc","col":"red","c":"D"}]}],"fn":[]},"6-5":{"prog":[{"t":"loop","n":0,"body":[{"t":"ifc","col":"blue","c":"R"},{"t":"ifc","col":"red","c":"D"},{"t":"ifc","col":"yellow","c":"L"}]}],"fn":[]},"6-7":{"prog":[{"t":"loop","n":0,"body":[{"t":"ifc","col":"green","c":"U"},{"t":"ifc","col":"blue","c":"R"},{"t":"ifc","col":"red","c":"D"}]}],"fn":[]},"7-1":{"prog":[{"t":"cmd","c":"D"},{"t":"cmd","c":"D"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"U"},{"t":"cmd","c":"R"}],"fn":[]},"7-2":{"prog":[{"t":"loop","n":5,"body":[{"t":"cmd","c":"R"}]},{"t":"loop","n":3,"body":[{"t":"cmd","c":"D"}]}],"fn":[]},"7-4":{"prog":[{"t":"loop","n":3,"body":[{"t":"cmd","c":"L"},{"t":"cmd","c":"D"}]}],"fn":[]},"7-5":{"prog":[{"t":"call"},{"t":"cmd","c":"R"},{"t":"call"}],"fn":[{"t":"cmd","c":"U"},{"t":"cmd","c":"U"},{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"cmd","c":"D"}]},"7-7":{"prog":[{"t":"loop","n":6,"body":[{"t":"cmd","c":"R"},{"t":"ifc","col":"red","c":"D"},{"t":"ifc","col":"green","c":"U"}]}],"fn":[]},"7-8":{"prog":[{"t":"call"},{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"cmd","c":"R"},{"t":"call"},{"t":"cmd","c":"D"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"}],"fn":[{"t":"cmd","c":"R"},{"t":"cmd","c":"U"}]},"8-1":{"prog":[{"t":"tf"},{"t":"cmd","c":"R"}],"fn":[]},"8-2":{"prog":[{"t":"tf"},{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"cmd","c":"L"}],"fn":[]},"8-3":{"prog":[{"t":"tf"},{"t":"cmd","c":"R"},{"t":"tf"},{"t":"cmd","c":"L"},{"t":"cmd","c":"D"},{"t":"cmd","c":"D"}],"fn":[]},"8-5":{"prog":[{"t":"tf"},{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"cmd","c":"L"},{"t":"cmd","c":"D"},{"t":"cmd","c":"R"}],"fn":[]},"8-7":{"prog":[{"t":"tf"},{"t":"cmd","c":"U"},{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"tf"},{"t":"cmd","c":"R"},{"t":"tf"},{"t":"cmd","c":"U"}],"fn":[]},"9-1":{"prog":[{"t":"cmd","c":"U"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"tf"},{"t":"cmd","c":"R"}],"fn":[]},"9-2":{"prog":[{"t":"tf"},{"t":"cmd","c":"U"},{"t":"cmd","c":"R"},{"t":"cmd","c":"L"},{"t":"cmd","c":"D"},{"t":"cmd","c":"R"}],"fn":[]},"9-4":{"prog":[{"t":"cmd","c":"L"},{"t":"tf"},{"t":"cmd","c":"R"},{"t":"tf"},{"t":"cmd","c":"L"},{"t":"cmd","c":"L"},{"t":"tf"},{"t":"cmd","c":"U"},{"t":"cmd","c":"L"}],"fn":[]},"9-6":{"prog":[{"t":"tf"},{"t":"cmd","c":"U"},{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"tf"},{"t":"loop","n":3,"body":[{"t":"cmd","c":"L"}]},{"t":"cmd","c":"U"},{"t":"cmd","c":"U"}],"fn":[]},"10-1":{"prog":[{"t":"cmd","c":"R"},{"t":"tf","to":"tank"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"cmd","c":"D"}],"fn":[]},"10-2":{"prog":[{"t":"cmd","c":"R"},{"t":"tf","to":"tank"},{"t":"loop","n":5,"body":[{"t":"cmd","c":"R"}]}],"fn":[]},"10-3":{"prog":[{"t":"tf","to":"jet"},{"t":"loop","n":3,"body":[{"t":"cmd","c":"R"}]}],"fn":[]},"10-4":{"prog":[{"t":"tf","to":"jet"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"tf","to":"bot"},{"t":"cmd","c":"R"},{"t":"tf","to":"jet"},{"t":"cmd","c":"R"}],"fn":[]},"10-6":{"prog":[{"t":"cmd","c":"R"},{"t":"tf","to":"jet"},{"t":"loop","n":3,"body":[{"t":"cmd","c":"R"}]}],"fn":[]},"10-7":{"prog":[{"t":"cmd","c":"R"},{"t":"tf","to":"tank"},{"t":"loop","n":3,"body":[{"t":"cmd","c":"R"}]},{"t":"tf","to":"jet"},{"t":"cmd","c":"R"},{"t":"tf","to":"bot"},{"t":"cmd","c":"R"}],"fn":[]},"10-8":{"prog":[{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"tf","to":"tank"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"tf","to":"jet"},{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"tf","to":"car"},{"t":"cmd","c":"L"}],"fn":[]},"11-1":{"rounds":[[{"t":"cmd","c":"U"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"zap"}]]},"11-2":{"rounds":[[{"t":"cmd","c":"D"}],[{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"zap"}],[{"t":"zap"}]]},"11-3":{"rounds":[[{"t":"cmd","c":"U"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"zap"}],[{"t":"cmd","c":"L"},{"t":"cmd","c":"D"},{"t":"zap"}]]},"11-4":{"rounds":[[{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"}],[{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"D"},{"t":"cmd","c":"R"},{"t":"zap"}]]},"11-6":{"rounds":[[{"t":"cmd","c":"D"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"zap"}],[{"t":"cmd","c":"L"},{"t":"cmd","c":"U"},{"t":"zap"}]]},"11-7":{"rounds":[[{"t":"cmd","c":"R"}],[{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"zap"}],[{"t":"tf","to":"jet"},{"t":"cmd","c":"R"},{"t":"zap"}]]},"11-8":{"rounds":[[{"t":"tf","to":"jet"},{"t":"cmd","c":"R"}],[{"t":"cmd","c":"R"},{"t":"cmd","c":"R"},{"t":"zap"}],[{"t":"cmd","c":"L"},{"t":"zap"}],[{"t":"cmd","c":"R"},{"t":"zap"}]]}};
 const BipMigration=(()=>{/** Actual ΜΠΙΠ v1.1 two-key migration. Core remains its original v:2 schema.
  * Adaptive data is independent; old keys are never overwritten. */
@@ -787,13 +859,127 @@ function migrateStorage(storage,shape,shapeLog,createState,sanitizeState,skillId
  if(!parsed(rawCore)&&oldCore&&read(KEYS.backupCore)===null)backed=write(KEYS.backupCore,oldCore)&&backed;
  if(!parsed(rawLog)&&oldLog&&read(KEYS.backupLog)===null)backed=write(KEYS.backupLog,oldLog)&&backed;
  const core=shape(coreSource),log=shapeLog(logSource);
- const adaptive=sanitizeState(parsed(read(KEYS.adaptive))||createState(skillIds),skillIds);
- if(backed){write(KEYS.core,JSON.stringify(core));write(KEYS.log,JSON.stringify(log));write(KEYS.adaptive,JSON.stringify(adaptive));}
- return {core,log,adaptive,warnings};
+ const rawAdaptive=read(KEYS.adaptive),previous=parsed(rawAdaptive);
+ const adaptive=sanitizeState(previous||createState(skillIds),skillIds);
+ let adaptiveWritable=true;
+ // Preserve exact historical bytes, including corrupt input, before rewriting.
+ if(rawAdaptive&&previous?.schema_version!==2){
+  const key=previous?.schema_version===1?'agis-adaptive-v1-backup-schema1':'agis-adaptive-v1-backup-corrupt';
+  if(read(key)===null)adaptiveWritable=write(key,rawAdaptive);
+ }
+ if(backed){write(KEYS.core,JSON.stringify(core));write(KEYS.log,JSON.stringify(log));if(adaptiveWritable)write(KEYS.adaptive,JSON.stringify(adaptive));}
+ return {core,log,adaptive,warnings,adaptiveWritable:backed&&adaptiveWritable};
 }
 
 return {KEYS,migrateStorage};})();
-const BipTasks=(()=>{// Reproducible workshop challenges. Validators check the child's construction,
+const BipMetadata=(()=>{// BIP-specific attribution stays outside the common learner engine.
+const LEVEL_SKILL={code:'spatial_reasoning',draw:'geometry',studs:'number_sense',tower:'arithmetic_strategy',pattern:'patterns_early_algebra',trace:'problem_decomposition',logic:'deductive_logic',turbo:'spatial_reasoning',duel:'constraint_reasoning'};
+function metaLevel(id,d={}) {
+ const primary_skill=d.need!=null?'arithmetic_strategy':LEVEL_SKILL[d.t]||'spatial_reasoning';
+ return {item_id:id,primary_skill,secondary_skills:[...(d.need!=null?['constraint_reasoning']:[]),...(d.pre?['error_detection']:[])],nominal_difficulty:Math.min(5,1+(d.tier||0)),cognitive_demand:d.pre?'debug':d.boss?'transfer':'apply',representation:d.t==='pattern'?'mixed':'spatial',family:d.t,mode:d.t==='duel'?'boss':d.pre?'debug':d.t==='draw'?'spatial':'reasoning',domain:'math_logic',content_version:'1.1-retained'};
+}
+function timeCategory(screen,meta={},flags={}) {
+ if(screen==='shop')return 'workshop';if(screen==='comic')return 'comics_story';
+ if(flags.studio)return 'low_load_creative';if(flags.lesson)return 'new_material';
+ if(screen==='adaptive')return meta.mode==='boss'?'arena_boss':meta.mode==='low_load'?'low_load_creative':'adaptive_missions';
+ if(screen==='math')return ['logic','pattern'].includes(meta.family)?'logic_debugging':'numbers_reasoning';
+ if(screen==='play')return flags.duel?'arena_boss':meta.cognitive_demand==='debug'?'logic_debugging':meta.family==='draw'?'spatial_geometry':'story_coding';
+ return 'menu';
+}
+
+return {metaLevel,timeCategory};})();
+const BipBackup=(()=>{function backupPayload(progress,log,adaptive,now=Date.now(),storage={},lab=null) {
+ return {game:'ΜΠΙΠ',version:'1.2.1',schema_version:2,schema_versions:{core:progress.v,legacy_log:log.v,adaptive:adaptive.schema_version,...(lab?{lab:lab.schema_version}:{})},exported:new Date(now).toISOString(),progress,log,adaptive,storage,...(lab?{lab}:{})};
+}
+function exportFile(kind,data,date) {
+ const json=kind==='json';return {name:(json?'bip-backup-':kind==='legacy-csv'?'bip-legacy-':'bip-playtest-')+date+(json?'.json':'.csv'),type:json?'application/json':'text/csv;charset=utf-8',data};
+}
+async function saveFile(file,env=globalThis) {
+ const blob=new env.Blob([file.data],{type:file.type});
+ try{
+  if(env.File&&env.navigator?.share&&env.navigator?.canShare){const f=new env.File([blob],file.name,{type:file.type});
+   if(env.navigator.canShare({files:[f]})){await env.navigator.share({files:[f],title:file.name});return 'shared';}
+  }
+ }catch(e){if(e.name==='AbortError')return 'cancelled';}
+ let url;
+ try{url=env.URL.createObjectURL(blob);const a=env.document.createElement('a');a.href=url;a.download=file.name;a.style.display='none';env.document.body.append(a);a.click();a.remove();env.setTimeout(()=>env.URL.revokeObjectURL(url),60000);return 'downloaded';}
+ catch{if(url)env.URL.revokeObjectURL(url);return 'copy_fallback';}
+}
+function parseBackup(text,shape,shapeLog,sanitizeState,skills) {
+ const p=JSON.parse(text),object=x=>x&&typeof x==='object'&&!Array.isArray(x);
+ const core=p?.progress,log=p?.log;
+ if(p?.game!=='ΜΠΙΠ'||core?.v!==2||!['stars','skill','robot','bots','seen','tut','tutAt','got'].every(k=>object(core[k]))||!['epoch','t'].every(k=>Number.isFinite(core[k]))||!['sound','voice','all'].every(k=>typeof core[k]==='boolean')||!Number.isFinite(core.robot.ch)||log?.v!==1||!['days','levels','mech','shop'].every(k=>object(log[k]))||!Array.isArray(log.sessions)||!object(p.adaptive)||![1,2].includes(p.adaptive.schema_version)||!object(p.adaptive.skills)||!Array.isArray(p.adaptive.events)||!Array.isArray(p.adaptive.sessions)||(p.adaptive.schema_version===2&&!Array.isArray(p.adaptive.raw_events)))throw Error('Δεν είναι πλήρες αντίγραφο ΜΠΙΠ.');
+ if(p.lab!==undefined&&(p.lab?.schema_version!==1||!Number.isFinite(p.lab.generated_count)||!Array.isArray(p.lab.recent_surfaces)||!Array.isArray(p.lab.recent_families)))throw Error('Μη έγκυρο ιστορικό εργαστηρίου.');
+ return {lab:p.lab,progress:shape(p.progress),log:shapeLog(p.log),adaptive:sanitizeState(p.adaptive,skills),storage:p.storage&&typeof p.storage==='object'?p.storage:{}};
+}
+function restoreBackup(storage,text,shape,shapeLog,sanitizeState,skills) {
+ const p=parseBackup(text,shape,shapeLog,sanitizeState,skills);
+ const entries={'bip-save-v12':JSON.stringify(p.progress),'bip-log-v12':JSON.stringify(p.log),'agis-adaptive-v1':JSON.stringify(p.adaptive)};
+ if(p.lab)entries['bip-lab-v1']=JSON.stringify(p.lab);
+ for(const key of ['bip-save-v1','bip-log-v1','bip-v11-backup-save','bip-v11-backup-log','agis-adaptive-v1-backup-schema1','agis-adaptive-v1-backup-corrupt'])if(typeof p.storage[key]==='string'&&storage.getItem(key)===null)entries[key]=p.storage[key];
+ const before=Object.fromEntries(Object.keys(entries).map(k=>[k,storage.getItem(k)]));
+ // One exact, complete recovery snapshot precedes any progress change.
+ storage.setItem('bip-restore-backup-before',JSON.stringify(before));
+ try{for(const [k,v] of Object.entries(entries))storage.setItem(k,v);}
+ catch(e){for(const [k,v] of Object.entries(before)){try{if(v===null)storage.removeItem(k);else storage.setItem(k,v);}catch{}}throw e;}
+ return {ok:true,...p};
+}
+
+return {backupPayload,exportFile,saveFile,parseBackup,restoreBackup};})();
+const BipVisuals=(()=>{// Combine constraints on a square: a checkpoint must never hide its battery.
+function gridMarker(task,x,y) {
+ const ch=task.grid?.[y]?.[x];if(ch==='R')return '🤖';if(ch==='G')return '⚙';if(ch==='#')return '▣';
+ const pickup=task.pickups?.find(p=>p.x===x&&p.y===y),gate=task.gates?.find(g=>g.x===x&&g.y===y);
+ return (task.required_cells?.includes(x+','+y)?'🚩':'')+(pickup?'⚡'+pickup.value:'')+(gate?.color||'');
+}
+
+return {gridMarker};})();
+const BipRegistry=(()=>{// Engineered content contract. New mechanics must add a renderer and tests;
+// this registry never creates executable mechanics from content at runtime.
+const RENDERERS=['build','sequence','shape','logic','combination','probability','debug','program','predict'];
+function createRegistry(catalog,{generate,check,solve}) {
+ const seen=new Set();return catalog.map(meta=>{
+  if(seen.has(meta.family)||!RENDERERS.includes(meta.kind))throw Error('Invalid family contract: '+meta.family);seen.add(meta.family);
+  return {id:meta.family,skills:[meta.primary_skill,...meta.secondary_skills],prerequisites:meta.prerequisites,generator_version:'bip-lab-1',validator_version:'bip-validator-2',renderer:meta.kind,interactions:meta.kind,scaffolding:['attention','strategy','one_step','partial_structure','worked_example'],difficulty_dimensions:meta.difficulty_dimensions,telemetry:{domain:'math_logic',family:meta.family,primary_skill:meta.primary_skill,secondary_skills:meta.secondary_skills},generator:(seed,band)=>generate(meta.family,seed,band),solver:task=>solve(task),validator:task=>{
+   try{
+    if(!task||task.family!==meta.family||task.kind!==meta.kind||!Array.isArray(task.hints)||task.hints.length!==5||!task.surface_id||!Number.isFinite(task.nominal_difficulty)||task.nominal_difficulty<1||task.nominal_difficulty>4)return false;
+    if(task.grid&&(task.grid.length>5||task.grid.some(row=>typeof row!=='string'||row.length!==task.grid[0].length)||task.grid[0].length>5))return false;
+    if(task.tokens&&(task.tokens.length>10||new Set(task.tokens.map(x=>x.id)).size!==task.tokens.length||task.tokens.some(x=>!Number.isFinite(x.value)||x.value<0)))return false;
+    const answer=solve(task);return answer!==null&&answer!==undefined&&check(task,answer);
+   }catch{return false;}
+  }};
+ });
+}
+
+return {createRegistry};})();
+const BipLab=(()=>{const LAB_KEY='bip-lab-v1';
+function createLabState(){return {schema_version:1,generated_count:0,recent_surfaces:[],recent_families:[],last_seed:null};}
+function sanitizeLabState(raw){
+ const s=createLabState();if(!raw||raw.schema_version!==1)return s;
+ s.generated_count=Number.isFinite(raw.generated_count)?Math.max(0,Math.min(1e9,Math.floor(raw.generated_count))):0;
+ for(const key of ['recent_surfaces','recent_families'])s[key]=Array.isArray(raw[key])?raw[key].filter(x=>typeof x==='string').slice(-120):[];
+ s.last_seed=Number.isFinite(raw.last_seed)?raw.last_seed>>>0:null;return s;
+}
+function loadLabState(storage){try{return sanitizeLabState(JSON.parse(storage.getItem(LAB_KEY)))}catch{return createLabState();}}
+function saveLabState(storage,state){try{storage.setItem(LAB_KEY,JSON.stringify(sanitizeLabState(state)));return true}catch{return false;}}
+function storyComplete(progress,levelIds){return levelIds.length>0&&levelIds.every(id=>(progress?.stars?.[id]||0)>0);}
+function nextChallenge(state,family,difficulty,{generate,validate,seed=1,replay=false}={}){
+ const s=sanitizeLabState(state);let chosen=null;
+ // Never accept a duplicate by relaxing the rule. Small finite surfaces may
+ // recur after twelve intervening challenges; identical replay is explicit.
+ for(let offset=0;offset<256;offset++){
+  const candidateSeed=(Number(seed)+offset)>>>0;let task;
+  try{task=generate(family,candidateSeed,difficulty);}catch{continue;}
+  if(!validate(task))continue;if(!replay&&s.recent_surfaces.slice(-12).includes(task.surface_id))continue;
+  chosen=task;break;
+ }
+ if(!chosen)return {state:s,task:null};
+ s.generated_count=Math.min(1e9,s.generated_count+1);s.last_seed=chosen.seed;s.recent_surfaces=[...s.recent_surfaces,chosen.surface_id].slice(-120);s.recent_families=[...s.recent_families,family].slice(-120);return {state:s,task:chosen};
+}
+
+return {LAB_KEY,createLabState,sanitizeLabState,loadLabState,saveLabState,storyComplete,nextChallenge};})();
+const BipTasks=(()=>{const {createRegistry}=BipRegistry;
+// Reproducible workshop challenges. Validators check the child's construction,
 // not a prescribed strategy; explanation/reflection evidence is collected separately.
 const SKILLS = ['number_sense','arithmetic_strategy','place_value','patterns_early_algebra','geometry','spatial_reasoning','deductive_logic','constraint_reasoning','combinatorics','probability_intuition','problem_decomposition','transfer','error_detection','mathematical_explanation','metacognition'];
 const definitions = [
@@ -819,54 +1005,82 @@ const definitions = [
   ['alternatives','problem_decomposition','program','create','spatial'],
   ['map-transfer','transfer','program','boss','spatial',['spatial_reasoning']],
   ['predict','spatial_reasoning','predict','retrieval','spatial'],
-  ['quiet-energy','number_sense','build','low_load','mixed']
+  ['quiet-energy','number_sense','build','low_load','mixed'],
+  ['equivalents','arithmetic_strategy','build','create','mixed',['number_sense']],
+  ['reflect','geometry','shape','spatial','spatial',['spatial_reasoning']],
+  ['counterexample','deductive_logic','logic','debug','mixed',['error_detection']],
+  ['battery-boss','transfer','program','boss','mixed',['arithmetic_strategy','spatial_reasoning','constraint_reasoning']],
+  ['signal-boss','patterns_early_algebra','program','boss','mixed',['error_detection','spatial_reasoning']]
+
 ];
-const titles={'energy':'Η πόρτα ενέργειας','make-ten':'Γέφυρα στη δεκάδα','bundles':'Το συρτάρι με τις βίδες','cargo':'Φόρτωση της Βίδας','signal':'Επισκευή σήματος','lights':'Τα φώτα του εργαστηρίου','rotate':'Η περιστροφή της Βίδας','translate':'Μετακόμιση εξαρτήματος','robot-clues':'Το χαμένο εξάρτημα','cargo-rules':'Οι κανόνες του φορτίου','routes':'Η συλλογή από στολές','paint':'Ο σάκος με τα χρώματα','debug-sum':'Το μπέρδεμα στις μπαταρίες','debug-pattern':'Το λάθος σήμα','debug-turn':'Ο Σκουριάς στρίβει','debug-rule':'Το κιβώτιο που περισσεύει','debug-loop':'Η μπερδεμένη επανάληψη','shortest':'Ο πιο σύντομος δρόμος','repair-route':'Επισκεύασε τον δρόμο','alternatives':'Δύο διαφορετικοί δρόμοι','map-transfer':'Η αποστολή φόρτωσης','predict':'Πριν πατήσουμε ΠΑΜΕ','quiet-energy':'Μικρή πόρτα, μεγάλη ιδέα'};
+const titles={'equivalents':'Δύο τρόποι για την ίδια ενέργεια','reflect':'Το κομμάτι στον καθρέφτη','counterexample':'Ισχύει πάντα;','battery-boss':'Η διαδρομή της ενέργειας','signal-boss':'Η πύλη του σήματος','energy':'Η πόρτα ενέργειας','make-ten':'Γέφυρα στη δεκάδα','bundles':'Το συρτάρι με τις βίδες','cargo':'Φόρτωση της Βίδας','signal':'Επισκευή σήματος','lights':'Τα φώτα του εργαστηρίου','rotate':'Η περιστροφή της Βίδας','translate':'Μετακόμιση εξαρτήματος','robot-clues':'Το χαμένο εξάρτημα','cargo-rules':'Οι κανόνες του φορτίου','routes':'Η συλλογή από στολές','paint':'Ο σάκος με τα χρώματα','debug-sum':'Το μπέρδεμα στις μπαταρίες','debug-pattern':'Το λάθος σήμα','debug-turn':'Ο Σκουριάς στρίβει','debug-rule':'Το κιβώτιο που περισσεύει','debug-loop':'Η μπερδεμένη επανάληψη','shortest':'Ο πιο σύντομος δρόμος','repair-route':'Επισκεύασε τον δρόμο','alternatives':'Δύο διαφορετικοί δρόμοι','map-transfer':'Η αποστολή φόρτωσης','predict':'Πριν πατήσουμε ΠΑΜΕ','quiet-energy':'Μικρή πόρτα, μεγάλη ιδέα'};
 const errorTags={'energy':['quantity_constraint','sum'],'quiet-energy':['quantity_constraint'],'make-ten':['quantity_constraint','sum'],'bundles':['quantity_constraint','place_value'],'cargo':['quantity_constraint','sum'],'signal':['pattern_rule'],'lights':['pattern_rule'],'rotate':['spatial_transform'],'translate':['spatial_transform'],'robot-clues':['constraint'],'cargo-rules':['constraint'],'routes':['combination'],'paint':['likelihood'],'debug-sum':['arithmetic_decomposition','sum'],'debug-pattern':['pattern_rule'],'debug-turn':['orientation'],'debug-rule':['constraint'],'debug-loop':['loop_expansion'],'shortest':['wall','edge','short','program_not_yet'],'repair-route':['wall','program_not_yet'],'alternatives':['program_not_yet'],'map-transfer':['program_not_yet','quantity_constraint'],'predict':['prediction']};
+const dimensions={build:['decomposition','distractors','second_solution'],sequence:['reasoning_steps','changed_rule','representation'],shape:['direction','transform','representation'],logic:['constraints','irrelevant_information','counterexample'],combination:['search_space','constraints','exhaustiveness'],probability:['comparison','representation'],debug:['find_first_error','repair','transfer'],program:['shortest_solution','second_solution','constraints','mixed_skills'],predict:['prediction','reasoning_steps']};
 const prerequisites={arithmetic_strategy:['number_sense'],place_value:['number_sense'],geometry:['spatial_reasoning'],constraint_reasoning:['deductive_logic'],combinatorics:['deductive_logic'],probability_intuition:['number_sense'],problem_decomposition:['spatial_reasoning'],transfer:['arithmetic_strategy','spatial_reasoning']};
-const catalog = definitions.map(([family,primary_skill,kind,mode,representation,secondary_skills=[]]) => ({item_id:'a:'+family,family,title:titles[family],error_tags:errorTags[family]||[],primary_skill,secondary_skills,prerequisites:prerequisites[primary_skill]||[],nominal_difficulty:1,cognitive_demand:mode==='debug'?'debug':primary_skill==='transfer'?'transfer':mode==='create'?'create':'apply',representation,novelty_level:1,mode,kind}));
+const catalog = definitions.map(([family,primary_skill,kind,mode,representation,secondary_skills=[]]) => ({item_id:'a:'+family,family,title:titles[family],error_tags:errorTags[family]||[],primary_skill,secondary_skills,prerequisites:family==='counterexample'?['deductive_logic']:family==='battery-boss'?['arithmetic_strategy','spatial_reasoning','constraint_reasoning']:family==='signal-boss'?['patterns_early_algebra','error_detection','spatial_reasoning']:prerequisites[primary_skill]||[],nominal_difficulty:1,cognitive_demand:mode==='debug'?'debug':primary_skill==='transfer'?'transfer':mode==='create'?'create':'apply',representation,novelty_level:1,mode,kind,difficulty_dimensions:dimensions[kind]}));
+const buildSignature=(t,ids)=>ids.map(id=>t.tokens.find(x=>x.id===id)?.value).sort((a,b)=>a-b).join(',');
 const cellId = c => `${c.x},${c.y}`;
 const sameSet = (a,b) => Array.isArray(a) && a.length===b.length && new Set(a).size===a.length && a.every(x=>b.includes(x));
 function random(seed) { let n=2166136261; for(const ch of String(seed)) n=Math.imul(n^ch.charCodeAt(0),16777619); return () => { n=(Math.imul(n,1664525)+1013904223)>>>0; return n/4294967296; }; }
 const ladder = (cue,strategy,structure,step,solution) => [cue,strategy,structure,step,solution];
-function generateTask(family,seed=1,difficulty=1) {
+function generateUnchecked(family,seed=1,difficulty=1) {
   const meta=catalog.find(t=>t.family===family); if(!meta) throw new RangeError('Unknown task family: '+family);
-  const rng=random(seed), band=Math.max(1,Math.min(4,Math.round(Number(difficulty)||1))), pick=n=>Math.floor(rng()*n);
-  const task={...meta,title:meta.title,prompt:'',seed,generator_version:'bip-1',content_version:'1.2',nominal_difficulty:band};
+  const rng=random(seed), band=Math.max(1,Math.min(4,Math.round(Number(difficulty)||1))), pick=n=>Math.floor(rng()*n),scale=Math.min(2,band);
+  const task={...meta,title:meta.title,prompt:'',seed,generator_family:family,generator_version:'bip-lab-1',validator_version:'bip-validator-2',content_version:'1.2.1-endless',difficulty:band,nominal_difficulty:band,constraints:{}};
   if(meta.kind==='build') {
-    const a=family==='bundles'?10*(1+pick(band+1)):family==='make-ten'?6+pick(4):2+pick(3*band), b=family==='make-ten'?10-a+1+pick(band+2):1+pick(band+3);
+    const a=family==='bundles'?10*(1+pick(scale+1)):family==='make-ten'?6+pick(4):2+pick(3*scale), b=family==='make-ten'?10-a+1+pick(scale+2):1+pick(scale+3);
     task.tokens=[{id:'A',label:family==='bundles'?`${a/10} δεκάδες`:`${a} ⚡`,value:a},{id:'B',label:`${b}${family==='bundles'?' μονάδες':' ⚡'}`,value:b},{id:'C',label:`${a+b+1} ⚡`,value:a+b+1},{id:'D',label:`${a+b+2} ⚡`,value:a+b+2}];
+    if((band>=3&&family!=='quiet-energy')||family==='equivalents'){
+      const c=family==='bundles'?(a>=20?10:5):1+pick(a-1);task.tokens=[a,b,c,a-c,a+b+1,a+b+2].map((v,i)=>({id:String.fromCharCode(65+i),label:family==='bundles'?(v%10===0?`${v/10} δεκάδες`:`${v} μονάδες`):`${v} ⚡`,value:v}));task.split_values=[c,a-c,b];task.alternate=band===4||family==='equivalents';task.cognitive_demand=task.alternate?'alternative':'apply';
+    }
     // Shuffle identity and order so retrieval requires the relation, not remembering A+B.
-    const letters=['A','B','C','D'];for(let i=letters.length-1;i>0;i--){const j=pick(i+1);[letters[i],letters[j]]=[letters[j],letters[i]];}task.tokens.forEach((t,i)=>t.id=letters[i]);
+    const letters=task.tokens.map(t=>t.id);for(let i=letters.length-1;i>0;i--){const j=pick(i+1);[letters[i],letters[j]]=[letters[j],letters[i]];}task.tokens.forEach((t,i)=>t.id=letters[i]);
     for(let i=task.tokens.length-1;i>0;i--){const j=pick(i+1);[task.tokens[i],task.tokens[j]]=[task.tokens[j],task.tokens[i]];}
-    const parts=task.tokens.filter(t=>t.value===a||t.value===b).map(t=>t.id).join(' και ');
-    task.target=a+b; task.start=0; task.max_parts=2;
+    const parts=task.tokens.filter(t=>t.value===a||t.value===b).map(t=>t.label).join(' και ');
+    task.target=a+b; task.start=0; task.max_parts=task.tokens.length>4?3:2;task.min_parts=2;
     task.prompt=family==='cargo'?`Η Βίδα φορτώνει ${task.target} κιλά. Διάλεξε μέχρι δύο κιβώτια χωρίς να ξεπεράσεις το φορτίο.`:family==='bundles'?`Φτιάξε ${task.target} βίδες με δέσμες δεκάδων και μονάδες.`:`Άνοιξε την πόρτα του ΜΠΙΠ με ακριβώς ${task.target} ενέργεια, έως δύο μπαταρίες.`;
     task.hints=ladder('Κοίτα τον στόχο και τις μπαταρίες.','Διάλεξε ένα κομμάτι και σκέψου πόσο λείπει.',`Ο στόχος χωρίζεται σε ${a} και κάτι ακόμη.`,`${task.target} − ${a} = ${b}.`,`Βάλε ${parts}: ${a} + ${b} = ${task.target}.`);
-    if(family==='make-ten')task.hints=ladder('Δες πόσο απέχει η πρώτη μπαταρία από το 10.','Φτιάξε πρώτα μία δεκάδα και κράτα ό,τι περισσεύει.',`Το ${a} χρειάζεται ${10-a} για να γίνει 10.`,`Από το ${b}, κράτα ${10-a} για τη δεκάδα και ${b-(10-a)} ακόμη.`,`Βάλε ${parts}: ${a} + ${b} = 10 + ${b-(10-a)} = ${task.target}.`);
+    if(task.tokens.length>4){task.prompt=`Φτιάξε ακριβώς ${task.target} ${family==='bundles'?'βίδες με δεκάδες και μονάδες':'ενέργεια με μπαταρίες'}, με δύο ή τρία κομμάτια.${task.alternate?' Κράτησε ΔΥΟ διαφορετικές κατασκευές.':''}`;task.hints=ladder('Κοίτα τον στόχο και όλα τα κομμάτια.','Το ίδιο σύνολο μπορεί να χωριστεί με διαφορετικούς τρόπους.',`Δοκίμασε πρώτα ${a} και ${b}.`,'Μπορείς να σπάσεις το μεγάλο κομμάτι σε δύο μικρότερα.',`Μια κατασκευή: ${a} και ${b}. Άλλη: ${task.split_values[0]}, ${task.split_values[1]} και ${b}.`);}
+    if(family==='make-ten'&&task.tokens.length===4)task.hints=ladder('Δες πόσο απέχει η πρώτη μπαταρία από το 10.','Φτιάξε πρώτα μία δεκάδα και κράτα ό,τι περισσεύει.',`Το ${a} χρειάζεται ${10-a} για να γίνει 10.`,`Από το ${b}, κράτα ${10-a} για τη δεκάδα και ${b-(10-a)} ακόμη.`,`Βάλε ${parts}: ${a} + ${b} = 10 + ${b-(10-a)} = ${task.target}.`);
   } else if(meta.kind==='sequence') {
     const start=1+pick(6), delta=1+pick(band+1);const colors=['🔵','🟡','🔴','🟢'];const lightA=colors.splice(pick(colors.length),1)[0],lightB=colors.splice(pick(colors.length),1)[0];
     task.slots=family==='lights'?[lightA,lightB,lightA,'?','?']: [start,start+delta,'?',start+3*delta,'?'];
     task.choices=family==='lights'?[lightA,lightB,colors[0]]:[...new Set([String(start+2*delta),String(start+4*delta),String(start+2*delta+1),String(start+4*delta+2)])];
     task.expected=family==='lights'?[lightB,lightA]:[String(start+2*delta),String(start+4*delta)];
+    if(band>=3){
+      if(family==='lights'){task.cycle=[lightA,lightB,colors[0]];task.slots=[...task.cycle,'?',lightB,'?'];task.choices=task.cycle.slice();task.expected=[lightA,colors[0]];}
+      else {task.step_pattern=[delta,delta+1];const values=[start];for(let i=1;i<6;i++)values.push(values[i-1]+task.step_pattern[(i-1)%2]);task.slots=values.map((v,i)=>[3,5].includes(i)?'?':v);task.expected=[String(values[3]),String(values[5])];task.choices=[...new Set([...task.expected,String(values[3]+1),String(values[5]-1)])];}
+      task.cognitive_demand='transfer';
+    }
     task.prompt='Επισκεύασε τα δύο κενά στο σήμα του ΜΠΙΠ, από αριστερά προς τα δεξιά.';
-    task.hints=ladder('Κοίτα γειτονικά σήματα.','Δοκίμασε τον ίδιο κανόνα σε κάθε βήμα.',family==='lights'?'Τα χρώματα εναλλάσσονται.':`Κάθε βήμα προσθέτει ${delta}.`,`Το πρώτο κενό είναι ${task.expected[0]}.`,`Τα κενά είναι ${task.expected.join(', ')}.`);
+    task.hints=ladder('Κοίτα γειτονικά σήματα.','Δοκίμασε τον ίδιο κανόνα σε κάθε βήμα.',family==='lights'?(task.cycle?'Επαναλαμβάνονται τρία χρώματα.':'Τα χρώματα εναλλάσσονται.'):(task.step_pattern?`Εναλλάσσονται βήματα ${delta} και ${delta+1}.`:`Κάθε βήμα προσθέτει ${delta}.`),`Το πρώτο κενό είναι ${task.expected[0]}.`,`Τα κενά είναι ${task.expected.join(', ')}.`);
   } else if(meta.kind==='shape') {
-    task.cells=[{x:0,y:0},{x:1,y:0},{x:0,y:1}];
-    const turns=1+pick(3), dx=1+pick(2),dy=1;
-    task.target=family==='rotate'?task.cells.map(c=>{let x=c.x,y=c.y;for(let i=0;i<turns;i++) [x,y]=[3-y,x];return {x,y};}):task.cells.map(c=>({x:c.x+dx,y:c.y+dy}));
-    task.turns=turns;task.offset={x:dx,y:dy};task.prompt=family==='rotate'?`Σχεδίασε το κομμάτι της Βίδας μετά από ${turns} στροφές δεξιά. Μία στροφή: πάνω αριστερά → πάνω δεξιά.`:`Μετακίνησε το κομμάτι ${dx} θέσεις δεξιά και ${dy} κάτω. Σχεδίασε πού θα βρεθεί.`;
-    task.hints=ladder('Κράτα το ίδιο πλήθος τετραγώνων.','Ακολούθησε κάθε τετράγωνο χωριστά.',family==='rotate'?'Σε δεξιά στροφή (x,y) γίνεται (3−y,x).':`Πρόσθεσε (${dx},${dy}) σε κάθε θέση.`,`Ένα τετράγωνο φτάνει στο ${cellId(task.target[0])}.`,`Σημείωσε ${task.target.map(cellId).join(' · ')} (θέσεις από 0).`);
+    const shapes=[[{x:0,y:0},{x:1,y:0},{x:0,y:1}],[{x:0,y:0},{x:1,y:0},{x:1,y:1}],[{x:0,y:1},{x:1,y:1},{x:1,y:0}],[{x:0,y:0},{x:0,y:1},{x:1,y:1}]];
+    const shape=shapes[pick(shapes.length)],sx=pick(2),sy=pick(2);
+    task.cells=shape.map(c=>({x:c.x+sx,y:c.y+sy}));
+    const turns=band===1?1:1+pick(3),dx=1,dy=1;
+    task.target=family==='reflect'?task.cells.map(c=>({x:3-c.x,y:c.y})):family==='rotate'?task.cells.map(c=>{let x=c.x,y=c.y;for(let i=0;i<turns;i++)[x,y]=[3-y,x];return {x,y};}):task.cells.map(c=>({x:c.x+dx,y:c.y+dy}));
+    task.turns=turns;task.offset={x:dx,y:dy};task.visual_scaffold=true;
+    task.prompt=family==='reflect'?'Ο καθρέφτης είναι όρθιος. Φτιάξε το κομμάτι όπως φαίνεται από την άλλη πλευρά.':family==='rotate'?`Κοίτα το κομμάτι. Γύρισέ το δεξιά ${turns} ${turns===1?'φορά':'φορές'} και φτιάξε το στο άδειο πλαίσιο.`:'Μετακίνησε όλο το κομμάτι ένα βήμα δεξιά και ένα κάτω.';
+    task.hints=ladder('Κοίτα το αρχικό κομμάτι και το καμπύλο βέλος.','Το πλαίσιο γυρίζει δεξιά. Το σχήμα μένει ολόκληρο.','Ακολούθησε το φωτεινό τετράγωνο. Πού θα πάνε τα υπόλοιπα;','Μερικά τετράγωνα φαίνονται σαν σκιές. Συμπλήρωσε το σχήμα.','Δες όλο το κομμάτι να γυρίζει. Μετά δοκίμασε καινούργιο σχέδιο μόνος σου.');
+    if(family==='reflect')task.hints=ladder('Κοίτα το αρχικό κομμάτι και τον όρθιο καθρέφτη.','Ο καθρέφτης αλλάζει δεξιά και αριστερά. Πάνω και κάτω μένουν ίδια.','Ακολούθησε το φωτεινό τετράγωνο στην άλλη πλευρά.','Συμπλήρωσε τις σκιές στον καθρέφτη.','Δες όλο το κατοπτρικό κομμάτι. Μετά δοκίμασε νέο σχέδιο μόνος σου.');
+    if(family==='translate')task.hints=ladder('Κοίτα το αρχικό κομμάτι και το βέλος.','Κάθε τετράγωνο κάνει το ίδιο βήμα δεξιά και κάτω.','Ακολούθησε το φωτεινό τετράγωνο.','Συμπλήρωσε τα τετράγωνα που λείπουν από τις σκιές.','Δες το μετακινημένο κομμάτι. Το σχήμα του έμεινε ίδιο.');
   } else if(meta.kind==='logic') {
     task.options=[{id:'A',label:'🔵 μικρό',properties:{blue:true,small:true}},{id:'B',label:'🔴 μικρό',properties:{blue:false,small:true}},{id:'C',label:'🔵 μεγάλο',properties:{blue:true,small:false}},{id:'D',label:'🔴 μεγάλο',properties:{blue:false,small:false}}];
     const wanted=pick(4);task.accepted=[task.options[wanted].id];const p=task.options[wanted].properties;
     task.clues=[p.blue?'Έχει μπλε χρώμα.':'Δεν έχει μπλε χρώμα.',p.small?'Χωρά στο μικρό κουτί.':'Δεν χωρά στο μικρό κουτί.'];task.prompt='Βρες το εξάρτημα που χρειάζεται η Βίδα. Πρέπει να ταιριάζει σε ΟΛΑ τα στοιχεία.';
     task.hints=ladder('Διάβασε και τα δύο στοιχεία.','Απέκλεισε όσα παραβιάζουν έστω ένα στοιχείο.',`Πρώτα κράτα τα ${p.blue?'μπλε':'κόκκινα'}.`,`Ύστερα κράτα τα ${p.small?'μικρά':'μεγάλα'}.`,`Διάλεξε ${task.accepted[0]}: ${task.options[wanted].label}.`);
+    if(band>=3)task.options=Array.from({length:8},(_,i)=>({id:String.fromCharCode(65+i),properties:{blue:!!(i&1),small:!!(i&2),heavy:!!(i&4)},label:`${i&1?'🔵':'🔴'} ${i&2?'μικρό':'μεγάλο'} ${i&4?'βαρύ':'ελαφρύ'}`}));
+    const chosen=task.options[pick(task.options.length)].properties;task.rules=Object.keys(chosen).map(property=>({property,equals:chosen[property]}));task.accepted=task.options.filter(o=>task.rules.every(r=>o.properties[r.property]===r.equals)).map(o=>o.id);
+    task.clues=task.rules.map(r=>r.property==='blue'?(r.equals?'Έχει μπλε χρώμα.':'Δεν έχει μπλε χρώμα.'):r.property==='small'?(r.equals?'Χωρά στο μικρό κουτί.':'Δεν χωρά στο μικρό κουτί.'):(r.equals?'Είναι βαρύ.':'Είναι ελαφρύ.'));if(band>=3)task.clues.push('Όλα φτιάχτηκαν στο εργαστήρι.');
+    if(family==='counterexample'){task.rules=[{property:'blue',equals:true},{property:'small',equals:false}];task.accepted=task.options.filter(o=>o.properties.blue&&!o.properties.small).map(o=>o.id);task.prompt='Ο Σκουριάς λέει: «Όλα τα μπλε κομμάτια είναι μικρά». Βρες ΟΛΑ τα κομμάτια που δείχνουν ότι κάνει λάθος.';task.clues=['Ψάξε μπλε κομμάτι που δεν είναι μικρό.'];task.cognitive_demand='debug';}
+    task.hints=ladder('Κοίτα όλα τα στοιχεία.','Κράτα μόνο τα κομμάτια που ταιριάζουν.',task.clues[0],task.clues.slice(0,2).join(' '),`Διάλεξε ${task.accepted.map(id=>task.options.find(o=>o.id===id).label).join(' και ')}.`);
   } else if(meta.kind==='combination') {
     task.options=Array.from({length:3+(band>2?1:0)},(_,i)=>({id:String.fromCharCode(65+i),label:['🔵','🟡','🔴','🟢'][i]}));
     task.valid_combinations=[];for(let i=0;i<task.options.length;i++) for(let j=i+1;j<task.options.length;j++) task.valid_combinations.push(task.options[i].id+'+'+task.options[j].id);
-    task.expected_count=task.valid_combinations.length;task.prompt='Κατασκεύασε ΟΛΕΣ τις δίχρωμες στολές του ΜΠΙΠ. Δύο διαφορετικά χρώματα ανά στολή· η σειρά δεν αλλάζει τη στολή.';
-    task.hints=ladder('Κάθε στολή έχει δύο διαφορετικά χρώματα.','Κράτα ένα χρώμα σταθερό και ταίριαξέ το με τα υπόλοιπα.','Μετά άλλαξε το πρώτο χρώμα, χωρίς να ξαναφτιάξεις παλιό ζευγάρι.',`Με το Α: ${task.valid_combinations.filter(x=>x.startsWith('A')).join(', ')}.`,`Όλες: ${task.valid_combinations.join(', ')}.`);
+    task.forbidden=band===4?[task.valid_combinations[pick(task.valid_combinations.length)]]:[];task.valid_combinations=task.valid_combinations.filter(x=>!task.forbidden.includes(x));task.expected_count=task.valid_combinations.length;task.prompt='Κατασκεύασε ΟΛΕΣ τις δίχρωμες στολές του ΜΠΙΠ. Δύο διαφορετικά χρώματα ανά στολή· η σειρά δεν αλλάζει τη στολή.';
+    if(task.forbidden.length)task.prompt+=` Προσοχή: το ζευγάρι ${task.forbidden[0].split('+').map(id=>task.options.find(o=>o.id===id).label).join(' + ')} δεν επιτρέπεται.`;
+    task.hints=ladder('Κάθε στολή έχει δύο διαφορετικά χρώματα.','Κράτα ένα χρώμα σταθερό και ταίριαξέ το με τα υπόλοιπα.','Μετά άλλαξε το πρώτο χρώμα, χωρίς να ξαναφτιάξεις παλιό ζευγάρι.',`Με το ${task.options[0].label}: ${task.valid_combinations.filter(x=>x.startsWith('A')).map(x=>x.split('+').map(id=>task.options.find(o=>o.id===id).label).join(' + ')).join(', ')}.`,`Όλες: ${task.valid_combinations.map(x=>x.split('+').map(id=>task.options.find(o=>o.id===id).label).join(' + ')).join(', ')}.`);
   } else if(meta.kind==='probability') {
     const red=1+pick(band+2),blue=1+pick(band+2);task.bag=[...Array(red).fill('red'),...Array(blue).fill('blue')];task.choices=['Κόκκινο','Μπλε','Το ίδιο πιθανό'];task.accepted=red>blue?task.choices[0]:blue>red?task.choices[1]:task.choices[2];task.prompt='Ο ΜΠΙΠ παίρνει ένα χρώμα χωρίς να κοιτάζει. Ποιο είναι πιο πιθανό; Δεν χρειάζεται να μαντέψεις την ίδια τη λήψη.';
     task.hints=ladder('Κοίτα όλα τα χρώματα στον σάκο.','Σύγκρινε πόσα είναι από κάθε χρώμα.',`Κόκκινα: ${red}. Μπλε: ${blue}.`,'Περισσότερα κομμάτια σημαίνουν περισσότερες πιθανότητες.',`Απάντηση: ${task.accepted}. Αυτό δεν εγγυάται ποιο θα βγει.`);
@@ -883,30 +1097,43 @@ function generateTask(family,seed=1,difficulty=1) {
       'debug-loop':[[`Επαναλαμβάνω ${pair} ${repeats} φορές`,pair,loopDirs[first]+', '+loopDirs[first]],2,pair,'Κάθε επανάληψη κρατά και τις δύο κινήσεις.']};
     const [steps,first_error,repair,cue]=variants[family];Object.assign(task,{steps,first_error,repair,repairs:[repair,'Δεν αλλάζω τίποτα','Σβήνω όλες τις κινήσεις']});task.prompt='Ο Σκουριάς μπέρδεψε το σχέδιο! Βρες το ΠΡΩΤΟ λάθος βήμα και επίλεξε επισκευή.';
     task.hints=ladder('Έλεγξε τα βήματα από την αρχή.',cue,'Σταμάτα στο πρώτο βήμα που δεν ακολουθεί τον κανόνα.',`Έλεγξε το βήμα ${first_error+1}.`,`Πρώτο λάθος: βήμα ${first_error+1}. Επισκευή: ${repair}.`);
+  } else if(family==='battery-boss'||family==='signal-boss'){
+    task.grid=['R...','....','....','...G'];task.target={x:3,y:3};task.par=band>=3?6:8;task.required_cells=band===4?['2,0']:[];task.program=['R','R','R','D','D','D'];
+    if(family==='battery-boss'){
+      const a=2+pick(5),b=2+pick(5);task.pickups=[{x:1+pick(2),y:0,value:a},{x:3,y:1+pick(2),value:b},{x:0,y:1,value:a+1},{x:2,y:3,value:b}];task.energy_target=a+b;task.prompt=`Πήγαινε στο γρανάζι μαζεύοντας ΑΚΡΙΒΩΣ ${a+b} ενέργεια. Κάθε μπαταρία μετρά μία φορά. Μέχρι ${task.par} κινήσεις.`;task.cognitive_demand='transfer';
+    }else{
+      const colors=['🔵','🟡','🔴','🟢'],first=colors.splice(pick(4),1)[0],second=colors[pick(3)];task.signal=[first,second,first,'?'];task.gates=Array.from({length:4},(_,x)=>({x,y:1,color:x===3?second:first}));task.broken_program=['D','D','R','R','R','D'];task.prompt=`Επισκεύασε τον δρόμο του Σκουριά. Περνάμε μόνο από πύλη με το ΕΠΟΜΕΝΟ χρώμα του σήματος. Φτάσε στο γρανάζι με έως ${task.par} κινήσεις.`;task.cognitive_demand='debug';
+    }
+    if(task.required_cells.length)task.prompt+=' Πέρασε επίσης από τη σημαία.';
+    task.hints=ladder('Δες τις μπαταρίες ή το σήμα πριν φτιάξεις δρόμο.','Ο δρόμος πρέπει να ταιριάζει σε όλους τους κανόνες.',family==='battery-boss'?'Σύγκρινε το άθροισμα των μπαταριών με τον στόχο.':'Δες ποιο χρώμα ακολουθεί στο σήμα.','Δοκίμασε την πάνω άκρη και μετά τη δεξιά.',`Μια λύση: ${task.program.map(c=>({R:'→',L:'←',U:'↑',D:'↓'}[c])).join(' ')}.`);
   } else {
     const flipped=pick(2)===1, size=3+(band>2?1:0);
     const rows=Array.from({length:size},()=>Array(size).fill('.'));rows[0][0]='R';rows[size-1][size-1]='G';
     if(family==='shortest'||family==='repair-route') rows[1][1]='#';
     if(flipped) rows.reverse();task.grid=rows.map(r=>r.join(''));task.target={x:size-1,y:flipped?0:size-1};task.par=2*(size-1);task.program=[...Array(size-1).fill('R'),...Array(size-1).fill(flipped?'U':'D')];task.alternate=family==='alternatives';
-    if(family==='predict') {task.program=task.program.slice(0,1+pick(task.par));task.target=execute(task,task.program);}
+    if(family==='predict') {task.program=task.program.slice(0,1+pick(task.par));const end=execute(task,task.program);task.target={x:end.x,y:end.y};}
     if(family==='map-transfer'){task.cargo_limit=task.par;task.representation='mixed';task.prompt=`Νέος χάρτης φόρτωσης! Κάθε κίνηση ξοδεύει μία μπαταρία. Πήγαινε στο G με έως ${task.par} μπαταρίες.`;}
     else task.prompt=family==='predict'?'Πριν τρέξει ο ΜΠΙΠ, δείξε πού θα σταματήσει το πρόγραμμα.':task.alternate?'Φτιάξε δύο ΔΙΑΦΟΡΕΤΙΚΑ προγράμματα που φτάνουν στο G.':family==='repair-route'?'Το σχέδιο του Σκουριά περνά από εμπόδιο. Ξαναχτίσε μια ασφαλή διαδρομή με το μικρότερο πλήθος κινήσεων.':`Οδήγησε τον ΜΠΙΠ στο G με το μικρότερο πρόγραμμα (${task.par} κινήσεις).`;
     if(family==='repair-route')task.broken_program=['R',flipped?'U':'D',...task.program.slice(2)];
     const second=[...Array(size-1).fill(flipped?'U':'D'),...Array(size-1).fill('R')];
-    task.hints=ladder('Βρες την αρχή, τον στόχο και τα εμπόδια.','Χώρισε τη διαδρομή σε οριζόντια και κάθετα βήματα.',`Η αρχή είναι στην ${flipped?'κάτω':'πάνω'} αριστερή γωνία.`,family==='predict'?`Ακολούθησε μία εντολή τη φορά: ${task.program.join(' ')}.`:'Μπορείς να πας πρώτα κατά μήκος της άκρης.',family==='predict'?`Σταματά στο ${cellId(task.target)} (θέσεις από 0).`:task.alternate?`Δύο λύσεις: ${task.program.join(' ')} και ${second.join(' ')}.`:`Μια λύση: ${task.program.join(' ')}.`);
+    task.hints=ladder('Βρες την αρχή, τον στόχο και τα εμπόδια.','Χώρισε τη διαδρομή σε οριζόντια και κάθετα βήματα.',`Η αρχή είναι στην ${flipped?'κάτω':'πάνω'} αριστερή γωνία.`,family==='predict'?`Ακολούθησε μία εντολή τη φορά: ${task.program.map(c=>({R:'→',L:'←',U:'↑',D:'↓'}[c])).join(' ')}.`:'Μπορείς να πας πρώτα κατά μήκος της άκρης.',family==='predict'?'Ακολούθησε τα βελάκια από το ρομπότ και δείξε το τελευταίο τετράγωνο.':task.alternate?`Δύο λύσεις: ${task.program.map(c=>({R:'→',L:'←',U:'↑',D:'↓'}[c])).join(' ')} και ${second.map(c=>({R:'→',L:'←',U:'↑',D:'↓'}[c])).join(' ')}.`:`Μια λύση: ${task.program.map(c=>({R:'→',L:'←',U:'↑',D:'↓'}[c])).join(' ')}.`);
   }
   if(task.repairs){for(let i=task.repairs.length-1;i>0;i--){const j=pick(i+1);[task.repairs[i],task.repairs[j]]=[task.repairs[j],task.repairs[i]];}}
-  const surface=JSON.stringify([task.family,task.tokens,task.target,task.start,task.max_parts,task.slots,task.choices,task.cells,task.turns,task.offset,task.options,task.clues,task.bag,task.steps,task.repairs,task.grid,task.program,task.broken_program]);let hash=2166136261;for(const ch of surface)hash=Math.imul(hash^ch.codePointAt(0),16777619);task.surface_id=task.family+':'+(hash>>>0).toString(16);
+  task.constraints=Object.fromEntries(Object.entries({max_parts:task.max_parts,min_parts:task.min_parts,alternate:!!task.alternate,max_moves:task.par,energy_target:task.energy_target,required_cells:task.required_cells,forbidden:task.forbidden,rules:task.rules}).filter(([,v])=>v!==undefined));
+  const surface=JSON.stringify([task.family,task.tokens?.map(t=>({label:t.label,value:t.value})),task.target,task.start,task.max_parts,task.slots,task.choices,task.cells,task.family==='rotate'?task.turns:null,task.family==='translate'?task.offset:null,task.options,task.clues,task.bag,task.steps,task.repairs,task.grid,task.program,task.broken_program,task.pickups,task.gates,task.signal,task.constraints,task.step_pattern,task.cycle]);let hash=2166136261;for(const ch of surface)hash=Math.imul(hash^ch.codePointAt(0),16777619);task.surface_id=task.family+':'+(hash>>>0).toString(16);
   task.explanation=task.kind==='build'?`Πώς ξέρεις ότι αυτά τα κομμάτια ανοίγουν την πόρτα στο ${task.target}; Υπάρχει άλλος τρόπος να τα μετρήσεις;`:task.kind==='debug'?'Γιατί εκείνο ήταν το πρώτο λάθος; Πώς το διόρθωσες;':task.kind==='logic'?'Ποιο στοιχείο απέκλεισε ένα εξάρτημα; Πώς το ξέρεις;':task.kind==='probability'?'Γιατί το ένα χρώμα είναι πιο πιθανό; Μπορεί να βγει και το άλλο;':'Ποια ιδέα έκανε τη διαφορά; Τι θα δοκίμαζες σε έναν καινούργιο χάρτη;';return task;
 }
 function execute(task,program) {
-  if(!Array.isArray(program)||program.length>64)return null;let y=task.grid.findIndex(r=>r.includes('R')),x=task.grid[y]?.indexOf('R');
-  for(const op of program) { const d={U:[0,-1],D:[0,1],L:[-1,0],R:[1,0]}[op];if(!d)return null;x+=d[0];y+=d[1];if(!task.grid[y]||x<0||x>=task.grid[y].length||task.grid[y][x]==='#')return null; }return{x,y};
+  if(!Array.isArray(program)||program.length>64)return null;let y=task.grid.findIndex(r=>r.includes('R')),x=task.grid[y]?.indexOf('R');const picked=new Set(),visited=new Set([x+','+y]);let sum=0;
+  for(const op of program){const d={U:[0,-1],D:[0,1],L:[-1,0],R:[1,0]}[op];if(!d)return null;x+=d[0];y+=d[1];if(!task.grid[y]||x<0||x>=task.grid[y].length||task.grid[y][x]==='#')return null;
+   const gate=task.gates?.find(g=>g.x===x&&g.y===y);if(gate&&gate.color!==task.signal[1])return null;
+   task.pickups?.forEach((p,i)=>{if(p.x===x&&p.y===y&&!picked.has(i)){sum+=p.value;picked.add(i);}});visited.add(x+','+y);
+  }return{x,y,sum,visited};
 }
-function checkTask(task,answer) {
+function checkUnchecked(task,answer) {
   if(!task||!catalog.some(m=>m.family===task.family))return false;
   switch(task.kind) {
-    case 'build': {if(!Array.isArray(answer)||answer.length>task.max_parts||new Set(answer).size!==answer.length)return false;const tokens=answer.map(id=>task.tokens.find(t=>t.id===id));return tokens.every(Boolean)&&tokens.reduce((n,t)=>n+t.value,task.start)===task.target;}
+    case 'build': {if(task.alternate)return Array.isArray(answer)&&answer.length===2&&answer.every(a=>checkUnchecked({...task,alternate:false},a))&&buildSignature(task,answer[0])!==buildSignature(task,answer[1]);if(!Array.isArray(answer)||answer.length>task.max_parts||answer.length<(task.min_parts||1)||new Set(answer).size!==answer.length)return false;const tokens=answer.map(id=>task.tokens.find(t=>t.id===id));return tokens.every(Boolean)&&tokens.reduce((n,t)=>n+t.value,task.start)===task.target;}
     case 'sequence':return Array.isArray(answer)&&answer.length===task.expected.length&&answer.every((x,i)=>String(x)===task.expected[i]);
     case 'shape':return sameSet(answer,task.target.map(cellId));
     case 'logic':return sameSet(answer,task.accepted);
@@ -914,12 +1141,69 @@ function checkTask(task,answer) {
     case 'probability':return answer===task.accepted;
     case 'debug':return !!answer&&answer.correct===false&&answer.first_error===task.first_error&&answer.repair===task.repair;
     case 'predict':return answer===cellId(task.target);
-    case 'program': {const valid=p=>{const end=execute(task,p);return end&&cellId(end)===cellId(task.target)&&p.length<=(task.alternate?task.par+4:task.par);};return task.alternate?Array.isArray(answer)&&answer.length===2&&answer.every(valid)&&JSON.stringify(answer[0])!==JSON.stringify(answer[1]):!!valid(answer);}
+    case 'program': {const valid=p=>{const end=execute(task,p);return end&&cellId(end)===cellId(task.target)&&p.length<=(task.alternate?task.par+4:task.par)&&(task.energy_target===undefined||end.sum===task.energy_target)&&(task.required_cells||[]).every(c=>end.visited.has(c));};return task.alternate?Array.isArray(answer)&&answer.length===2&&answer.every(valid)&&JSON.stringify(answer[0])!==JSON.stringify(answer[1]):!!valid(answer);}
     default:return false;
   }
 }
 
-return {SKILLS,catalog,generateTask,checkTask};})();
+function paths(task) {
+  let sy=task.grid.findIndex(r=>r.includes('R')),sx=task.grid[sy].indexOf('R');
+  const queue=[{x:sx,y:sy,p:[]}],found=[];
+  while(queue.length) {
+    const {x,y,p}=queue.shift();
+    if(task.grid[y][x]==='G'&&routeAllowed(task,p)){found.push(p);if(found.length===2)return found;continue;}
+    if(p.length>=task.par)continue;
+    for(const [op,dx,dy] of [['R',1,0],['D',0,1],['L',-1,0],['U',0,-1]]) {
+      const nx=x+dx,ny=y+dy;
+      if(task.grid[ny]?.[nx]&&task.grid[ny][nx]!=='#'&&(!task.gates?.some(g=>g.x===nx&&g.y===ny&&g.color!==task.signal[1])))queue.push({x:nx,y:ny,p:[...p,op]});
+    }
+  }return found;
+}
+function routeAllowed(t,p){let x=t.grid[t.grid.findIndex(r=>r.includes('R'))].indexOf('R'),y=t.grid.findIndex(r=>r.includes('R')),sum=0;const picked=new Set(),visited=new Set([x+','+y]);for(const op of p){if(op==='R')x++;if(op==='L')x--;if(op==='D')y++;if(op==='U')y--;t.pickups?.forEach((a,i)=>{if(a.x===x&&a.y===y&&!picked.has(i)){sum+=a.value;picked.add(i);}});visited.add(x+','+y);}return(t.energy_target===undefined||sum===t.energy_target)&&(t.required_cells||[]).every(c=>visited.has(c));}
+function solveTask(t) {
+  if(t.kind==='build') {const found=[];
+    for(let mask=1;mask<2**t.tokens.length;mask++) {
+      const chosen=t.tokens.filter((_,i)=>mask&(1<<i));
+      if(chosen.length>=(t.min_parts||1)&&chosen.length<=t.max_parts&&chosen.reduce((a,b)=>a+b.value,t.start)===t.target){const ids=chosen.map(x=>x.id);if(!found.some(set=>buildSignature(t,set)===buildSignature(t,ids)))found.push(ids);if(found.length===(t.alternate?2:1))return t.alternate?found:found[0];}
+    }
+  }
+  if(t.kind==='sequence') {
+    if(t.cycle)return t.slots.flatMap((x,i)=>x==='?'?[t.cycle[i%t.cycle.length]]:[]);
+    if(t.step_pattern){let n=Number(t.slots[0]);return t.slots.flatMap((x,i)=>{if(i)n+=t.step_pattern[(i-1)%t.step_pattern.length];return x==='?'?[String(n)]:[];});}
+    if(t.family==='lights')return t.slots.filter(x=>x==='?').map((_,i)=>i===0?t.slots[1]:t.slots[0]);
+    const delta=Number(t.slots[1])-Number(t.slots[0]);return t.slots.flatMap((x,i)=>x==='?'?[String(Number(t.slots[0])+i*delta)]:[]);
+  }
+  if(t.kind==='shape')return t.cells.map(c=>{
+    let x=c.x,y=c.y;
+    if(t.family==='rotate') for(let i=0;i<t.turns;i++){const nx=3-y;y=x;x=nx;}
+    else if(t.family==='reflect')x=3-x;
+    else {x+=t.offset.x;y+=t.offset.y;}
+    if(!(x>=0&&x<4&&y>=0&&y<4))return null;return `${x},${y}`;
+  });
+  if(t.kind==='logic')return t.options.filter(o=>t.rules.every(r=>o.properties[r.property]===r.equals)).map(o=>o.id);
+  if(t.kind==='combination'){const out=[];for(let i=0;i<t.options.length;i++)for(let j=i+1;j<t.options.length;j++){const key=[t.options[i].id,t.options[j].id].sort().join('+');if(!t.forbidden?.includes(key))out.push(key);}if(out.length!==t.expected_count)return null;return out;}
+  if(t.kind==='probability'){const r=t.bag.filter(x=>x==='red').length,b=t.bag.filter(x=>x==='blue').length;return r>b?'Κόκκινο':b>r?'Μπλε':'Το ίδιο πιθανό';}
+  if(t.kind==='debug') {
+    if(t.family==='debug-sum'){const [a,b]=t.steps[0].match(/\d+/g).map(Number);const decomposition=t.steps[1].match(/\d+/g).map(Number);return decomposition[1]+decomposition[2]!==b?{correct:false,first_error:1,repair:`Χωρίζω το ${b} σε ${b-2} και 2`}:{correct:false,first_error:2,repair:`Σύνολο: ${a+b}`};}
+    if(t.family==='debug-turn'){const dirs=['πάνω','δεξιά','κάτω','αριστερά'],i=dirs.indexOf(t.steps[0].replace('Κοιτάζω ',''));return {correct:false,first_error:2,repair:'Τώρα κοιτάζω '+dirs[(i+1)%4]};}
+    if(t.family==='debug-rule'){const cap=Number(t.steps[0].match(/\d+/)[0]),loaded=Number(t.steps[1].match(/\d+/)[0]);return {correct:false,first_error:2,repair:`Προσθέτω άλλα ${cap-loaded}`};}
+    if(t.family==='debug-loop')return {correct:false,first_error:2,repair:t.steps[1]};
+    return {correct:false,first_error:2,repair:`Επόμενο: ${Number(t.steps[0].split(',')[0])+6}`};
+  }
+  if(t.kind==='program'){const found=paths(t);if(found.length<(t.alternate?2:1)||found[0].length>t.par)return null;return t.alternate?found:found[0];}
+  if(t.kind==='predict') {
+    let y=t.grid.findIndex(r=>r.includes('R')),x=t.grid[y].indexOf('R');
+    for(const op of t.program){if(op==='R')x++;else if(op==='L')x--;else if(op==='D')y++;else if(op==='U')y--;if(!t.grid[y]?.[x]||t.grid[y][x]==='#')return null;}return `${x},${y}`;
+  }
+  throw new Error('No independent solution for '+t.family);
+}
+
+const registry=createRegistry(catalog,{generate:generateUnchecked,check:checkUnchecked,solve:solveTask});
+function validateTask(task){return registry.find(r=>r.id===task?.family)?.validator(task)||false;}
+function generateTask(family,seed=1,difficulty=1){const entry=registry.find(r=>r.id===family);if(!entry)throw new RangeError('Unknown task family: '+family);const task=entry.generator(seed,difficulty);if(!entry.validator(task))throw Error('Invalid generated task: '+family+'/'+seed);return task;}
+function checkTask(task,answer){try{return !!registry.find(r=>r.id===task?.family)&&checkUnchecked(task,answer);}catch{return false;}}
+
+return {SKILLS,catalog,registry,generateTask,checkTask,validateTask,solveTask};})();
 /* ================= CORE: data + rules (no DOM) ================= */
 const DIRS={U:[0,-1],D:[0,1],L:[-1,0],R:[1,0]};
 const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
@@ -2888,34 +3172,60 @@ window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{fit();
 
 /* ΜΠΙΠ adapter: engine contains no robot/grid/domain assumptions. */
 let AD=MIG.adaptive;
-let AS=AgisEngine.createSession('bip-'+Date.now().toString(36),Date.now());
+let LAB=BipLab.loadLabState(bipStorage);
+const endlessUnlocked=()=>BipLab.storyComplete(ST,LEVELS.map(l=>l.id));
+let AS=AgisEngine.continueSession(AD.sessions,Date.now(),'bip-'+Date.now().toString(36));
 let pendingLegacyHelp=null;
-let TR=null,mission=null,missionReturn=null,lastPacing='',lastAdaptiveOffer=0;
-const safeAdaptive=()=>{try{const at=AD.sessions.findIndex(s=>s.session_id===AS.session_id);if(at<0)AD.sessions.push(AS);else AD.sessions[at]=AS;AD.sessions=AD.sessions.slice(-60);localStorage.setItem(BipMigration.KEYS.adaptive,JSON.stringify(AD));}catch{MIG.warnings=['Οι αλλαγές δεν αποθηκεύτηκαν. Κρατήστε εξαγωγή JSON πριν κλείσετε.'];}};
-const LEVEL_SKILL={code:'spatial_reasoning',draw:'geometry',studs:'number_sense',tower:'arithmetic_strategy',pattern:'patterns_early_algebra',trace:'problem_decomposition',logic:'deductive_logic',turbo:'spatial_reasoning',duel:'constraint_reasoning'};
-function metaLevel(id,d){d=d||LEVELS.find(l=>l.id===id)?.def||{t:id?.split(':')[1]||'code'};return {item_id:id,primary_skill:d.need!=null?'arithmetic_strategy':LEVEL_SKILL[d.t]||'spatial_reasoning',secondary_skills:d.need!=null?['constraint_reasoning']:[],nominal_difficulty:Math.min(5,1+(d.tier||0)),cognitive_demand:d.pre?'debug':d.boss?'transfer':'apply',representation:d.t==='pattern'?'mixed':'spatial',family:d.t,mode:d.t==='duel'?'boss':d.pre?'debug':d.t==='draw'?'spatial':'reasoning',content_version:'1.1-retained'};}
-function beginTrial(meta){TR={meta,start:Date.now(),lastAttempt:Date.now(),hint:0,attempts:0,resets:0,done:false,replay:!!ST.stars[meta.replay_key||meta.item_id]};if(pendingLegacyHelp===meta.item_id){TR.hint=5;pendingLegacyHelp=null;}}
+let TR=null,mission=null,missionReturn=null,lastPacing='',lastAdaptiveOffer=0,replayIntent=null;
+let activeLast=Date.now(),activeWasHidden=document.hidden,pendingRestore=null,resumeEpisode=null;
+const safeAdaptive=()=>{try{if(!MIG.adaptiveWritable)return;const at=AD.sessions.findIndex(s=>s.session_id===AS.session_id);if(at<0)AD.sessions.push(AS);else AD.sessions[at]=AS;AD.sessions=AD.sessions.slice(-60);localStorage.setItem(BipMigration.KEYS.adaptive,JSON.stringify(AD));}catch{MIG.warnings=['Οι αλλαγές δεν αποθηκεύτηκαν. Κρατήστε εξαγωγή JSON πριν κλείσετε.'];}};
+function metaLevel(id,d){return BipMetadata.metaLevel(id,d||LEVELS.find(l=>l.id===id)?.def||{t:id?.split(':')[1]||'code'});}
+function tickActive(now=Date.now(),hidden=document.hidden){
+ const dt=AgisEngine.activeDelta(activeLast,now,lastInput,hidden||activeWasHidden);activeLast=now;if(!dt)return;
+ const mode=S.screen==='shop'?'create':S.screen==='comic'?'story':S.screen==='adaptive'?(mission?.task.mode||'low_load'):S.lesson?'new_material':S.studio?'create':TR?.meta.mode||'menu';
+ const cat=BipMetadata.timeCategory(S.screen,TR?.meta||{}, {studio:S.studio,lesson:S.lesson,duel:S.D});
+ AS=AgisEngine.accountTime(AS,dt,cat,mode,now);if(TR&&!TR.done)TR.active_ms+=dt;
+ const legacy=cat==='story_coding'||cat==='spatial_geometry'?'code':cat==='arena_boss'?'arena':cat==='workshop'?'shop':cat==='new_material'?'learn':cat==='numbers_reasoning'||cat==='logic_debugging'?'math':'menu';
+ logTick(LOG,now,dt,legacy,S.lesson||S.studio||!S.at||!['play','math'].includes(S.screen)?null:S.at.id);logDirty=true;
+}
+function finishEpisode(result='abandoned',extra={}){
+ tickActive();if(!TR||TR.done)return;const e=AgisEngine.summarizeEpisode(TR,result,Date.now(),{level_id:S.lvl?.id||null,...(TR.meta.generator_family?{generator_family:TR.meta.generator_family,difficulty:TR.meta.difficulty,secondary_skills:TR.meta.secondary_skills,cognitive_demand:TR.meta.cognitive_demand,constraints:TR.meta.constraints}:{}),...extra});
+ if(e){AD=AgisEngine.recordTrial(AD,e);AS=AgisEngine.recordSessionTrial(AS,e);}safeAdaptive();
+}
+function beginTrial(meta,prior=null){
+ finishEpisode();TR=AgisEngine.createEpisode({...meta,domain:'math_logic',challenge_origin:meta.challenge_origin||replayIntent||'new_challenge'},AS.session_id,Date.now());replayIntent=null;
+ if(prior){TR.hint=prior.hint||0;TR.resets=prior.resets||0;TR.prior_attempts=(prior.attempts||0)+(prior.prior_attempts||0);}
+ TR.initial_program=JSON.stringify([S.prog,S.fn]);if(pendingLegacyHelp===meta.item_id){TR.hint=5;pendingLegacyHelp=null;}
+}
+function rawInteraction(kind,extra={}){
+ tickActive();if(!TR||TR.done)return;const e={timestamp:Date.now(),session_id:AS.session_id,item_id:TR.meta.item_id,episode_start:TR.start,family:TR.meta.family,kind,...extra};
+ AgisEngine.episodeInteraction(TR,e);AD=AgisEngine.recordInteraction(AD,e);safeAdaptive();
+}
 function emitTrial(ok,tags=[],extra={}){
- if(!TR||TR.done)return;const m=TR.meta;const now=Date.now();
- const e={schema_version:1,session_id:AS.session_id,timestamp:now,item_id:m.item_id,level_id:S.lvl?.id||null,domain:'math_logic',skills:[m.primary_skill,...(m.secondary_skills||[])],primary_skill:m.primary_skill,start_time:TR.start,response_time:Math.max(0,now-TR.lastAttempt),result:ok?'success':'not_yet',first_attempt:TR.attempts<=1,attempts:Math.max(1,TR.attempts),hint_level_used:TR.hint,reset_count:TR.resets,voluntary_replay:TR.replay,mastery_evidence_type:m.cognitive_demand==='recall'?'retrieval':m.cognitive_demand,context:m.family,modality:'touch',representation:m.representation,content_version:m.content_version||'1.2',generator_version:m.generator_version||null,surface_id:m.surface_id||m.item_id,seed:m.seed??null,parameters:m.parameters||null,family:m.family,mode:m.mode,error_tags:tags,...extra};
- AD=AgisEngine.recordTrial(AD,e);const elapsedModes=AS.mode_ms;AS=AgisEngine.recordSessionTrial(AS,e);AS.mode_ms=elapsedModes;TR.lastAttempt=now;if(ok)TR.done=true;safeAdaptive();
+ if(!TR||TR.done)return;rawInteraction('attempt',{ok,error_tags:tags});if(ok)finishEpisode('success',extra);
 }
 function adaptiveLegacyEvent(type,id,x={}){
- if(type==='enter'&&S.screen!=='adaptive'){beginTrial(metaLevel(id,S.def||S.lvl?.def));}
- else if(type==='hint'&&TR)TR.hint=Math.min(5,TR.hint+1);
- else if(type==='clear'&&TR)TR.resets++;
- else if(type==='run'&&TR&&!S.lesson){TR.attempts++;if(!x.ok)emitTrial(false,[x.error_tag|| (S.D?'arena_restart':'program_not_yet')]);}
- else if(type==='win'&&TR&&!S.lesson&&S.screen!=='adaptive')emitTrial(true);
+ if(type==='enter'&&S.screen!=='adaptive'){beginTrial({...metaLevel(id,S.def||S.lvl?.def),challenge_origin:replayIntent||(ST.stars[id]?'story_replay':'new_challenge')});}
+ else if(type==='hint'&&TR)rawInteraction('hint',{level:Math.min(5,TR.hint+1)});
+ else if(type==='clear'&&TR)rawInteraction('reset');
+ else if(['edit','undo'].includes(type)&&TR)rawInteraction('edit',{action:type});
+ else if(type==='run'&&TR&&!S.lesson){
+  const repaired=TR.meta.cognitive_demand==='debug'&&TR.initial_program!==JSON.stringify([S.prog,S.fn]);
+  rawInteraction('attempt',{ok:!!x.ok,error_tags:x.ok?[]:[x.error_tag||(S.D?'arena_restart':'program_not_yet')]});TR.debug_repaired=repaired;
+ }
+ else if(type==='win'&&TR&&!TR.done&&!S.lesson&&S.screen!=='adaptive'){
+  if(!TR.attempts)rawInteraction('attempt',{ok:true});finishEpisode('success',{debug_repaired:!!TR.debug_repaired});
+ }
 }
 const originalNewQ=newQ;
-newQ=function(){originalNewQ();const m=S.m;if(m){beginTrial({...metaLevel((S.lvl?.id||'p:'+m.game)+':'+m.qi,{t:m.game,tier:m.tier}),item_id:(S.lvl?.id||'p:'+m.game)+':'+m.qi,replay_key:S.lvl?.id||'p:'+m.game,seed:null});}};
+newQ=function(){originalNewQ();const m=S.m;if(m){beginTrial({...metaLevel((S.lvl?.id||'p:'+m.game)+':'+m.qi,{t:m.game,tier:m.tier}),item_id:(S.lvl?.id||'p:'+m.game)+':'+m.qi,replay_key:S.lvl?.id||'p:'+m.game,seed:null,challenge_origin:S.lvl?.id&&ST.stars[S.lvl.id]?'story_replay':'new_challenge'});}};
 for(const action of ['ans','tadd','lput','guess']){
  const original=ACT[action];ACT[action]=async function(d,b){const m=S.m,wrong=m?.wrong||0;await original(d,b);if(S.m!==m||!TR||!m)return;
-  if(m.wrong>wrong){TR.attempts++;if(m.help)TR.hint=Math.max(TR.hint,3);emitTrial(false,[m.game==='pattern'?'pattern_rule':m.game==='logic'?'constraint':'quantity']);}
-  if(m.done){TR.attempts=Math.max(1,TR.attempts+1);if(action==='guess'&&+d.i!==m.q.answer){emitTrial(false,['prediction']);TR.done=true;}else emitTrial(true);}
+  if(m.wrong>wrong){if(m.help)TR.hint=Math.max(TR.hint,3);emitTrial(false,[m.game==='pattern'?'pattern_rule':m.game==='logic'?'constraint':'quantity']);}
+  if(m.done){if(action==='guess'&&+d.i!==m.q.answer){emitTrial(false,['prediction']);finishEpisode('not_yet');}else emitTrial(true);}
  };
 }
-const originalGo=go;go=function(screen){if(S.screen==='adaptive')abandonMission();originalGo(screen);if(screen==='shop')AS.last_mode='create';};
+const originalGo=go;go=function(screen){finishEpisode();if(S.screen==='adaptive')abandonMission();originalGo(screen);if(screen==='shop')AS.last_mode='create';};
 const originalHome=renderHome;renderHome=function(){originalHome();if(MIG.warnings.length){const p=document.createElement('p');p.className='ad-note';p.textContent=MIG.warnings.join(' ');$('.home').append(p);}};
 function candidates(){
  const c=BipTasks.catalog.map(x=>({...x,nominal_difficulty:AD.skills[x.primary_skill]?.band||x.nominal_difficulty||1}));
@@ -2927,11 +3237,13 @@ function recommendation(){const plan=AgisEngine.sessionPlan(AS,Date.now());let l
  if(['create','exploration','low_load'].includes(plan.mode))list.push({item_id:'activity:'+plan.mode,family:plan.mode,primary_skill:'metacognition',mode:plan.mode,nominal_difficulty:0,novelty_level:0,representation:'spatial',cognitive_demand:'create',prerequisites:[]});
  const due=list.filter(c=>AD.skills[c.primary_skill]?.next_retrieval_due&&Date.now()>=AD.skills[c.primary_skill].next_retrieval_due&&c.item_id.startsWith('a:'));
  if(due.length&&AS.trial_count%4===0)list=due.map(c=>({...c,mode:'retrieval',cognitive_demand:'recall'}));
+ if(!due.length&&plan.reason!=='pacing'&&!['create','exploration','low_load','explain'].includes(plan.mode)&&AS.trial_count>0&&AS.trial_count%8===0){const bosses=list.filter(c=>['battery-boss','signal-boss'].includes(c.family));if(AgisEngine.selectCandidate(bosses,AD,AS,Date.now()))list=bosses;}
  if(plan.reason==='pacing')list=list.filter(c=>c.item_id.startsWith('activity:')||c.mode==='low_load'||(c.mode==='retrieval'&&c.nominal_difficulty<=1)).map(c=>({...c,nominal_difficulty:Math.min(1,c.nominal_difficulty)}));
  return AgisEngine.selectCandidate(list,AD,AS,Date.now());
 }
-const originalMap=renderMap;renderMap=function(){originalMap();const c=recommendation();const sec=document.createElement('section');sec.className='issue k-yellow';sec.innerHTML=`<h2><span class="no">★</span><span class="nm">Μυστικές αποστολές του Μπιπ</span></h2><div class="xtra"><button class="btn yl" data-act="adaptive-next">${I.zap}Πάμε σε αποστολή!<small>Νέοι δρόμοι, πόρτες και μυστικά</small></button><button class="btn" data-act="adaptive-list">${I.wrench}Διάλεξε αποστολή</button></div>`;$('.screen.map').insertBefore(sec,$('.screen.map').children[1]);$('.screen.map').scrollTop=0;};
-function notePacing(mode){const plan=AgisEngine.sessionPlan(AS,Date.now());if(plan.reason==='pacing'&&lastPacing!==AS.session_id+':'+AS.trial_count){lastPacing=AS.session_id+':'+AS.trial_count;AD.events.push({schema_version:1,session_id:AS.session_id,timestamp:Date.now(),item_id:'pacing-switch',result:'pacing_switch',mode,reason:'change_of_pacing',signals:plan.signals});AD.events=AD.events.slice(-500);safeAdaptive();}}
+const originalComic=showComic;showComic=function(panels,title,then){originalComic(panels,title,then);if(panels===END4_COMIC&&endlessUnlocked()){const button=$('[data-act="comicgo"]');button.textContent='Ατελείωτο Εργαστήριο — ΠΑΜΕ!';}};
+const originalMap=renderMap;renderMap=function(){originalMap();const c=recommendation();const sec=document.createElement('section');sec.className='issue k-yellow';sec.innerHTML=`<h2><span class="no">★</span><span class="nm">${endlessUnlocked()?'Ατελείωτο Εργαστήριο':'Μυστικές αποστολές του Μπιπ'}</span></h2>${endlessUnlocked()?'<p>Η ιστορία ολοκληρώθηκε! Ο Μπιπ έχει πάντα μια νέα αποστολή. Το τέλος της ιστορίας μένει στα επεισόδια.</p>':''}<div class="xtra"><button class="btn yl" data-act="adaptive-next">${I.zap}Πάμε σε αποστολή!<small>Νέοι δρόμοι, πόρτες και μυστικά</small></button><button class="btn" data-act="adaptive-list">${I.wrench}Διάλεξε αποστολή</button></div>`;$('.screen.map').insertBefore(sec,$('.screen.map').children[1]);$('.screen.map').scrollTop=0;};
+function notePacing(mode){const plan=AgisEngine.sessionPlan(AS,Date.now());if(plan.reason==='pacing'&&lastPacing!==AS.session_id+':'+AS.trial_count){lastPacing=AS.session_id+':'+AS.trial_count;AD.events.push({schema_version:2,event_kind:'pacing_decision',session_id:AS.session_id,timestamp:Date.now(),item_id:'pacing-switch',result:'pacing_switch',mode,reason:'change_of_pacing',signals:plan.signals});AD.events=AD.events.slice(-500);safeAdaptive();}}
 function startRecommended(then){
  const pacing=AgisEngine.sessionPlan(AS,Date.now()).reason==='pacing';let c=recommendation();
  if(c?.item_id.startsWith('activity:')&&S.screen==='adaptive'&&!mission){
@@ -2948,58 +3260,68 @@ function showActivity(mode){S.runId++;S.running=false;closeOv();S.screen='adapti
  notePacing(mode);
 }
 function startMission(c){
+ finishEpisode();
  S.runId++;S.running=false;S.lesson=null;S.studio=false;S.D=null;S.lvl=null;S.at=null;S.screen='adaptive';closeOv();
  let seed=(Date.now()^Math.imul(AD.events.length+1,2654435761))>>>0;
- const oldSurface=mission?.task.surface_id;let t=BipTasks.generateTask(c.family,seed,c.nominal_difficulty||1);for(let tries=0;oldSurface&&t.surface_id===oldSurface&&tries<32;tries++){seed=(seed+1)>>>0;t=BipTasks.generateTask(c.family,seed,c.nominal_difficulty||1);}Object.assign(t,{mode:c.mode,cognitive_demand:c.cognitive_demand});
+ const replay=c.challenge_origin==='child_requested_repeat';if(replay)seed=c.seed;
+ let generated=BipLab.nextChallenge(LAB,c.family,c.nominal_difficulty||1,{generate:BipTasks.generateTask,validate:BipTasks.validateTask,seed,replay});
+ if(!generated.task){const alternatives=candidates().filter(x=>x.item_id.startsWith('a:')&&x.family!==c.family);for(let tries=0;tries<alternatives.length;tries++){const next=AgisEngine.selectCandidate(alternatives,AD,AS,Date.now());if(!next)break;generated=BipLab.nextChallenge(LAB,next.family,next.nominal_difficulty,{generate:BipTasks.generateTask,validate:BipTasks.validateTask,seed});if(generated.task){c=next;break;}alternatives.splice(alternatives.indexOf(next),1);}}
+ if(!generated.task){showActivity('create');return;}LAB=generated.state;if(!BipLab.saveLabState(bipStorage,LAB))MIG.warnings=['Το ιστορικό αποστολών δεν αποθηκεύτηκε. Κρατήστε εξαγωγή JSON.'];
+ const t=generated.task;seed=t.seed;if(c.mode==='retrieval'&&c.cognitive_demand==='recall')Object.assign(t,{mode:'retrieval',cognitive_demand:'recall'});else t.mode=c.mode;
+
  mission={task:t,selected:[],program:t.broken_program?.slice()||[],routes:[],first_error:null,repair:null,correct:null,stage:'solve',completed:false,status:'',hint:0};
- beginTrial({...t,item_id:c.item_id+':'+seed,replay_key:'a:'+c.family,parameters:t.parameters||{difficulty:c.nominal_difficulty}});renderMission();speak(t.prompt);
+ beginTrial({...t,item_id:c.item_id+':'+seed,replay_key:'a:'+c.family,challenge_origin:c.challenge_origin||(c.mode==='retrieval'&&c.cognitive_demand==='recall'?'scheduled_retrieval':'new_challenge'),parameters:t.parameters||{difficulty:t.difficulty,constraints:t.constraints}});renderMission();speak(t.prompt);
 }
 const missionButton=(id,label,on=false)=>`<button class="device ${on?'on':''}" data-act="ad-select" data-id="${esc(id)}">${esc(label)}</button>`;
-function miniGrid(t,pickable=false){return `<div class="pad">${Array.from({length:16},(_,i)=>{const x=i%4,y=Math.floor(i/4),id=x+','+y;const selected=mission.selected.includes(id);const marked=(t.cells||[]).some(c=>c.x===x&&c.y===y);const ch=t.grid?.[y]?.[x]||'';return `<button ${pickable?'data-act="ad-select" data-id="'+id+'"':'disabled'} class="${selected?'on':''}" aria-label="τετράγωνο ${x+1}, ${y+1}">${marked?'◆':ch==='R'?'🤖':ch==='G'?'⚙':ch==='#'?'▣':''}</button>`}).join('')}</div>`;}
+function miniGrid(t,pickable=false){const size=t.grid?.[0]?.length||4,rows=t.grid?.length||4;return `<div class="pad" style="grid-template-columns:repeat(${size},1fr)">${Array.from({length:size*rows},(_,i)=>{const x=i%size,y=Math.floor(i/size),id=x+','+y;const selected=mission.selected.includes(id);const ch=t.grid?.[y]?.[x]||'';const ghosts=t.kind==='shape'&&mission.hint>=3?t.target.slice(0,mission.hint===3?1:mission.hint===4?t.target.length-1:t.target.length):[];const ghost=ghosts.some(c=>c.x===x&&c.y===y);return `<button ${pickable?'data-act="ad-select" data-id="'+id+'"':'disabled'} class="${selected?'on':''} ${ghost?'ad-ghost':''}" aria-label="τετράγωνο ${x+1}, ${y+1}">${ghost?'◇':esc(BipVisuals.gridMarker(t,x,y))}</button>`}).join('')}</div>`;}
+function shapeReference(t){const squares=t.cells.map((c,i)=>`<rect x="${c.x+.08}" y="${c.y+.08}" width=".84" height=".84" rx=".08" class="${i===0&&mission.hint>=3?'trace':''}"/>`).join('');return `<div class="shape-reference"><figure><figcaption>Το αρχικό κομμάτι</figcaption><svg viewBox="0 0 4 4" role="img" aria-label="Το αρχικό σχήμα"><defs><pattern id="shape-grid" width="1" height="1" patternUnits="userSpaceOnUse"><path d="M1 0H0V1" fill="none" stroke="currentColor" stroke-width=".025"/></pattern></defs><rect width="4" height="4" fill="url(#shape-grid)"/>${squares}${t.family==='reflect'?'<path d="M2 0V4" stroke="#fc3" stroke-width=".08" stroke-dasharray=".12 .08"/>':''}</svg></figure><span class="turn-arrow ${mission.hint>=2&&t.family==='rotate'?'turn-cue':''}" aria-label="${t.family==='reflect'?'όρθιος καθρέφτης':t.family==='rotate'?'στροφή δεξιά':'μετακίνηση'}">${t.family==='reflect'?'↔':t.family==='rotate'?'↻':'↘'}<small>${t.family==='rotate'?t.turns+' '+(t.turns===1?'στροφή':'στροφές'):t.family==='reflect'?'καθρέφτης':'μετακίνηση'}</small></span>${mission.hint===5&&t.family==='rotate'?`<figure><figcaption>Δες πώς γυρίζει</figcaption><svg viewBox="0 0 4 4" role="img" aria-label="Ολόκληρη περιστροφή"><g class="worked-turn" style="--turn:${t.turns*90}deg">${squares}</g></svg></figure>`:''}</div>`;}
 function renderMission(){if(!mission)return;const a=mission,t=a.task;let body='';
- if(t.kind==='build'){const sum=(t.start||0)+a.selected.reduce((n,id)=>n+(t.tokens.find(x=>String(x.id)===id)?.value||0),0);body=`<div class="devices"><span class="device door ${a.completed?'done':''}">${a.completed?gearSVG():I.lock}${t.target}</span><span class="device ${sum===t.target?'done':''}">${sum}</span></div><div class="devices">${t.tokens.map(x=>missionButton(String(x.id),x.label,a.selected.includes(String(x.id)))).join('')}</div><p>Χτίσε τη δύναμη της πόρτας${t.max_parts?' με έως '+t.max_parts+' κομμάτια':''}.</p>`;}
+ if(t.kind==='build'){const sum=(t.start||0)+a.selected.reduce((n,id)=>n+(t.tokens.find(x=>String(x.id)===id)?.value||0),0);body=`<div class="devices"><span class="device door ${a.completed?'done':''}">${a.completed?gearSVG():I.lock}${t.target}</span><span class="device ${sum===t.target?'done':''}">${sum}</span></div><div class="devices">${t.tokens.map(x=>missionButton(String(x.id),x.label,a.selected.includes(String(x.id)))).join('')}</div><p>Χτίσε τη δύναμη της πόρτας${t.max_parts?' με έως '+t.max_parts+' κομμάτια':''}.</p>${t.alternate?`<button class="btn yl" data-act="ad-build-save">Κράτησε την κατασκευή</button><div class="devices">${a.routes.map(set=>`<span class="device">${set.map(id=>t.tokens.find(x=>x.id===id)?.value).join(' + ')}</span>`).join('')}</div>`:''}`;}
  else if(t.kind==='sequence')body=`<div class="devices">${t.slots.map((x,i)=>`<span class="device">${x==='?'?(a.selected[t.slots.slice(0,i+1).filter(v=>v==='?').length-1]||'?'):esc(x)}</span>`).join('')}</div><div class="devices">${t.choices.map(x=>missionButton(String(x),x)).join('')}</div>`;
- else if(t.kind==='shape')body=miniGrid(t,true);
+ else if(t.kind==='shape')body=shapeReference(t)+'<p>Φτιάξε το νέο κομμάτι εδώ:</p>'+miniGrid(t,true);
  else if(t.kind==='logic')body=`<div class="devices">${t.clues.map(x=>`<p>🔎 ${esc(x)}</p>`).join('')}</div><div class="devices">${t.options.map(x=>missionButton(String(x.id),x.label,a.selected.includes(String(x.id)))).join('')}</div>`;
- else if(t.kind==='combination')body=`<div class="devices">${t.options.map(x=>missionButton(String(x.id),x.label,a.selected.includes(String(x.id)))).join('')}</div><button class="btn yl" data-act="ad-route">Βάλε κατασκευή στη συλλογή</button><div class="devices">${a.routes.map(x=>`<span class="device">${esc(x)}</span>`).join('')}</div>`;
+ else if(t.kind==='combination')body=`<div class="devices">${t.options.map(x=>missionButton(String(x.id),x.label,a.selected.includes(String(x.id)))).join('')}</div><button class="btn yl" data-act="ad-route">Βάλε κατασκευή στη συλλογή</button><div class="devices">${a.routes.map(x=>`<span class="device">${esc(x.split('+').map(id=>t.options.find(o=>o.id===id)?.label||id).join(' + '))}</span>`).join('')}</div>`;
  else if(t.kind==='probability')body=`<div class="signal-bag">${t.bag.map(x=>`<i class="${x}"></i>`).join('')}</div><p>Όλα τα φωτάκια έχουν την ίδια πιθανότητα να ανάψουν. Κάνε πρόβλεψη!</p><div class="devices">${t.choices.map(x=>missionButton(String(x),x,a.selected.includes(String(x)))).join('')}</div>`;
  else if(t.kind==='debug')body=`<div class="devices"><button class="btn ${a.correct===true?'yl':''}" data-act="ad-correct" data-v="yes">Είναι σωστό</button><button class="btn ${a.correct===false?'yl':''}" data-act="ad-correct" data-v="no">Κάτι πήγε στραβά</button></div><ol class="steps">${t.steps.map((x,i)=>`<li><button class="${a.first_error===i?'on':''}" data-act="ad-error" data-i="${i}">${i+1}. ${esc(x)}</button></li>`).join('')}</ol><p>Δείξε το πρώτο λάθος και φτιάξε το:</p><div class="devices">${t.repairs.map(x=>`<button class="btn ${a.repair===x?'yl':''}" data-act="ad-repair" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>`;
- else if(t.kind==='program'||t.kind==='predict')body=miniGrid(t,t.kind==='predict')+`<div class="devices">${(t.kind==='predict'?t.program:a.program).map(c=>`<span class="device">${I.arrow(c)}</span>`).join('')}</div>`+(t.kind==='program'?`<div class="controls">${['U','D','L','R'].map(c=>`<button class="btn sq bl" data-act="ad-command" data-c="${c}" aria-label="${DN[c]}">${I.arrow(c)}</button>`).join('')}<button class="btn sq" data-act="ad-remove-command" aria-label="Σβήσε την τελευταία εντολή">${I.undo}</button></div>${t.alternate?`<button class="btn yl" data-act="ad-program-save">Κράτησε αυτόν τον δρόμο</button><p>${a.routes.length} δρόμοι στη συλλογή</p>`:''}`:'');
+ else if(t.kind==='program'||t.kind==='predict')body=(t.signal?`<p class="devices">Σήμα: ${t.signal.join(' ')}</p>`:'')+miniGrid(t,t.kind==='predict')+`<div class="devices">${(t.kind==='predict'?t.program:a.program).map(c=>`<span class="device">${I.arrow(c)}</span>`).join('')}</div>`+(t.kind==='program'?`<div class="controls">${['U','D','L','R'].map(c=>`<button class="btn sq bl" data-act="ad-command" data-c="${c}" aria-label="${DN[c]}">${I.arrow(c)}</button>`).join('')}<button class="btn sq" data-act="ad-remove-command" aria-label="Σβήσε την τελευταία εντολή">${I.undo}</button></div>${t.alternate?`<button class="btn yl" data-act="ad-program-save">Κράτησε αυτόν τον δρόμο</button><p>${a.routes.length} δρόμοι στη συλλογή</p>`:''}`:'');
  app.innerHTML=`<div class="screen adaptive"><header class="bar"><button class="btn sq" data-act="map" aria-label="Πίσω">${I.back}</button><div class="ttl">${esc(t.title)}</div><button class="btn sq yl" data-act="ad-hint" aria-label="Βοήθεια">${I.bulb}</button><button class="btn sq" data-act="resay" aria-label="Πες το ξανά">${I.speaker}</button></header>${talkHTML(t.prompt)}<div class="mission"><div class="smallbot">${robotSVG(ST.robot)}</div>${body}<p class="status" role="status">${esc(a.status)}</p><div class="controls"><button class="btn sq" data-act="ad-reset" aria-label="Ξανά από την αρχή">${I.undo}</button><button class="btn go" data-act="ad-run">${I.play}ΠΑΜΕ!</button></div></div></div>`;
 }
-function taskAnswer(){const a=mission,t=a.task;return t.kind==='debug'?{correct:a.correct,first_error:a.first_error,repair:a.repair}:t.kind==='probability'||t.kind==='predict'?a.selected[0]:t.kind==='program'?(t.alternate?a.routes:a.program):t.kind==='combination'?a.routes:a.selected;}
-function abandonMission(){mission=null;TR=null;}
+function taskAnswer(){const a=mission,t=a.task;return t.kind==='debug'?{correct:a.correct,first_error:a.first_error,repair:a.repair}:t.kind==='probability'||t.kind==='predict'?a.selected[0]:t.kind==='program'?(t.alternate?a.routes:a.program):t.kind==='combination'||(t.kind==='build'&&t.alternate)?a.routes:a.selected;}
+function abandonMission(){finishEpisode();mission=null;TR=null;}
 function missionDone(){mission.completed=true;mission.status='Άνοιξε! Μπιπ μπιπ, τα καταφέραμε!';const t=mission.task;renderMission();sfx.win();
  const stars=TR.hint?1:TR.attempts===1?3:2;ST.stars['a:'+t.family]=Math.max(ST.stars['a:'+t.family]||0,stars);save();const won=claimRewards();const reward=won.find(r=>r.k==='ch')||won[won.length-1];
  const selectedExplanation=t.mode==='explain'||AD.events.filter(e=>e.result==='success').length%4===0||t.cognitive_demand==='transfer';
  overlay(`<div class="burst">${burstSVG()}<span>ΜΠΡΑΒΟ!</span></div><div class="smallbot">${robotSVG(ST.robot)}</div><p class="note">Η αποστολή πέτυχε! ${stars} ⭐</p>${reward?`<div class="unlock"><b>${RNAME[reward.k][0]}</b><span class="uprev">${optHTML(reward.k,reward.i)}</span><button class="btn yl" data-act="tryit" data-k="${reward.k}" data-i="${reward.i}">ΔΟΚΙΜΑΣΕ ΤΟ</button></div>`:''}<div class="row">${selectedExplanation?'<button class="btn yl" data-act="ad-explain">Πες μου το μυστικό!</button>':''}${TR.hint>=3?'<button class="btn go" data-act="ad-fade">Καινούργιο σχέδιο, μόνος μου!</button>':'<button class="btn go" data-act="adaptive-next">Άλλη αποστολή</button>'}<button class="btn" data-act="ad-return">${missionReturn?'Συνέχεια ιστορίας':'Τα επεισόδια'}</button><button class="btn" data-act="ad-replay">${I.redo}Ξανά</button></div>`);
 }
 Object.assign(ACT,{
- 'adaptive-next':()=>{if(mission?.completed)mission=null;startRecommended(missionReturn);},
- 'adaptive-list':()=>overlay(`<h2>Μυστικές αποστολές</h2><div class="row">${BipTasks.catalog.filter((x,i,a)=>a.findIndex(y=>y.family===x.family)===i).map(c=>`<button class="btn" data-act="ad-family" data-f="${c.family}">${esc(c.title||c.family)}</button>`).join('')}</div><button class="btn yl" data-act="closeov">Κλείσιμο</button>`,'par'),
- 'ad-family':d=>{missionReturn=null;startMission(BipTasks.catalog.find(x=>x.family===d.f));},
- 'ad-select':d=>{if(!mission||mission.completed)return;const a=mission,t=a.task;if(t.kind==='sequence'){if(a.selected.length>=t.slots.filter(x=>x==='?').length)a.selected=[];a.selected.push(d.id);}else if(['probability','predict'].includes(t.kind))a.selected=[d.id];else if(a.selected.includes(d.id))a.selected=a.selected.filter(x=>x!==d.id);else a.selected.push(d.id);a.status='';renderMission();},
+ 'adaptive-next':()=>{finishEpisode();if(mission?.completed)mission=null;startRecommended(missionReturn);},
+ 'adaptive-list':()=>overlay(`<h2>${endlessUnlocked()?'Ατελείωτο Εργαστήριο':'Μυστικές αποστολές'}</h2><div class="row">${BipTasks.catalog.filter(x=>!['equivalents','reflect','counterexample','battery-boss','signal-boss'].includes(x.family)||AgisEngine.selectCandidate([x],AD,{...AS,active_ms:0},Date.now())).map(c=>`<button class="btn" data-act="ad-family" data-f="${c.family}">${esc(c.title||c.family)}</button>`).join('')}</div><button class="btn yl" data-act="closeov">Κλείσιμο</button>`,'par'),
+ 'ad-family':d=>{const c=BipTasks.catalog.find(x=>x.family===d.f);if(!c||(['equivalents','reflect','counterexample','battery-boss','signal-boss'].includes(c.family)&&!AgisEngine.selectCandidate([c],AD,{...AS,active_ms:0},Date.now())))return;missionReturn=null;startMission({...c,nominal_difficulty:AD.skills[c.primary_skill]?.band||1});},
+ 'ad-select':d=>{if(!mission||mission.completed)return;rawInteraction('select',{selection:d.id});const a=mission,t=a.task;if(t.kind==='sequence'){if(a.selected.length>=t.slots.filter(x=>x==='?').length)a.selected=[];a.selected.push(d.id);}else if(['probability','predict'].includes(t.kind))a.selected=[d.id];else if(a.selected.includes(d.id))a.selected=a.selected.filter(x=>x!==d.id);else a.selected.push(d.id);a.status='';renderMission();},
  'ad-correct':d=>{mission.correct=d.v==='yes';renderMission();},'ad-error':d=>{mission.first_error=+d.i;renderMission();},'ad-repair':d=>{mission.repair=d.v;renderMission();},
+ 'ad-build-save':()=>{if(!mission||mission.completed)return;mission.routes.push(mission.selected.slice());mission.selected=[];renderMission();},
  'ad-route':()=>{const a=mission;if(a.selected.length!==2){a.status='Διάλεξε δύο κομμάτια.';renderMission();return;}const key=a.selected.slice().sort().join('+');if(!a.routes.includes(key))a.routes.push(key);a.selected=[];renderMission();},
  'ad-command':d=>{if(mission.program.length<24)mission.program.push(d.c);renderMission();},
  'ad-remove-command':()=>{if(!mission||mission.completed)return;mission.program.pop();mission.status='';renderMission();},
  'ad-program-save':()=>{mission.routes.push(mission.program.slice());mission.program=[];renderMission();},
- 'ad-reset':()=>{if(!mission||mission.completed)return;TR.resets++;mission.selected=[];mission.program=[];mission.routes=[];mission.first_error=null;mission.repair=null;mission.correct=null;renderMission();},
- 'ad-hint':()=>{if(!mission||mission.completed)return;mission.hint=Math.min(5,mission.hint+1);TR.hint=mission.hint;mission.status=mission.task.hints[mission.hint-1];renderMission();speak(mission.status,true);},
- 'ad-run':()=>{if(!mission||mission.completed)return;TR.attempts++;const ok=BipTasks.checkTask(mission.task,taskAnswer());emitTrial(ok,ok?[]:[mission.task.error_tags?.[0]|| (mission.task.kind==='debug'?'first_error_or_repair':mission.task.kind==='build'?'quantity_constraint':'strategy')]);if(ok)missionDone();else{mission.status='Κάτι δεν ταιριάζει ακόμα. Δοκίμασε άλλη ιδέα!';renderMission();sfx.no();}},
- 'ad-return':()=>{const f=missionReturn;missionReturn=null;mission=null;TR=null;closeOv();f?f():go('map');},
+ 'ad-reset':()=>{if(!mission||mission.completed)return;rawInteraction('reset');mission.selected=[];mission.program=[];mission.routes=[];mission.first_error=null;mission.repair=null;mission.correct=null;renderMission();},
+ 'ad-hint':()=>{if(!mission||mission.completed)return;mission.hint=Math.min(5,mission.hint+1);rawInteraction('hint',{level:mission.hint});mission.status=mission.task.hints[mission.hint-1];renderMission();speak(mission.status,true);},
+ 'ad-run':()=>{if(!mission||mission.completed)return;const ok=BipTasks.checkTask(mission.task,taskAnswer());emitTrial(ok,ok?[]:[mission.task.error_tags?.[0]|| (mission.task.kind==='debug'?'first_error_or_repair':mission.task.kind==='build'?'quantity_constraint':'strategy')]);if(ok)missionDone();else{mission.status='Κάτι δεν ταιριάζει ακόμα. Δοκίμασε άλλη ιδέα!';renderMission();sfx.no();}},
+ 'ad-return':()=>{const f=missionReturn;missionReturn=null;finishEpisode();mission=null;TR=null;closeOv();f?f():go('map');},
  'ad-fade':()=>{const t=mission.task;startMission({...t,item_id:'a:'+t.family});},
- 'ad-replay':()=>{const c=mission.task;startMission({...c,item_id:'a:'+c.family});},
+ 'ad-replay':()=>{const c=mission.task;startMission({...c,item_id:'a:'+c.family,challenge_origin:'child_requested_repeat'});},
  'ad-explain':()=>{const t=mission.task;overlay(`<h2>Πες μου το μυστικό!</h2><p>${esc(t.explanation||'Ποια ιδέα έκανε τη διαφορά; Υπάρχει άλλος τρόπος;')}</p><p>Πώς έλεγξες την ιδέα σου; Τι θα άλλαζες αν το ξανάκανες;</p><p class="fine">Πες το δυνατά σε έναν μεγάλο. Δεν χρειάζεται να γράψεις.</p><button class="btn yl" data-act="ad-parent-score">Για τον μεγάλο</button><button class="btn" data-act="ad-return">Συνέχεια</button>`,'par');},
  'ad-parent-score':()=>overlay(`<h2>Προφορική εξήγηση</h2><p>Καταγράψτε μόνο ό,τι ακούσατε: συνέδεσε την ιδέα με το αποτέλεσμα ή έδειξε ποια ένδειξη αποκλείει μια λύση;</p><p class="fine">Δεν βαθμολογούμε ευφράδεια. Χωρίς παρατήρηση, παραλείψτε την καταγραφή.</p><label class="fine"><input id="ad-reflection" type="checkbox"> Παρατήρησα επίσης σαφή έλεγχο ή αλλαγή στρατηγικής με αιτιολόγηση.</label><div class="row"><button class="btn" data-act="ad-score" data-v="independent">Συνεκτική, ανεξάρτητη</button><button class="btn" data-act="ad-score" data-v="assisted">Με υπόδειξη</button><button class="btn" data-act="ad-score" data-v="not_yet">Δεν εξήγησε ακόμα</button><button class="btn yl" data-act="ad-return">Παράλειψη</button></div>`,'par'),
- 'ad-score':d=>{if(!mission)return;const t=mission.task,reflection=!!$('#ad-reflection')?.checked;beginTrial({...t,item_id:'explain:'+t.seed,primary_skill:'mathematical_explanation',secondary_skills:reflection?['metacognition']:[],cognitive_demand:'explain',mode:'explain'});TR.attempts=1;TR.hint=Math.max(mission.hint,d.v==='assisted'?2:0);emitTrial(d.v!=='not_yet',[],{evidence_source:'parent_observed_spoken',reflection_observed:reflection});ACT['ad-return']();}
+ 'ad-score':d=>{if(!mission)return;const t=mission.task,reflection=!!$('#ad-reflection')?.checked;beginTrial({...t,item_id:'explain:'+t.seed,primary_skill:'mathematical_explanation',secondary_skills:reflection?['metacognition']:[],cognitive_demand:'explain',mode:'explain'});TR.hint=Math.max(mission.hint,d.v==='assisted'?2:0);emitTrial(d.v!=='not_yet',[],{evidence_source:'parent_observed_spoken',reflection_observed:reflection});ACT['ad-return']();}
 });
 // Original story flow remains the return path. Insert optional mode/retrieval at boundaries.
 const originalNextLevel=ACT.nextlevel;ACT.nextlevel=function(){
  const due=Object.values(AD.skills).some(r=>r.next_retrieval_due&&Date.now()>=r.next_retrieval_due);
- const plan=AgisEngine.sessionPlan(AS,Date.now());if((due||AS.active_ms-lastAdaptiveOffer>6*60000||plan.reason==='pacing')&&AS.trial_count>0){lastAdaptiveOffer=AS.active_ms;overlay(`<h2>Ο Μπιπ βρήκε μια νέα αποστολή!</h2><div class="row"><button class="btn yl" data-act="ad-interlude">Πάμε να δούμε!</button><button class="btn" data-act="ad-story">Συνέχεια ιστορίας</button></div>`);return;}originalNextLevel();
+ const plan=AgisEngine.sessionPlan(AS,Date.now());if(S.lvl?.id===LEVELS.at(-1).id){originalNextLevel();return;}if((due||AS.active_ms-lastAdaptiveOffer>6*60000||plan.reason==='pacing')&&AS.trial_count>0){lastAdaptiveOffer=AS.active_ms;overlay(`<h2>Ο Μπιπ βρήκε μια νέα αποστολή!</h2><div class="row"><button class="btn yl" data-act="ad-interlude">Πάμε να δούμε!</button><button class="btn" data-act="ad-story">Συνέχεια ιστορίας</button></div>`);return;}originalNextLevel();
 };ACT['ad-interlude']=()=>{const story={lvl:S.lvl,def:S.def,m:S.m,at:S.at};startRecommended(()=>{Object.assign(S,story);originalNextLevel();});};ACT['ad-story']=()=>{closeOv();originalNextLevel();};
-const originalRelearn=ACT.relearn;ACT.relearn=(d,b)=>{if(TR){TR.hint=5;pendingLegacyHelp=TR.meta.item_id;}originalRelearn(d,b);};
+const originalStudio=startStudio;startStudio=function(){finishEpisode();TR=null;originalStudio();};
+const originalReplay=ACT.replay;ACT.replay=(d,b)=>{replayIntent='story_replay';return originalReplay(d,b);};
+const originalRelearn=ACT.relearn;ACT.relearn=(d,b)=>{if(TR){rawInteraction('hint',{level:5});pendingLegacyHelp=TR.meta.item_id;}originalRelearn(d,b);};
 function scaffoldHTML(prog){return (prog||[]).map(b=>b.t==='loop'?`<span class="remind">${I.loop}×${b.n||'∞'} ${scaffoldHTML(b.body)}</span>`:b.t==='cmd'?`<span class="mblk">${I.arrow(b.c)}</span>`:b.t==='call'?`<span class="mblk pu">${I.trick}</span>`:b.t==='tf'?`<span class="mblk">${FI[b.to||'car']}</span>`:b.t==='zap'?`<span class="mblk yl">${I.zap}</span>`:`<span class="remind">ΑΝ ${esc(CN[b.col])} ${I.arrow(b.c)}</span>`).join('');}
 const originalHint=ACT.hint;ACT.hint=function(){
  if(!TR||!S.def)return originalHint();const level=Math.min(5,TR.hint+1);const hb=$('#hintb');if(hb)hb.classList.remove('pulse','coach');ST.tut.hint=1;save();if(S.at)logE('hint',S.at.id);
@@ -3010,27 +3332,38 @@ const originalHint=ACT.hint;ACT.hint=function(){
 };
 const legacyFinish=finish;finish=function(stars){const hinted=TR?.hint||0;const meta=TR?.meta;legacyFinish(stars);if(hinted>=3&&meta&&S.screen!=='adaptive'){const family=meta.primary_skill==='arithmetic_strategy'?'energy':meta.family==='draw'?'rotate':meta.family==='duel'?'robot-clues':'predict';const b=document.createElement('button');b.className='btn yl';b.dataset.act='ad-legacy-fade';b.dataset.f=family;b.textContent='Καινούργιο σχέδιο, μόνος μου!';$('.dlg')?.append(b);}};
 ACT['ad-legacy-fade']=d=>{const story={lvl:S.lvl,def:S.def,m:S.m,at:S.at};missionReturn=()=>{if(story.lvl?.id){Object.assign(S,story);originalNextLevel();}else go('map');};startMission(BipTasks.catalog.find(x=>x.family===d.f));};
-// Calibrated parent evidence and full versioned exports; legacy CSV is still available.
+// Calibrated parent evidence and complete backups, including preserved storage keys.
 const skillNames={number_sense:'Αριθμοί',arithmetic_strategy:'Αριθμητικές στρατηγικές',place_value:'Δεκάδες και μονάδες',patterns_early_algebra:'Μοτίβα',geometry:'Γεωμετρία',spatial_reasoning:'Χώρος',deductive_logic:'Συμπεράσματα',constraint_reasoning:'Περιορισμοί',combinatorics:'Συνδυασμοί',probability_intuition:'Προβλέψεις',problem_decomposition:'Κομμάτια προβλήματος',transfer:'Νέες αναπαραστάσεις',error_detection:'Λάθη και επιδιόρθωση',mathematical_explanation:'Εξήγηση',metacognition:'Σκέψη για τη στρατηγική'};
-const originalParents=parents;parents=function(){originalParents();const box=document.createElement('section');box.id='adaptive-evidence';const ev=AD.events.filter(e=>['success','not_yet'].includes(e.result));const succ=ev.filter(e=>e.result==='success'),ind=succ.filter(e=>e.hint_level_used===0&&e.attempts===1&&e.reset_count===0),ass=succ.filter(e=>e.hint_level_used>0),retry=succ.length-ind.length-ass.length;
- box.innerHTML=`<h3>Στοιχεία από αποστολές v1.2</h3><p class="fine">Ενδείξεις από εργασίες, όχι μόνιμα χαρακτηριστικά. Κλίμακα 0–4· οι μηχανικές εκτιμήσεις χρειάζονται πραγματικό παιχνίδι. Οι συνολικές δοκιμές αφορούν τις τελευταίες 500 καταγραφές και ο χρόνος έως 60 πρόσφατες συνεδρίες· οι μετρητές δεξιοτήτων διατηρούν το ιστορικό.</p><p>${AD.sessions.length} συνεδρίες · ${ind.length} ανεξάρτητες επιτυχίες · ${ass.length} με βοήθεια · ${retry} μετά από δοκιμές</p><p>${ev.filter(e=>!e.voluntary_replay).length} νέες δοκιμές · ${ev.filter(e=>e.voluntary_replay).length} επαναλήψεις · ${fmtT(AD.sessions.reduce((n,s)=>n+s.active_ms,0))} ενεργός χρόνος</p>${BipTasks.SKILLS.map(id=>{const r=AD.skills[id];const recent=r.recent||[];return `<div class="orow"><span>${skillNames[id]}</span><b>${AgisEngine.mastery(r)}/4${r.observations<5||r.session_ids.length<2?' · περιορισμένα στοιχεία':''}${r.next_retrieval_due&&Date.now()>=r.next_retrieval_due?' · ώρα για επανάληψη':''}</b></div><p class="fine">${r.independent_success_count} ανεξάρτητες · ${r.assisted_success_count} με βοήθεια · ${r.flexible_success_count} ευέλικτες · ${r.delayed_success_count} μετά από καθυστέρηση${recent.filter(x=>x==='F').length>=2?' · πρόσφατες δυσκολίες':''}${r.error_tags.length?' · '+esc(r.error_tags.join(', ')):''}</p>`;}).join('')}<h3>Ρυθμός συνεδρίας</h3><p class="fine">${Object.entries(AS.mode_ms).map(([k,v])=>esc(k)+': '+fmtT(v)).join(' · ')||'Χωρίς στοιχεία ακόμα'}<br>${AD.events.filter(e=>e.result==='pacing_switch').length} αλλαγές ρυθμού</p><p class="fine">Υποδείξεις 0–5: ${[0,1,2,3,4,5].map(i=>i+': '+ev.filter(e=>e.hint_level_used===i).length).join(' · ')}</p><button class="btn" data-act="exp" data-f="legacy-csv">CSV παλιών επιπέδων</button>`;$('.dlg.par').insertBefore(box,$('#expbox'));};
-exportData=function(kind){safeAdaptive();if(kind==='legacy-csv')return logCSV(LOG);if(kind==='csv')return AgisEngine.eventsCSV(AD.events);return JSON.stringify({game:'ΜΠΙΠ',version:'1.2',schema_version:1,exported:new Date().toISOString(),progress:ST,log:LOG,adaptive:AD},null,1);};
+const timeNames={story_coding:'Κώδικας ιστορίας',numbers_reasoning:'Αριθμοί και συλλογισμός',spatial_geometry:'Χώρος και γεωμετρία',logic_debugging:'Λογική και επιδιόρθωση',adaptive_missions:'Αποστολές εργαστηρίου',workshop:'Εργαστήρι / αλλαγές',comics_story:'Κόμικ και ιστορία',low_load_creative:'Δημιουργία / ήρεμο παιχνίδι',arena_boss:'Αρένα / σύνθετες αποστολές',new_material:'Νέοι κανόνες',menu:'Χάρτης / μενού',uncategorised:'Παλαιότερος χρόνος χωρίς κατηγορία'};
+const originalParents=parents;parents=function(){tickActive();safeAdaptive();originalParents();
+ const time=AgisEngine.timeSummary(AD.sessions);const dlg=$('.dlg.par');
+ for(const h of dlg.querySelectorAll('h3')){if(h.textContent==='Πιο δύσκολα ως τώρα'){h.textContent='Ακατέργαστες εκτελέσεις ιστορίας';h.insertAdjacentHTML('afterend','<p class="fine">Οι παρακάτω μετρητές είναι παλιές εκτελέσεις, όχι ανεξάρτητες εργασίες ή εκτίμηση δεξιότητας. Οι γρήγορες απόπειρες δεν ενημερώνουν χωριστά το μοντέλο.</p>');}if(h.textContent==='Κανόνες')h.textContent='Παλιές ενδείξεις κανόνων (ακατέργαστες εκτελέσεις)';}
+ const oldHeading=[...dlg.querySelectorAll('h3')].find(x=>x.textContent.startsWith('Πού πέρασε η ώρα'));if(oldHeading){let n=oldHeading.nextElementSibling;while(n?.classList.contains('tbar')){const next=n.nextElementSibling;n.remove();n=next;}oldHeading.innerHTML=`Πού πέρασε η ώρα <small>σύνολο ${fmtT(time.total_ms)}</small>`;oldHeading.insertAdjacentHTML('afterend',Object.entries(time.category_ms).filter(([,v])=>v>0).map(([k,v])=>`<div class="tbar"><span>${timeNames[k]||esc(k)}</span><i><u style="width:${100*v/Math.max(1,time.total_ms)}%"></u></i><b>${fmtT(v)}</b></div>`).join('')+'<p class="fine">Ένας μετρητής ενεργού χρόνου για όλο το παιχνίδι. Κρυφή καρτέλα και παύση μετά από 90 δευτερόλεπτα χωρίς άγγιγμα εξαιρούνται. Οι κατηγορίες δεν επικαλύπτονται. Παλαιότερος μη ταξινομημένος χρόνος φαίνεται ξεχωριστά.</p>');}
+ const box=document.createElement('section');box.id='adaptive-evidence';const ev=AD.events.filter(e=>e.event_kind==='task_summary');const succ=ev.filter(e=>e.result==='success'),ind=succ.filter(e=>e.solved_independently),ass=succ.filter(e=>e.assistance_used),retry=succ.filter(e=>e.solved_after_retry&&!e.assistance_used);
+ box.innerHTML=`<h3>Στοιχεία από εργασίες v1.2.1</h3><p class="fine">Ενδείξεις από εργασίες, όχι μόνιμα χαρακτηριστικά. Μία σύνοψη ανά εργασία. Διατηρούνται έως 500 συνόψεις/ιστορικές καταγραφές, 1000 αλληλεπιδράσεις και 60 συνεδρίες. Οι παλιές απόπειρες v1.2 διατηρούνται αλλά δεν παρουσιάζονται ως διορθωμένες μετρήσεις.</p><p>${AD.sessions.length} συνεδρίες · ${ind.length} ανεξάρτητες επιτυχίες · ${ass.length} με βοήθεια · ${retry.length} μετά από δοκιμές</p><p>${ev.filter(e=>e.challenge_origin==='new_challenge').length} νέες προκλήσεις · ${ev.filter(e=>e.challenge_origin==='scheduled_retrieval').length} προγραμματισμένες ανακλήσεις · ${ev.filter(e=>e.challenge_origin==='child_requested_repeat').length} ξανά από επιλογή · ${ev.filter(e=>e.challenge_origin==='story_replay').length} επαναλήψεις ιστορίας</p><p>${AD.raw_events.filter(e=>e.kind==='hint').length} ανοίγματα βοήθειας στο παράθυρο αλληλεπιδράσεων · ${ev.filter(e=>e.assistance_used).length} εργασίες με υποστήριξη · ${succ.filter(e=>e.success_after_help).length} επιτυχίες μετά από βοήθεια · μέγιστη βοήθεια ${Math.max(0,...ev.map(e=>e.hint_level_used))}/5</p>${BipTasks.SKILLS.map(id=>{const r=AD.skills[id];return `<div class="orow"><span>${skillNames[id]}</span><b>${AgisEngine.mastery(r)}/4${r.observations<5||r.session_ids.length<2?' · περιορισμένα στοιχεία':''}${r.prior_mastery?' · με παλαιότερη εκτίμηση':''}${r.next_retrieval_due&&Date.now()>=r.next_retrieval_due?' · ώρα για ανάκληση':''}</b></div><p class="fine">${r.independent_success_count} ανεξάρτητες · ${r.assisted_success_count} με βοήθεια · ${r.flexible_success_count} ευέλικτες · ${r.delayed_success_count} μετά από καθυστέρηση</p>`;}).join('')}<h3>Ρυθμός συνεδρίας</h3><p class="fine">${AD.events.filter(e=>e.result==='pacing_switch').length} αλλαγές ρυθμού. Ο χρόνος απόκρισης μετρά ενεργό χρόνο, η ακατέργαστη διάρκεια παραμένει στην εξαγωγή.</p><button class="btn" data-act="exp" data-f="legacy-csv">CSV παλιών επιπέδων</button><label class="btn">Εισαγωγή πλήρους JSON<input id="bip-restore-file" type="file" accept=".json,application/json"></label>`;dlg.insertBefore(box,$('#expbox'));
+ $('#bip-restore-file').addEventListener('change',async event=>{try{const file=event.target.files[0];if(!file)return;pendingRestore=await file.text();const p=BipBackup.parseBackup(pendingRestore,shape,shapeLog,AgisEngine.sanitizeState,BipTasks.SKILLS);$('#expbox').innerHTML=`<p>Αντίγραφο με ${Object.keys(p.progress.stars).length} εργασίες. Η επαναφορά αντικαθιστά την τωρινή πρόοδο και πρώτα κρατά αντίγραφο.</p><button class="btn" data-act="ad-restore">Επαναφορά αυτού του αντιγράφου</button>`;}catch(e){pendingRestore=null;$('#expbox').textContent=e.message;}});
+};
+exportData=function(kind){tickActive();safeAdaptive();if(kind==='legacy-csv')return logCSV(LOG);if(kind==='csv')return AgisEngine.eventsCSV([...AD.events,...AD.raw_events]);
+ const storage={};for(const k of ['bip-save-v1','bip-log-v1','bip-save-v12','bip-log-v12','agis-adaptive-v1','bip-v11-backup-save','bip-v11-backup-log','agis-adaptive-v1-backup-schema1','agis-adaptive-v1-backup-corrupt'])try{storage[k]=localStorage.getItem(k);}catch{}
+ return JSON.stringify(BipBackup.backupPayload(ST,LOG,AD,Date.now(),storage,LAB),null,1);
+};
+ACT.exp=async d=>{const file=BipBackup.exportFile(d.f,exportData(d.f),dayKey(Date.now()));const box=$('#expbox');if(box){box.innerHTML=`<p class="fine">${esc(file.name)} · Αν χρειαστεί, αντιγράψτε το κείμενο:</p><textarea readonly rows="6"></textarea><p role="status" id="export-status"></p>`;$('textarea',box).value=file.data;}const result=await BipBackup.saveFile(file);if($('#export-status'))$('#export-status').textContent=result==='shared'?'Το αρχείο κοινοποιήθηκε.':result==='downloaded'?'Το αρχείο στάλθηκε στις λήψεις.':result==='cancelled'?'Η κοινοποίηση ακυρώθηκε. Το κείμενο παραμένει διαθέσιμο.':'Αντιγράψτε το κείμενο για αποθήκευση.';};
+ACT['ad-restore']=()=>{try{if(!pendingRestore)return;const p=BipBackup.restoreBackup(bipStorage,pendingRestore,shape,shapeLog,AgisEngine.sanitizeState,BipTasks.SKILLS);ST=p.progress;LOG=p.log;AD=p.adaptive;LAB=BipLab.loadLabState(bipStorage);AS=AgisEngine.continueSession(AD.sessions,Date.now(),'bip-'+Date.now().toString(36));MIG.adaptiveWritable=true;pendingRestore=null;TR=null;mission=null;save();safeAdaptive();parents();}catch(e){$('#expbox').textContent='Δεν ολοκληρώθηκε η επαναφορά: '+e.message;}};
 const originalResetLog=ACT.resetlog;ACT.resetlog=(d,b)=>{const confirmed=!!b.dataset.sure;originalResetLog(d,b);if(confirmed){AD=AgisEngine.createState(BipTasks.SKILLS);AS=AgisEngine.createSession('bip-'+Date.now().toString(36),Date.now());safeAdaptive();parents();}};
-let activeLast=Date.now();setInterval(()=>{const now=Date.now(),dt=now-activeLast;activeLast=now;if(document.hidden||now-lastInput>90000||dt>15000)return;AS.active_ms+=dt;const mode=S.screen==='shop'?'create':S.screen==='comic'?'story':S.screen==='adaptive'?(mission?.task.mode||'low_load'):S.screen==='play'?(S.studio?'exploration':S.lesson?'new_material':TR?.meta.mode||'reasoning'):S.screen==='math'?(TR?.meta.mode||'reasoning'):'menu';AS.mode_ms[mode]=(AS.mode_ms[mode]||0)+dt;safeAdaptive();},5000);
-window.addEventListener('pagehide',safeAdaptive);document.addEventListener('visibilitychange',()=>{if(document.hidden)safeAdaptive();});
-// Read-only debug surface for reproducible QA; no progress mutation or forced unlock API.
-window.__bipQA={state:()=>JSON.parse(JSON.stringify({core:ST,log:LOG,adaptive:AD,session:AS,trial:TR,mission,screen:S.screen})),engine:AgisEngine,tasks:BipTasks,exportData};
+function meaningfulActivity(){const now=Date.now();tickActive(now);const continued=AgisEngine.continueSession([AS],now,'bip-'+now.toString(36));if(continued.session_id!==AS.session_id){const prior=TR&&!TR.done?TR:null;finishEpisode();AS=continued;if(prior)beginTrial({...prior.meta,challenge_origin:'continued_challenge'},prior);}AS.last_activity_time=now;safeAdaptive();}
+['pointerdown','keydown'].forEach(t=>document.addEventListener(t,meaningfulActivity,true));
+setInterval(()=>{tickActive();safeAdaptive();},5000);
+window.addEventListener('pagehide',()=>{resumeEpisode=TR&&!TR.done?TR:null;finishEpisode();tickActive();safeAdaptive();});document.addEventListener('visibilitychange',()=>{tickActive(Date.now(),false);activeWasHidden=document.hidden;if(document.hidden)safeAdaptive();activeLast=Date.now();});
+window.addEventListener('pageshow',event=>{if(event.persisted&&resumeEpisode){beginTrial({...resumeEpisode.meta,challenge_origin:'continued_challenge'},resumeEpisode);resumeEpisode=null;}});
+safeAdaptive();
+// Read-only debug surface for reproducible QA; no progress mutation or unlock API.
+window.__bipQA={state:()=>JSON.parse(JSON.stringify({core:ST,log:LOG,adaptive:AD,lab:LAB,endless_unlocked:endlessUnlocked(),session:AS,trial:TR,mission,screen:S.screen})),engine:AgisEngine,tasks:BipTasks,exportData};
 
 /* ---------- boot ---------- */
 try{if('speechSynthesis' in window)window.speechSynthesis.getVoices();}catch(e){}
 logSession(LOG,Date.now());logDirty=true;
 ['pointerdown','keydown'].forEach(t=>document.addEventListener(t,()=>{lastInput=Date.now();},true));
-setInterval(()=>{                               // active time only: the tab is visible and someone touched it lately
-  const now=Date.now(),dt=now-lastTick;lastTick=now;
-  if(document.hidden||now-lastInput>90000||dt>15000)return;
-  const sc=S.screen,cat=sc==='shop'?'shop':S.lesson?'learn':sc==='math'?'math':sc==='play'?(S.studio?'draw':S.D?'arena':'code'):'menu';
-  logTick(LOG,now,dt,cat,S.lesson||S.studio||!S.at||(sc!=='play'&&sc!=='math')?null:S.at.id);logDirty=true;
-},5000);
+// Unified adaptive clock owns both time ledgers.
 setInterval(flushLog,20000);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flushLog();});
 window.addEventListener('pagehide',flushLog);
@@ -3041,7 +3374,7 @@ greetRewards();
 })();
 </script>
 <script>
-/* PWA shell only: does not alter game state or storage keys. */
+/* Public PWA shell only: game state/storage keys are untouched. */
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   window.addEventListener('load', function () {
     navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(function () {});
