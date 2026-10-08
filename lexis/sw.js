@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lexis-pwa-v01-6d10c4e967e3-20261008-1';
+const CACHE_NAME = 'lexis-pwa-v02-dbc65708ad91-hybrid';
 const CACHE_PREFIX = 'lexis-pwa-';
 const APP_URL = new URL('./', self.location.href);
 const INDEX_URL = new URL('index.html', APP_URL).href;
