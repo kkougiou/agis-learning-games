@@ -4,9 +4,12 @@ Public playable releases from Agis Learning Lab, intended for educational use. D
 
 - [ΜΠΙΠ v1.2 Adaptive](https://kkougiou.github.io/agis-learning-games/bip/)
 - [RoboMorph Academy](https://kkougiou.github.io/agis-learning-games/robomorph/)
+- [LEXIS — Το Αρχείο των Χαμένων Λέξεων](https://kkougiou.github.io/agis-learning-games/lexis/)
 - [All games](https://kkougiou.github.io/agis-learning-games/)
 
 Progress is stored locally in your browser. Clearing browser or site data may erase progress. Different browsers, devices, and Home Screen installations may have separate storage.
+
+LEXIS supports Home Screen installation in Chrome. Open its stable URL, use Chrome’s **Install app** or **Add to Home screen** option, then load it once while online for offline access. On Android Chrome, the installed app and browser share LEXIS storage when using the same browser profile and origin; other browsers or profiles may store progress separately. LEXIS updates preserve its existing storage keys. Audio pronunciation and physical-device behavior still need human review.
 
 ## Updating a game
 
