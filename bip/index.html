@@ -789,6 +789,29 @@ button.pedestal{position:relative;display:block;margin:0 auto;padding:0;border:0
  .handheld .flight-interact { width: clamp(84px, 6vw, 116px); min-height: clamp(84px, 6vw, 116px) !important; }
 }
 
+/* ΞΑΝΑ: finite, child-readable sequence grouping in expedition program mode. */
+.flight-loop{display:flex;flex-direction:column;gap:6px;max-width:100%;min-width:110px;padding:8px;border:3px solid #7e5800;border-radius:14px;background:#ffdb54;color:#17142a}
+.flight-loop.open{box-shadow:0 0 0 3px #7fe9ff}
+.flight-loop-head{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:16px;font-weight:900}
+.flight-loop-head>span:first-child{white-space:nowrap}
+.flight-loop-head button{min-width:46px;min-height:44px;padding:4px 8px;font-size:17px;font-weight:900;border:2px solid #17142a;border-radius:9px;background:#fff;color:#17142a;cursor:pointer}
+.flight-loop-head button:disabled{opacity:.6;cursor:default}
+.flight-loop-head .flight-loop-count{background:#7fe9ff}
+.flight-loop-body{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px;border:2px dashed #765417;border-radius:10px;min-height:55px;background:#fff2b1}
+.flight-loop-instruction{font-size:14px;line-height:1.35;color:#fff;font-weight:800}
+.flight-loop-addhint{font-size:13px;font-weight:700;color:#554214;padding:5px}
+.loop-progress{padding:3px 8px;border-radius:8px;background:#2a2353;color:#fff;font-size:13px}
+.flight-run{grid-template-columns:auto auto auto auto minmax(110px,1fr)}
+.flight-run .flight-loop-button{background:#ffdb54;color:#17142a;border-color:#806000;font-weight:900;font-size:16px;white-space:nowrap}
+.handheld .flight-run{grid-template-columns:auto auto auto auto minmax(110px,1fr)}
+@media(max-width:650px){
+ .flight-run,.handheld .flight-run{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ .flight-run .btn{font-size:13px;padding-inline:5px}
+ .flight-run .flight-loop-button{grid-column:span 2;font-size:13px;white-space:normal}
+ .flight-run .btn.go{grid-column:span 1;min-width:0;font-size:17px}
+}
+@media(prefers-reduced-motion:reduce){.flight-loop.open{box-shadow:0 0 0 3px #7fe9ff}}
+
 </style>
 </head>
 <body>
@@ -947,8 +970,31 @@ function validateFlight(task){
  return {valid:errors.length===0,errors,solution,minActions:solution?.length??null,requiresTransformation:!!solution&&!withoutTransforms};
 }
 
-return {createFlightState,flightStep,replayFlight,solveFlight,validateFlight};})();
-const BipExpeditions=(()=>{const {createFlightState,flightStep,replayFlight,solveFlight,validateFlight}=BipFlight;
+/** Expand finite educational ΞΑΝΑ blocks into atomic moves. The simulator never
+ * receives a loop opcode; action and fuel limits apply to EVERY expanded step.
+ * No recursion, infinite loops or unbounded expansion. */
+function compileFlightLoops(blocks,{allowEmpty=true}={}){
+ if(!Array.isArray(blocks)||blocks.length>80)throw new RangeError('Too many program blocks');
+ const commands=[],trace=[];let loops=0;
+ const add=(command,path,iteration)=>{
+  if(!FLIGHT_COMMANDS.includes(command))throw new TypeError('Unknown command');
+  if(commands.length>=80)throw new RangeError('Expanded program exceeds 80 steps');
+  commands.push(command);trace.push({path,iteration});
+ };
+ for(let i=0;i<blocks.length;i++){
+  const block=blocks[i];
+  if(typeof block==='string'){add(block,String(i),1);continue;}
+  if(!block||typeof block!=='object'||Array.isArray(block)||block.t!=='loop'||!Number.isInteger(block.n)||block.n<2||block.n>6||!Array.isArray(block.body)||block.body.length>16)throw new TypeError('Invalid ΞΑΝΑ block');
+  if(++loops>12)throw new RangeError('Too many loops');
+  if(!allowEmpty&&block.body.length===0)throw new TypeError('Empty ΞΑΝΑ block');
+  for(let j=0;j<block.body.length;j++)if(!FLIGHT_COMMANDS.includes(block.body[j]))throw new TypeError('Nested loops and unknown commands are not supported');
+  for(let turn=1;turn<=block.n;turn++)for(let j=0;j<block.body.length;j++)add(block.body[j],i+'.'+j,turn);
+ }
+ return {commands,trace,loops};
+}
+
+return {createFlightState,flightStep,replayFlight,solveFlight,validateFlight,compileFlightLoops};})();
+const BipExpeditions=(()=>{const {createFlightState,flightStep,replayFlight,solveFlight,validateFlight,compileFlightLoops}=BipFlight;
 
 const CONTENT_VERSION='1.3-expeditions-1';
 const definitions=[
@@ -1061,7 +1107,7 @@ const authoredChallenges=flightCatalog.flatMap(meta=>authoredNames[meta.family].
 if(new Set(authoredChallenges.map(structuralSignature)).size!==authoredChallenges.length)throw new Error('Duplicate curated expedition structure');
 
 return {flightCatalog,authoredChallenges,generateExpedition,validateExpedition,structuralSignature};})();
-const BipFlightPlanning=(()=>{const {createFlightState,flightStep,replayFlight,solveFlight,validateFlight}=BipFlight;
+const BipFlightPlanning=(()=>{const {createFlightState,flightStep,replayFlight,solveFlight,validateFlight,compileFlightLoops}=BipFlight;
 
 /** A route is a loop-erased spatial path. Stationary form changes, failed
  * commands and retracing a previously visited cell do not create variety. */
@@ -1076,7 +1122,8 @@ function routeSignature(task,commands){
 }
 
 return {routeSignature};})();
-const BipFlightCheckpoint=(()=>{/** Validate a complete mission snapshot, independently of its bounded UI trail.
+const BipFlightCheckpoint=(()=>{const {createFlightState,flightStep,replayFlight,solveFlight,validateFlight,compileFlightLoops}=BipFlight;
+/** Validate a complete mission snapshot, independently of its bounded UI trail.
  * No storage access, mutation, repair, or reset is performed here. The caller
  * validates the authored task separately and retains rejected save bytes. */
 function validFlightCheckpoint(task,state){
@@ -1136,6 +1183,16 @@ function validFlightCheckpoint(task,state){
 function validFlightSession(task,saved){
  try{
   const commands=new Set(['U','D','L','R','T','A']);
+  // Legacy v1.3/v1.3.1 journals contain only the already-expanded program.
+  // New loops are optional additive editor state, never executable opcodes.
+  if(saved?.blocks!==undefined){
+   const compiled=compileFlightLoops(saved.blocks);
+   if(!Array.isArray(saved.program)||compiled.commands.length!==saved.program.length||compiled.commands.some((cmd,i)=>cmd!==saved.program[i]))return false;
+   if(task.initialProgram&&compiled.loops)return false;
+   if(saved.loopOpen!=null&&(!Number.isInteger(saved.loopOpen)||saved.loopOpen<0||saved.blocks[saved.loopOpen]?.t!=='loop'))return false;
+   const empty=saved.blocks.map((b,i)=>typeof b==='object'&&b?.t==='loop'&&b.body?.length===0?i:-1).filter(i=>i>=0);
+   if(empty.length>(saved.loopOpen==null?0:1)||empty.length===1&&empty[0]!==saved.loopOpen)return false;
+  }else if(saved?.loopOpen!=null)return false;
   const coordinate=v=>typeof v==='string'&&/^\d+,\d+$/.test(v)&&(()=>{const [x,y]=v.split(',').map(Number);return y<task.grid.length&&x<task.grid[y].length&&task.grid[y][x]!=='#';})();
   const path=values=>Array.isArray(values)&&values.length>0&&values.length<=task.grid.length*task.grid[0].length&&values.every(coordinate);
   return !!saved&&validFlightCheckpoint(task,saved.state)&&path(saved.routeCells)&&Array.isArray(saved.routes)&&saved.routes.length<=2&&saved.routes.every(v=>typeof v==='string'&&path(v.split(';')))&&Array.isArray(saved.trail)&&saved.trail.length<=240&&saved.trail.every(v=>commands.has(v))&&Array.isArray(saved.program)&&saved.program.length<=80&&saved.program.every(v=>commands.has(v))&&Number.isInteger(saved.next)&&saved.next>=0&&saved.next<=saved.program.length&&['live','plan'].includes(saved.mode)&&Number.isInteger(saved.hint)&&saved.hint>=0&&saved.hint<=5&&typeof saved.completed==='boolean'&&(!saved.completed||saved.state.won);
@@ -3877,7 +3934,7 @@ function loadFlightJournal(){
 }
 let flightJournal=loadFlightJournal();
 function persistFlight(){
- if(flight)flightJournal.current={task:flight.task,state:flight.state,routeCells:flight.routeCells,trail:flight.trail.slice(-240),program:flight.program.slice(0,80),next:flight.next,mode:flight.mode,hint:flight.hint,trial:!flight.completed&&TR?{hint:Math.max(flight.hint,TR.hint||0),resets:TR.resets||0,attempts:TR.attempts||0,prior_attempts:TR.prior_attempts||0}:null,completed:flight.completed,routes:flight.routes,manualActions:flight.manualActions,routeModes:flight.routeModes};
+ if(flight)flightJournal.current={task:flight.task,state:flight.state,routeCells:flight.routeCells,trail:flight.trail.slice(-240),program:flight.program.slice(0,80),blocks:flight.blocks,next:flight.next,loopOpen:flight.loopOpen,mode:flight.mode,hint:flight.hint,trial:!flight.completed&&TR?{hint:Math.max(flight.hint,TR.hint||0),resets:TR.resets||0,attempts:TR.attempts||0,prior_attempts:TR.prior_attempts||0}:null,completed:flight.completed,routes:flight.routes,manualActions:flight.manualActions,routeModes:flight.routeModes};
  try{profileStorage.setItem(FLIGHT_KEY,JSON.stringify(flightJournal));return true;}catch{MIG.warnings=['Η αποστολή δεν αποθηκεύτηκε. Κρατήστε εξαγωγή JSON πριν κλείσετε.'];return false;}
 }
 const flightEntries=BipExpeditions.flightCatalog.map(meta=>({...meta,item_id:'a:'+meta.family,kind:'flight',content_version:'1.3',representation:'spatial',nominal_difficulty:meta.nominal_difficulty||1}));
@@ -3902,6 +3959,8 @@ function startFlight(c,task=null,saved=null){
  if(saved?.state&&!BipFlightCheckpoint.validFlightSession(task,saved))throw Error('Μη έγκυρη θέση αποστολής.');
  const state=saved?.state?JSON.parse(JSON.stringify(saved.state)):saved?BipFlight.replayFlight(task,saved.trail||[]):BipFlight.createFlightState(task);
  flight={task,state,routeCells:saved?.routeCells?.slice()||(saved?BipFlightPlanning.routeSignature(task,saved.trail||[]).split(';'):[`${task.start.x},${task.start.y}`]),trail:saved?.trail?.slice()||[],program:saved?.program?.slice()||task.initialProgram?.slice()||[],next:saved?.next||0,mode:saved?.mode||(task.initialProgram?'plan':'live'),hint:saved?.hint||0,completed:!!saved?.completed,running:!!(saved&&saved.mode==='plan'&&saved.next>0&&saved.next<saved.program?.length&&state.status!=='blocked'&&!saved.completed),paused:!!(saved&&saved.mode==='plan'&&saved.next>0&&saved.next<saved.program?.length&&state.status!=='blocked'&&!saved.completed),executing:false,status:saved?'Το σχέδιό σου συνεχίζεται από εδώ.':task.lesson||'Ρομπότ για χέρια και έδαφος. Τζετ για πτήση!',routes:saved?.routes||[],preview:false,selected:null,manualActions:Number.isSafeInteger(saved?.manualActions)&&saved.manualActions>=0?saved.manualActions:saved?.mode==='live'?(saved.trail?.length||0):0,routeModes:Array.isArray(saved?.routeModes)?saved.routeModes.filter(m=>flightExecutionModes.includes(m)).slice(0,2):[],cue:!Object.keys(flightJournal.completed).length&&!state.transforms};
+ flight.blocks=saved?.blocks?JSON.parse(JSON.stringify(saved.blocks)):flight.program.slice();
+ flight.loopOpen=saved?.loopOpen??null;
  beginTrial(BipProfiles.flightEpisodeMeta(c,task,!!saved),saved?.trial);
  persistFlight();renderFlight();speak(task.prompt);
 }
@@ -3971,12 +4030,29 @@ function flightPadHTML(locked){const f=flight,plan=f.mode==='plan';
  return `<div class="flight-dpad ${plan?'adds':''}">${['U','L','D','R'].map(c=>`<button class="btn bl direction-${c}" data-act="flight-command" data-c="${c}" ${locked||f.completed?'disabled':''} aria-label="${flightLabels[c]}">${I.arrow(c)}<small>${DN[c]}</small></button>`).join('')}</div>`;}
 function flightHandHTML(locked){const f=flight,jet=f.state.robot.form==='jet';
  return `<button class="btn flight-interact ${jet?'dim':''}" data-act="flight-command" data-c="A" ${locked||f.completed?'disabled':''} aria-label="Χέρια: πάρε, δώσε, διακόπτης"><span class="hand-ic">✋</span><span><b>Χέρια</b><small>πάρε · δώσε · πάτα</small></span></button>`;}
-function flightProgramHTML(){const f=flight,t=f.task;
- return `<div class="flight-tape"><div class="flight-program" aria-label="Το πρόγραμμά σου">${f.program.map((c,i)=>`<button class="flight-block cmd-${c} ${i===f.next&&f.running?'hot':''} ${f.selected===i?'selected':''}" data-act="flight-select" data-i="${i}" ${f.running?'disabled':''} aria-label="${i+1}. ${flightLabels[c]}">${['U','D','L','R'].includes(c)?I.arrow(c):c==='T'?I.morph:'✋'}<small>${i+1}</small></button>`).join('')||'<span class="tape-empty">Πάτα βελάκια: μπαίνουν εδώ στη σειρά.</span>'}</div>${t.initialProgram?'<p class="fine">Ο Μπιπ μπέρδεψε μία εντολή. Δείξε τη θέση της και αντικατάστησέ την!</p>':''}<div class="flight-run"><button class="btn" data-act="flight-undo" aria-label="Σβήσε την τελευταία" ${f.running?'disabled':''}>${I.undo}</button><button class="btn" data-act="flight-preview" ${f.running?'disabled':''}>👣 Ίχνος</button><button class="btn" data-act="flight-step" ${f.running&&!f.paused?'disabled':''}>▶│ Βήμα</button><button class="btn go" data-act="flight-run">${f.running?(f.paused?'▶ Συνέχεια':'❚❚ Παύση'):'▶ ΠΑΜΕ!'}</button></div></div>`;}
+function flightCommandBlockHTML(c,path,label,active){
+ const f=flight,selected=String(f.selected)===String(path),root=!String(path).includes('.');
+ const heading=flightLabels[c]||c;
+ return `<button class="flight-block cmd-${c} ${selected?'selected':''} ${active?.path===path?'hot':''}" data-act="flight-select" data-path="${path}" ${root?`data-i="${path}"`:''} ${f.running?'disabled':''} aria-label="${heading} · επίλεξε για αλλαγή">${['U','D','L','R'].includes(c)?I.arrow(c):c==='T'?I.morph:'✋'}<small>${label}</small></button>`;
+}
+function flightProgramHTML(){
+ const f=flight,t=f.task;
+ const {trace}=BipFlight.compileFlightLoops(f.blocks);
+ const active=f.running?trace[f.next]:null;
+ const blocks=f.blocks.map((block,i)=>{
+  if(typeof block==='string')return flightCommandBlockHTML(block,String(i),String(i+1),active);
+  const isOpen=f.loopOpen===i;
+  const children=block.body.map((c,j)=>flightCommandBlockHTML(c,i+'.'+j,String(j+1),active)).join('');
+  const iteration=active?.path.startsWith(i+'.')?`<span class="loop-progress">Γύρος ${active.iteration}/${block.n}</span>`:'';
+  return `<div class="flight-loop ${isOpen?'open':''}" aria-label="ΞΑΝΑ ${block.n} φορές"><div class="flight-loop-head"><span>↻ ΞΑΝΑ</span><button class="flight-loop-count" data-act="flight-loop-count" data-i="${i}" ${f.running?'disabled':''} aria-label="Επανάληψη ${block.n} φορές. Πάτησε για αλλαγή.">×${block.n}</button><button class="flight-loop-edit" data-act="flight-loop-open" data-i="${i}" ${f.running?'disabled':''} aria-label="Άνοιξε την επανάληψη ${i+1}">✎</button>${iteration}</div><div class="flight-loop-body">${children}${isOpen?'<span class="flight-loop-addhint">Βάλε εδώ τις κινήσεις</span>':''}</div></div>`;
+ }).join('');
+ const loopButton=!t.initialProgram?`<button class="btn flight-loop-button" data-act="${f.loopOpen===null?'flight-loop-add':'flight-loop-close'}" ${f.running?'disabled':''} aria-label="${f.loopOpen===null?'Ξεκίνα επανάληψη':'Ολοκλήρωσε επανάληψη'}">${f.loopOpen===null?'↻ ΞΑΝΑ':'✓ Τέλος ΞΑΝΑ'}</button>`:'';
+ return `<div class="flight-tape"><div class="flight-program" aria-label="Το πρόγραμμά σου">${blocks||'<span class="tape-empty">Πάτα βελάκια: μπαίνουν εδώ στη σειρά. Για επανάληψη, πάτα ΞΑΝΑ.</span>'}</div>${f.loopOpen!==null?'<p class="flight-loop-instruction">Οι εντολές μπαίνουν μέσα στο ΞΑΝΑ. Πάτα «Τέλος ΞΑΝΑ» όταν τελειώσεις.</p>':''}${t.initialProgram?'<p class="fine">Ο Μπιπ μπέρδεψε μία εντολή. Δείξε τη θέση της και αντικατάστησέ την!</p>':''}<div class="flight-run"><button class="btn" data-act="flight-undo" aria-label="Σβήσε την τελευταία" ${f.running?'disabled':''}>${I.undo}</button><button class="btn" data-act="flight-preview" ${f.running?'disabled':''}>👣 Ίχνος</button><button class="btn" data-act="flight-step" ${f.running&&!f.paused?'disabled':''}>▶│ Βήμα</button>${loopButton}<button class="btn go" data-act="flight-run">${f.running?(f.paused?'▶ Συνέχεια':'❚❚ Παύση'):'▶ ΠΑΜΕ!'}</button></div></div>`;
+}
 function renderFlight(){if(!flight||S.screen!=='flight')return;const f=flight,t=f.task;
  const planned=f.mode==='plan',locked=f.running&&!f.paused,lockedForm=locked||f.completed;
  const status=`<p class="flight-status" role="status" aria-live="polite">${esc(f.status)}</p>`;
- const footer=`<div class="flight-footer"><button class="btn" data-act="flight-replay">${I.redo}Ξανά</button><button class="btn" data-act="flight-list">☰ Αποστολές</button><button class="btn" data-act="home">☕ Διάλειμμα</button></div>`;
+ const footer=`<div class="flight-footer"><button class="btn" data-act="flight-replay">${I.redo}Από την αρχή</button><button class="btn" data-act="flight-list">☰ Αποστολές</button><button class="btn" data-act="home">☕ Διάλειμμα</button></div>`;
  const head=`<header class="bar"><button class="btn sq" data-act="map" aria-label="Πίσω στα επεισόδια">${I.back}</button><div class="ttl">${esc(t.title)}</div><button class="btn sq yl" data-act="flight-hint" aria-label="Μικρή βοήθεια">${I.bulb}</button></header>`;
  const body=`<div class="flight-layout">${flightModeHTML()}<section class="flight-stage"><div class="board-frame">${flightObjectivesHTML()}${flightGridHTML()}${status}</div>${flightLegendHTML(t)}</section>${planned?flightProgramHTML():''}<section class="gamepad"><div class="gp-left">${flightPadHTML(locked)}</div><div class="gp-right">${flightMorphButtonHTML(lockedForm)}${flightHandHTML(locked)}</div></section>${footer}</div>`;
  const scroller=document.querySelector('.screen.flight'),top=scroller?scroller.scrollTop:0;
@@ -4011,13 +4087,84 @@ function flightWon(){const f=flight,t=f.task;
   const route=f.routeCells.join(';');if(!f.routes.includes(route)){f.routes.push(route);f.routeModes=[...(f.routeModes||[]),flightRouteMode(f)].slice(0,2);}
   if(f.routes.length<2){flightGeneration++;f.status='Πρώτος δρόμος βρέθηκε! Βρες δεύτερο διαφορετικό δρόμο.';f.state=BipFlight.createFlightState(t);f.routeCells=[`${t.start.x},${t.start.y}`];f.trail=[];f.next=0;f.running=false;f.paused=false;f.executing=false;persistFlight();return renderFlight();}
  }
- const execution=flightExecutionMode(f);f.completed=true;f.executing=false;f.running=false;f.paused=false;rawInteraction('attempt',{ok:true});finishEpisode('success',{debug_repaired:!!t.initialProgram,transforms:f.state.transforms,routes:f.routes.length,...flightEvidence(execution,f)});
+ const execution=flightExecutionMode(f);f.completed=true;f.executing=false;f.running=false;f.paused=false;rawInteraction('attempt',{ok:true});finishEpisode('success',{debug_repaired:!!t.initialProgram,transforms:f.state.transforms,routes:f.routes.length,loop_blocks_used:f.mode==='plan'?f.blocks.filter(b=>typeof b==='object').length:0,...flightEvidence(execution,f)});
  const stars=f.hint?1:3;flightJournal.completed[t.id]=Math.max(flightJournal.completed[t.id]||0,stars);ST.stars['flight:'+t.id]=Math.max(ST.stars['flight:'+t.id]||0,stars);ST.stars['a:'+t.family]=Math.max(ST.stars['a:'+t.family]||0,stars);save();claimRewards();persistFlight();renderFlight();sfx.win();
- overlay(`<div class="burst">${burstSVG()}<span>ΠΕΤΥΧΕ!</span></div><div class="smallbot">${flightSprite(f.state.robot.form)}</div><p>Το σχέδιό σου δούλεψε! ${stars} ⭐</p>${AgisEngine.sessionPlan(AS,Date.now()).offer_break?'<p>Έκανες πολλά σχέδια! Θέλεις λίγο νερό ή ήρεμο παιχνίδι;</p>':''}<p class="fine">${esc(t.explanation||'Πότε χρειάστηκες χέρια και πότε φτερά;')}</p>${execution==='program'?'':'<p>Το οδήγησες! Μπορείς να το φτιάξεις και ως πρόγραμμα από την αρχή;</p>'}<div class="row">${execution==='program'?'':'<button class="btn yl" data-act="flight-replay-plan">🧩 Φτιάχνω πρόγραμμα</button>'}<button class="btn go" data-act="flight-tour">Επόμενη περιπέτεια</button><button class="btn" data-act="adaptive-next">Άλλο παιχνίδι</button><button class="btn" data-act="flight-replay">Ξανά</button><button class="btn" data-act="home">Διάλειμμα</button></div>`);
+ overlay(`<div class="burst">${burstSVG()}<span>ΠΕΤΥΧΕ!</span></div><div class="smallbot">${flightSprite(f.state.robot.form)}</div><p>Το σχέδιό σου δούλεψε! ${stars} ⭐</p>${AgisEngine.sessionPlan(AS,Date.now()).offer_break?'<p>Έκανες πολλά σχέδια! Θέλεις λίγο νερό ή ήρεμο παιχνίδι;</p>':''}<p class="fine">${esc(t.explanation||'Πότε χρειάστηκες χέρια και πότε φτερά;')}</p>${execution==='program'?'':'<p>Το οδήγησες! Μπορείς να το φτιάξεις και ως πρόγραμμα από την αρχή;</p>'}<div class="row">${execution==='program'?'':'<button class="btn yl" data-act="flight-replay-plan">🧩 Φτιάχνω πρόγραμμα</button>'}<button class="btn go" data-act="flight-tour">Επόμενη περιπέτεια</button><button class="btn" data-act="adaptive-next">Άλλο παιχνίδι</button><button class="btn" data-act="flight-replay">Παίξε πάλι</button><button class="btn" data-act="home">Διάλειμμα</button></div>`);
 }
-function appendFlight(command){if(!flight||flight.running||flight.completed)return;if(flight.selected!==null){flight.program[flight.selected]=command;flight.selected=null;}else if(!flight.task.initialProgram&&flight.program.length<80)flight.program.push(command);else{flight.status='Πρώτα δείξε την εντολή που θέλεις να αλλάξεις.';}flight.preview=false;rawInteraction('edit',{command});persistFlight();renderFlight();}
+function copyFlightBlocks(blocks){
+ return blocks.map(b=>typeof b==='string'?b:{t:'loop',n:b.n,body:b.body.slice()});
+}
+function commitFlightBlocks(blocks,{action='edit',openLoop=flight.loopOpen,status=null}={}){
+ const f=flight;
+ try{
+  const checked=BipFlight.compileFlightLoops(blocks);
+  if(f.task.initialProgram&&checked.loops)throw new Error('no loops in repair exercises');
+  if(openLoop!==null&&blocks[openLoop]?.t!=='loop')throw new Error('missing open loop');
+  f.blocks=blocks;f.program=checked.commands;f.loopOpen=openLoop;f.selected=null;f.preview=false;
+  if(status)f.status=status;
+  rawInteraction('edit',{action});
+  persistFlight();renderFlight();return true;
+ }catch{
+  f.status='Το ΞΑΝΑ χωρά μέχρι 6 επαναλήψεις και 80 συνολικές κινήσεις. Δοκίμασε λιγότερα βήματα.';
+  renderFlight();return false;
+ }
+}
+function appendFlight(command){
+ const f=flight;if(!f||f.running||f.completed)return;
+ const blocks=copyFlightBlocks(f.blocks);
+ if(f.selected!==null){
+  const parts=String(f.selected).split('.').map(Number);
+  if(parts.length===1&&typeof blocks[parts[0]]==='string')blocks[parts[0]]=command;
+  else if(parts.length===2&&blocks[parts[0]]?.t==='loop'&&typeof blocks[parts[0]].body[parts[1]]==='string')blocks[parts[0]].body[parts[1]]=command;
+  else{f.selected=null;f.status='Διάλεξε μια κίνηση για να την αλλάξεις.';return renderFlight();}
+ }else if(f.loopOpen!==null&&blocks[f.loopOpen]?.t==='loop')blocks[f.loopOpen].body.push(command);
+ else if(!f.task.initialProgram)blocks.push(command);
+ else{f.status='Πρώτα δείξε την εντολή που θέλεις να αλλάξεις.';return renderFlight();}
+ commitFlightBlocks(blocks,{action:'append',status:'Το πρόγραμμά σου ενημερώθηκε.'});
+}
+function beginFlightLoop(){
+ const f=flight;if(!f||f.mode!=='plan'||f.running||f.completed||f.task.initialProgram||f.loopOpen!==null)return;
+ const blocks=copyFlightBlocks(f.blocks);
+ const index=blocks.length;blocks.push({t:'loop',n:2,body:[]});
+ commitFlightBlocks(blocks,{action:'loop_begin',openLoop:index,status:'ΞΑΝΑ 2 φορές: βάλε τις κινήσεις μέσα και πάτα Τέλος ΞΑΝΑ.'});
+}
+function closeFlightLoop(){
+ const f=flight;if(!f||f.running||f.completed||f.loopOpen===null)return;
+ const blocks=copyFlightBlocks(f.blocks),i=f.loopOpen;
+ if(blocks[i]?.t!=='loop')return;
+ if(blocks[i].body.length===0)blocks.splice(i,1);
+ commitFlightBlocks(blocks,{action:'loop_close',openLoop:null,status:'Το ΞΑΝΑ είναι έτοιμο. Πάτα ΠΑΜΕ για να το δοκιμάσεις.'});
+}
+function editFlightLoop(index){
+ const f=flight;if(!f||f.running||f.completed||!Number.isInteger(index)||f.blocks[index]?.t!=='loop')return;
+ if(f.loopOpen!==null&&f.loopOpen!==index&&f.blocks[f.loopOpen]?.body?.length===0){f.status='Κλείσε πρώτα το άδειο ΞΑΝΑ.';return renderFlight();}
+ f.loopOpen=index;f.selected=null;f.status='Επεξεργάζεσαι το ΞΑΝΑ. Βάλε κινήσεις ή άλλαξε τις φορές.';
+ persistFlight();renderFlight();
+}
+function cycleFlightLoop(index){
+ const f=flight;if(!f||f.running||f.completed||!Number.isInteger(index)||f.blocks[index]?.t!=='loop')return;
+ const blocks=copyFlightBlocks(f.blocks),loop=blocks[index];
+ loop.n=loop.n===6?2:loop.n+1;
+ commitFlightBlocks(blocks,{action:'loop_count',status:`ΞΑΝΑ ${loop.n} φορές.`});
+}
+function undoFlightBlock(){
+ const f=flight;if(!f||f.running||f.completed||f.task.initialProgram)return;
+ const blocks=copyFlightBlocks(f.blocks);
+ if(f.loopOpen!==null){
+  const loop=blocks[f.loopOpen];
+  if(loop?.t!=='loop')return;
+  if(loop.body.length)loop.body.pop();
+  else{blocks.splice(f.loopOpen,1);return commitFlightBlocks(blocks,{action:'undo_loop',openLoop:null});}
+ }else blocks.pop();
+ commitFlightBlocks(blocks,{action:'undo'});
+}
 async function executeFlight(single=false){
  const f=flight;if(!f||f.completed)return;const token=flightGeneration;
+ if(f.loopOpen!==null){f.status='Πρώτα πάτα «Τέλος ΞΑΝΑ» για να κλείσεις την επανάληψη.';return renderFlight();}
+ try{
+  const expanded=BipFlight.compileFlightLoops(f.blocks,{allowEmpty:false}).commands;
+  if(expanded.length!==f.program.length||expanded.some((c,i)=>c!==f.program[i]))throw Error('invalid program');
+ }catch{f.status='Το ΞΑΝΑ πρέπει να έχει κινήσεις και σωστό πλήθος επαναλήψεων.';return renderFlight();}
  if(f.running&&!single){f.paused=!f.paused;renderFlight();if(f.paused||f.executing)return;}
  if(!f.running){if(!f.program.length){f.status='Βάλε πρώτα εντολές στο σχέδιο.';return renderFlight();}f.state=BipFlight.createFlightState(f.task);f.routeCells=[`${f.task.start.x},${f.task.start.y}`];f.trail=[];f.next=0;f.running=true;f.paused=single;f.preview=false;}
  if(!single){if(f.executing)return;f.executing=true;}
@@ -4040,13 +4187,17 @@ Object.assign(ACT,{
  'flight-level':d=>curatedFlight(BipExpeditions.authoredChallenges[+d.i]),
  'flight-command':d=>{if(!flight||flight.completed||flight.running&&!flight.paused)return;flight.mode==='plan'?appendFlight(d.c):applyFlight(d.c,true);},
  'flight-transform':()=>{if(!flight||flight.completed||flight.running&&!flight.paused)return;flight.mode==='plan'?appendFlight('T'):applyFlight('T',true);},
- 'flight-plan':()=>{if(!flight||flight.running||flight.mode==='plan')return;flight.mode='plan';flight.program=flight.task.initialProgram?.slice()||[];flight.state=BipFlight.createFlightState(flight.task);flight.routeCells=[`${flight.task.start.x},${flight.task.start.y}`];flight.trail=[];persistFlight();renderFlight();speak('Φτιάχνω πρόγραμμα. Βάζω εντολές στη σειρά. Μετά πατάω ΠΑΜΕ.');},
- 'flight-live':()=>{if(!flight||flight.running||flight.task.initialProgram)return;flight.mode='live';flight.preview=false;persistFlight();renderFlight();speak('Οδηγώ. Κάθε κουμπί κάνει μία κίνηση τώρα.');},
- 'flight-select':d=>{if(!flight||flight.running)return;flight.selected=+d.i;renderFlight();},
- 'flight-undo':()=>{if(!flight||flight.running||flight.task.initialProgram)return;flight.program.pop();flight.selected=null;flight.preview=false;rawInteraction('edit',{action:'undo'});persistFlight();renderFlight();},
+ 'flight-plan':()=>{if(!flight||flight.running||flight.mode==='plan')return;flight.mode='plan';flight.program=flight.task.initialProgram?.slice()||[];flight.blocks=flight.program.slice();flight.loopOpen=null;flight.state=BipFlight.createFlightState(flight.task);flight.routeCells=[`${flight.task.start.x},${flight.task.start.y}`];flight.trail=[];persistFlight();renderFlight();speak('Φτιάχνω πρόγραμμα. Βάζω εντολές στη σειρά. Μετά πατάω ΠΑΜΕ.');},
+ 'flight-live':()=>{if(!flight||flight.running||flight.task.initialProgram)return;if(flight.loopOpen!==null){flight.status='Κλείσε πρώτα το ΞΑΝΑ.';return renderFlight();}flight.mode='live';flight.preview=false;persistFlight();renderFlight();speak('Οδηγώ. Κάθε κουμπί κάνει μία κίνηση τώρα.');},
+ 'flight-select':d=>{if(!flight||flight.running)return;flight.selected=String(d.path??d.i);renderFlight();},
+ 'flight-undo':()=>undoFlightBlock(),
+  'flight-loop-add':()=>beginFlightLoop(),
+  'flight-loop-close':()=>closeFlightLoop(),
+  'flight-loop-count':d=>cycleFlightLoop(Number(d.i)),
+  'flight-loop-open':d=>editFlightLoop(Number(d.i)),
  'flight-preview':()=>{if(!flight||flight.running)return;flight.preview=!flight.preview;if(flight.preview){flight.hint=Math.max(1,flight.hint);TR.hint=Math.max(1,TR.hint);rawInteraction('hint',{level:1,kind:'own_program_preview'});}renderFlight();},
  'flight-hint':()=>{if(!flight)return;flight.hint=Math.min(5,flight.hint+1);rawInteraction('hint',{level:flight.hint});flight.status=(flight.task.hints?.[flight.hint-1]||'Σκέψου ποια μορφή χρειάζεται το επόμενο εμπόδιο.').replace(/\b[UDLRTA]\b/g,c=>flightLabels[c]);persistFlight();renderFlight();},
- 'flight-replay-plan':()=>{if(!flight)return;const task=flight.task;startFlight({...flightEntries.find(c=>c.family===task.family),challenge_origin:'child_requested_repeat'},task);if(flight&&!task.initialProgram){flight.mode='plan';flight.program=[];persistFlight();renderFlight();}},
+ 'flight-replay-plan':()=>{if(!flight)return;const task=flight.task;startFlight({...flightEntries.find(c=>c.family===task.family),challenge_origin:'child_requested_repeat'},task);if(flight&&!task.initialProgram){flight.mode='plan';flight.program=[];flight.blocks=[];flight.loopOpen=null;persistFlight();renderFlight();}},
  'flight-step':()=>executeFlight(true),'flight-run':()=>executeFlight(false),
  'flight-replay':()=>{if(!flight)return;const task=flight.task;startFlight({...flightEntries.find(c=>c.family===task.family),challenge_origin:'child_requested_repeat'},task);},
  'parent-test-enter':()=>{tickActive();safeAdaptive();flushLog();const url=new URL(location.href);url.searchParams.set('parent-test','1');location.assign(url.href);},
@@ -4061,7 +4212,7 @@ const startBeforeFlight=startPlay;startPlay=function(lv,def){flightGeneration++;
 const sideBeforeFlight=renderSide;renderSide=function(){sideBeforeFlight();if(!S.lesson&&!S.studio&&!S.D&&S.def?.forms?.includes('jet')){const panel=document.createElement('div');panel.className='flight-story-form';panel.innerHTML=`<button class="btn flight-transform" data-act="story-form" ${S.running?'disabled':''}>${I.morph}ROBOT ↔ JET</button><small>Πρόσθεσε μεταμόρφωση στο σχέδιό σου. Το τζετ πετά δύο τετράγωνα.</small>`;$('.side')?.prepend(panel);}};
 ACT['story-form']=()=>{if(S.running||S.lesson||!S.def?.forms?.includes('jet'))return;let form='bot';for(const block of S.prog)if(block.t==='tf'&&block.to)form=block.to;const target=form==='jet'?'bot':'jet';const before=JSON.stringify(S.prog);addCmd({t:'tf',to:target});if(JSON.stringify(S.prog)!==before){const r=$('#rob');if(r){setForm(r,target);r.classList.remove('morph');void r.offsetWidth;r.classList.add('morph');}sfx.morph();}};
 const parentBeforeFlight=parents;parents=function(){parentBeforeFlight();const section=document.createElement('section');section.innerHTML=`<h3>Parent Test Mode</h3><p>Η δοκιμή χρησιμοποιεί ξεχωριστό προφίλ. Δεν αλλάζει πρόοδο, αστέρια ή στοιχεία μάθησης του παιδιού.</p><button class="btn yl" data-act="${BIP_PARENT_TEST?'parent-test-exit':'parent-test-enter'}">${BIP_PARENT_TEST?'Έξοδος στη συνεδρία παιδιού':'Έναρξη απομονωμένης δοκιμής'}</button><p class="fine">${Object.keys(flightJournal.completed).length} ολοκληρωμένες νέες περιπέτειες. Πρόοδος προφίλ: ${BIP_PARENT_TEST?'δοκιμή γονέα':'παιδί'}.</p>`;$('.dlg.par')?.prepend(section);};
-const exportBeforeFlight=exportData;exportData=function(kind){persistFlight();const previous=exportBeforeFlight(kind);if(kind==='legacy-csv'&&!BIP_PARENT_TEST)return previous;if(kind==='json'){const value=JSON.parse(previous);value.version='1.3-private';value.profile=BIP_PARENT_TEST?'parent_test':'child';value.flight=flightJournal;value.schema_versions.flight=1;value.storage[FLIGHT_KEY]=profileStorage.getItem(FLIGHT_KEY);return JSON.stringify(value,null,2);}return 'profile,content_version,'+previous.split('\n').map((line,i)=>i===0?line:`${BIP_PARENT_TEST?'parent_test':'child'},1.3,${line}`).join('\n');};
+const exportBeforeFlight=exportData;exportData=function(kind){persistFlight();const previous=exportBeforeFlight(kind);if(kind==='legacy-csv'&&!BIP_PARENT_TEST)return previous;if(kind==='json'){const value=JSON.parse(previous);value.version='1.3.2';value.profile=BIP_PARENT_TEST?'parent_test':'child';value.flight=flightJournal;value.schema_versions.flight=1;value.storage[FLIGHT_KEY]=profileStorage.getItem(FLIGHT_KEY);return JSON.stringify(value,null,2);}return 'profile,content_version,'+previous.split('\n').map((line,i)=>i===0?line:`${BIP_PARENT_TEST?'parent_test':'child'},1.3,${line}`).join('\n');};
 ACT['ad-restore']=()=>{try{
  if(!pendingRestore)return;const parsed=JSON.parse(pendingRestore),journal=parsed.flight;
  if(journal){if(journal.schema_version!==1||!journal.completed||typeof journal.completed!=='object'||Array.isArray(journal.completed)||Object.values(journal.completed).some(v=>!Number.isInteger(v)||v<1||v>3)||!Array.isArray(journal.recent_signatures)||journal.recent_signatures.length>120||journal.recent_signatures.some(v=>typeof v!=='string')||!Number.isInteger(journal.generated_count)||journal.generated_count<0)throw Error('Μη έγκυρο αντίγραφο πτήσης.');const c=journal.current;if(c&&(!BipExpeditions.validateExpedition(c.task).valid||!BipFlightCheckpoint.validFlightSession(c.task,c)))throw Error('Μη έγκυρη θέση αποστολής.');}
@@ -4071,7 +4222,7 @@ ACT['ad-restore']=()=>{try{
  ST=p.progress;LOG=p.log;AD=p.adaptive;LAB=BipLab.loadLabState(profileStorage);AS=AgisEngine.continueSession(AD.sessions,Date.now(),'bip-'+Date.now().toString(36));MIG.adaptiveWritable=true;pendingRestore=null;TR=null;mission=null;flightGeneration++;flight=null;if(journal)flightJournal=journal;parents();
  }catch(e){if($('#expbox'))$('#expbox').textContent='Δεν ολοκληρώθηκε η επαναφορά: '+e.message;}};
 
-const profileBanner=document.createElement('div');profileBanner.className='profile-banner '+(BIP_PARENT_TEST?'test':'private');profileBanner.innerHTML=BIP_PARENT_TEST?'<strong>ΔΟΚΙΜΗ ΓΟΝΕΑ · ξεχωριστή πρόοδος</strong><button data-act="parent-test-exit">Έξοδος</button>':'<span>ΜΠΙΠ v1.3.1</span>';document.body.prepend(profileBanner);
+const profileBanner=document.createElement('div');profileBanner.className='profile-banner '+(BIP_PARENT_TEST?'test':'private');profileBanner.innerHTML=BIP_PARENT_TEST?'<strong>ΔΟΚΙΜΗ ΓΟΝΕΑ · ξεχωριστή πρόοδος</strong><button data-act="parent-test-exit">Έξοδος</button>':'<span>ΜΠΙΠ v1.3.2</span>';document.body.prepend(profileBanner);
 if(BIP_PARENT_TEST){profileBanner.querySelector('button').onclick=ACT['parent-test-exit'];document.body.classList.add('parent-test-profile');}
 window.addEventListener('pagehide',()=>persistFlight());
 const stateBeforeFlight=window.__bipQA.state;window.__bipQA.state=()=>({...stateBeforeFlight(),profile:BIP_PARENT_TEST?'parent_test':'child',flight:flight?JSON.parse(JSON.stringify(flight)):null,flightJournal:JSON.parse(JSON.stringify(flightJournal))});window.__bipQA.flight={tasks:BipExpeditions,engine:BipFlight};window.__bipQA.exportData=kind=>exportData(kind);
