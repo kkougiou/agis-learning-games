@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Private candidate · ΜΠΙΠ και το εργαστήρι των ρομπότ</title>
+<title>ΜΠΙΠ και το εργαστήρι των ρομπότ</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#190e45">
 <meta name="application-name" content="ΜΠΙΠ">
@@ -777,6 +777,18 @@ button.pedestal{position:relative;display:block;margin:0 auto;padding:0;border:0
 .fx-form{background:#ffdb54!important;color:#17142a;border-color:#8a6a00!important}.fx-form.is-jet{background:#7fe9ff!important;border-color:#1b6f86!important}
 @media(orientation:portrait) and (min-width:700px){.handheld .flight-dpad{--pad:78px;gap:10px}.handheld{--morph:150px}.handheld .flight-interact{width:106px;min-height:106px!important}.handheld .flight-dpad .btn .ic{width:36px;height:36px}.morph-pad b{font-size:19px}}
 
+/* v1.3.1 desktop-first stage sizing — tablet/phone layouts are untouched. */
+@media (min-width: 1200px) and (min-height: 720px) {
+ .screen.play { max-width: min(96vw, 1720px); padding: 14px 20px 20px; }
+ .screen.play .playgrid { grid-template-columns: minmax(0, 1.62fr) minmax(350px, .72fr); gap: 20px; }
+ .screen.flight { max-width: min(96vw, 1760px); padding-inline: 18px; }
+ .handheld .flight-layout { column-gap: 18px; }
+ .handheld .flight-mode { width: clamp(230px, 17vw, 270px); }
+ .handheld .flight-dpad { --pad: clamp(58px, 3.8vw, 82px); }
+ .handheld { --morph: clamp(118px, 8vw, 166px); }
+ .handheld .flight-interact { width: clamp(84px, 6vw, 116px); min-height: clamp(84px, 6vw, 116px) !important; }
+}
+
 </style>
 </head>
 <body>
@@ -1140,7 +1152,7 @@ const tail = (a, v, n = 10) => [...a, v].slice(-n);
 const unique = (a, v, n = 10) => tail(a.filter(x => x !== v), v, n);
 const ids = a => [...new Set(list(a, 1000))].filter(x => !['__proto__','constructor','prototype'].includes(x));
 function emptySkill() {
- return {prior_mastery:0,band:1,band_streak:0,band_misses:0,retrieval_anchor_time:null,mastery_state:0,evidence:0,confidence:0,observations:0,independent_success_count:0,assisted_success_count:0,retry_success_count:0,failure_count:0,flexible_success_count:0,delayed_success_count:0,recent:[],recent_successes:[],recent_failures:[],session_ids:[],independent_session_ids:[],last_seen:null,last_independent_success:null,last_independent_item:null,last_independent_surface:null,last_retrieval_session:null,next_retrieval_due:null,retrieval_interval_ms:DAY,last_hint_level:0,error_tags:[],representations:[],contexts:[],response_times:[]};
+ return {prior_mastery:0,band:1,band_streak:0,band_misses:0,retrieval_anchor_time:null,mastery_state:0,evidence:0,confidence:0,observations:0,independent_success_count:0,assisted_success_count:0,retry_success_count:0,manual_navigation_success_count:0,manual_navigation_unaided_count:0,program_after_manual_success_count:0,failure_count:0,flexible_success_count:0,delayed_success_count:0,recent:[],recent_successes:[],recent_failures:[],session_ids:[],independent_session_ids:[],last_seen:null,last_independent_success:null,last_independent_item:null,last_independent_surface:null,last_retrieval_session:null,next_retrieval_due:null,retrieval_interval_ms:DAY,last_hint_level:0,error_tags:[],representations:[],contexts:[],response_times:[]};
 }
 function createState(skillIds = []) {
  return {schema_version:2,skills:Object.fromEntries(ids(skillIds).map(id=>[id,emptySkill()])),events:[],raw_events:[],sessions:[]};
@@ -1155,7 +1167,7 @@ function sanitizeState(raw, skillIds = []) {
    else if(key==='last_independent_surface'||key==='last_independent_item'||key==='last_retrieval_session')r[key]=typeof old[key]==='string'?old[key]:null;
    else r[key]=Number.isFinite(old[key])&&old[key]>=0?old[key]:null;
   }
-  for(const key of ['observations','independent_success_count','assisted_success_count','retry_success_count','failure_count','flexible_success_count','delayed_success_count','band_streak','band_misses'])r[key]=Math.min(1e9,Math.floor(r[key]));
+  for(const key of ['observations','independent_success_count','assisted_success_count','retry_success_count','manual_navigation_success_count','manual_navigation_unaided_count','program_after_manual_success_count','failure_count','flexible_success_count','delayed_success_count','band_streak','band_misses'])r[key]=Math.min(1e9,Math.floor(r[key]));
   r.band=Math.max(1,Math.min(5,Math.floor(r.band)));r.band_streak=Math.min(2,r.band_streak);r.band_misses=Math.min(1,r.band_misses);r.retrieval_interval_ms=Math.max(DAY/2,Math.min(60*DAY,r.retrieval_interval_ms));
   r.prior_mastery=Math.min(4,Math.floor(raw.schema_version===1?num(old.mastery_state):r.prior_mastery));
   r.evidence=Math.min(1,r.evidence);r.confidence=Math.min(1,r.confidence);r.last_hint_level=Math.min(5,r.last_hint_level);r.mastery_state=mastery(r);
@@ -1177,20 +1189,31 @@ function currentMastery(r) {
  if(!r || !r.observations)return 0;const recent=r.recent??[];const rate=recent.filter(x=>x==='I').length/Math.max(1,recent.length);
  if(r.independent_success_count>=4 && rate>=.8 && (r.independent_session_ids?.length??0)>=2 && r.flexible_success_count>=1 && r.delayed_success_count>=1)return 4;
  if(r.independent_success_count>=3 && rate>=.75 && (r.independent_session_ids?.length??0)>=2)return 3;
- if(r.independent_success_count>=1 || r.assisted_success_count>=2 || r.retry_success_count>=2)return 2;
+ if(r.independent_success_count>=1 || r.assisted_success_count>=2 || r.retry_success_count>=2 || (r.manual_navigation_unaided_count||0)>=2)return 2;
  return 1;
 }
 function recordTrial(state, event) {
  if(event?.event_kind==='interaction')return recordInteraction(state,event);
  const s=sanitizeState(state,Object.keys(state?.skills??{}));const e=normalizeEvent(event);
  const success=e.result==='success'||e.result==='correct';
- const independent=success && e.hint_level_used===0 && e.attempts===1 && e.first_attempt && e.reset_count===0;
- const mark=independent?'I':success?(e.hint_level_used>0?'A':'R'):'F';
+ const expeditionMode=['program','manual','program_after_manual'].includes(e.execution_mode)?e.execution_mode:null;
+ const independent=success && (!expeditionMode||expeditionMode==='program') && e.hint_level_used===0 && e.attempts===1 && e.first_attempt && e.reset_count===0;
+ const mark=!success?'F':expeditionMode==='manual'?(e.hint_level_used>0?'A':'M'):expeditionMode==='program_after_manual'?(e.hint_level_used>0?'A':'E'):independent?'I':e.hint_level_used>0?'A':'R';
  for(const id of e.skills) {
   if(!s.skills[id])s.skills[id]=emptySkill();const r=s.skills[id];
   const delayed=independent && r.last_independent_success!==null && e.timestamp>=r.next_retrieval_due && e.timestamp-(r.retrieval_anchor_time??r.last_independent_success)>=DAY/2 && e.session_id!==r.last_retrieval_session && (e.surface_id??e.item_id)!==(r.last_independent_surface??r.last_independent_item);
-  r.observations++;r[mark==='I'?'independent_success_count':mark==='A'?'assisted_success_count':mark==='R'?'retry_success_count':'failure_count']++;
-  r.evidence=Math.round((r.evidence*.75+(mark==='I'?1:mark==='A'?.35:mark==='R'?.5:0)*.25)*1000)/1000;
+  r.observations++;
+  if(success&&expeditionMode==='manual'){
+   r.manual_navigation_success_count++;
+   if(id==='spatial_reasoning'&&e.hint_level_used===0&&e.attempts===1&&e.first_attempt&&e.reset_count===0)r.manual_navigation_unaided_count++;
+  }
+  if(success&&expeditionMode==='program_after_manual')r.program_after_manual_success_count++;
+  if(mark==='I')r.independent_success_count++;
+  else if(mark==='A')r.assisted_success_count++;
+  else if(mark==='R')r.retry_success_count++;
+  else if(mark==='F')r.failure_count++;
+  const weight={I:1,A:.35,R:.5,M:.6,E:.45,F:0}[mark];
+  r.evidence=Math.round((r.evidence*.75+weight*.25)*1000)/1000;
   r.confidence=Math.min(1,r.observations/12);r.recent=tail(r.recent,mark);r.session_ids=unique(r.session_ids,e.session_id,12);
   r.last_seen=e.timestamp;r.last_hint_level=e.hint_level_used;r.response_times=tail(r.response_times,e.response_time,20);
   if(success)r.recent_successes=tail(r.recent_successes,String(e.item_id??''));else r.recent_failures=tail(r.recent_failures,String(e.item_id??''));
@@ -2895,7 +2918,8 @@ function renderPlay(say){
 function fit(){
   const st=$('.stage'),b=$('#board');if(!st||!b)return;const L=S.L;
   st.style.minHeight='';
-  const c=Math.max(26,Math.floor(Math.min((st.clientWidth-26)/L.cols,(st.clientHeight-28)/L.rows,L.pen?72:96)));
+  const maxCell=(innerWidth>=1200&&innerHeight>=720)?(L.pen?140:168):(L.pen?72:96);
+  const c=Math.max(26,Math.floor(Math.min((st.clientWidth-26)/L.cols,(st.clientHeight-28)/L.rows,maxCell)));
   b.style.width=c*L.cols+6+'px';b.style.height=c*L.rows+6+'px';b.style.setProperty('--cellpx',c+'px');
   st.style.minHeight=c*L.rows+34+'px';
 }
@@ -3867,7 +3891,7 @@ const previousTimeCategory=BipMetadata.timeCategory;BipMetadata.timeCategory=(sc
 const flightExecutionModes=['program','program_after_manual','manual'];
 function flightRouteMode(f){return f.mode!=='plan'?'manual':f.manualActions>0?'program_after_manual':'program';}
 function flightExecutionMode(f){const modes=f.task.family==='flight-alternatives'&&f.routeModes?.length?f.routeModes:[flightRouteMode(f)];return modes.includes('manual')?'manual':modes.includes('program_after_manual')?'program_after_manual':'program';}
-function flightEvidence(execution,f){const base={execution_mode:execution,manual_actions:f.manualActions||0};if(execution==='program')return {...base,support_type:'none'};return {...base,support_type:'stepwise_feedback',first_attempt:false,solved_independently:false,mastery_evidence_type:execution==='manual'?'manual_navigation':'program_after_exploration'};}
+function flightEvidence(execution,f){const base={execution_mode:execution,manual_actions:f.manualActions||0};if(execution==='program')return {...base,support_type:'none'};return {...base,support_type:'stepwise_feedback',solved_independently:false,mastery_evidence_type:execution==='manual'?'manual_navigation':'program_after_exploration'};}
 function startFlight(c,task=null,saved=null){
  finishEpisode();flightGeneration++;S.runId++;S.running=false;S.lesson=null;S.studio=false;S.D=null;S.lvl=null;S.at=null;mission=null;S.screen='flight';closeOv();
  if(!task){
@@ -3901,8 +3925,8 @@ function flightCellSize(c){
  const vw=innerWidth,vh=innerHeight,planned=flight.mode==='plan',portrait=vh>=vw*1.05;
  let w,h;
  if(portrait){w=Math.min(vw,1180)-24;h=vh-(planned?560:420);}
- else{w=Math.min(vw,1240)-420;h=vh-(planned?470:370);}
- return Math.max(30,Math.floor(Math.min(w/c.w,Math.max(h,c.h*34)/c.h,118)));
+ else{w=Math.min(vw,innerWidth>=1200&&innerHeight>=720?1760:1240)-(innerWidth>=1200&&innerHeight>=720?480:420);h=vh-(planned?470:370);}
+ return Math.max(30,Math.floor(Math.min(w/c.w,Math.max(h,c.h*34)/c.h,innerWidth>=1200&&innerHeight>=720?190:118)));
 }
 function flightLegendHTML(t){
  const items=[];const has=k=>Array.isArray(t[k])&&t[k].length;
@@ -3970,7 +3994,7 @@ function fitFlightBoard(){
  const footer=sc.querySelector('.flight-footer'),boardH=board.getBoundingClientRect().height;
  const others=sc.scrollHeight-boardH-(footer?footer.getBoundingClientRect().height+8:0);
  const available=sc.clientHeight-others;
- const cell=Math.floor(Math.max(Math.min(maxW/c.w,48),Math.min(maxW/c.w,available/c.h,118)));
+ const cell=Math.floor(Math.max(Math.min(maxW/c.w,48),Math.min(maxW/c.w,available/c.h,innerWidth>=1200&&innerHeight>=720?190:118)));
  board.style.width=cell*c.w+'px';board.style.setProperty('--cell',cell+'px');
 }
 let flightResizeTimer=0;addEventListener('resize',()=>{clearTimeout(flightResizeTimer);flightResizeTimer=setTimeout(()=>{if(flight&&S.screen==='flight')renderFlight();},120);});
@@ -4047,7 +4071,7 @@ ACT['ad-restore']=()=>{try{
  ST=p.progress;LOG=p.log;AD=p.adaptive;LAB=BipLab.loadLabState(profileStorage);AS=AgisEngine.continueSession(AD.sessions,Date.now(),'bip-'+Date.now().toString(36));MIG.adaptiveWritable=true;pendingRestore=null;TR=null;mission=null;flightGeneration++;flight=null;if(journal)flightJournal=journal;parents();
  }catch(e){if($('#expbox'))$('#expbox').textContent='Δεν ολοκληρώθηκε η επαναφορά: '+e.message;}};
 
-const profileBanner=document.createElement('div');profileBanner.className='profile-banner '+(BIP_PARENT_TEST?'test':'private');profileBanner.innerHTML=BIP_PARENT_TEST?'<strong>ΔΟΚΙΜΗ ΓΟΝΕΑ · ξεχωριστή πρόοδος</strong><button data-act="parent-test-exit">Έξοδος</button>':'<span>Ιδιωτική υποψήφια έκδοση · 1.3</span>';document.body.prepend(profileBanner);
+const profileBanner=document.createElement('div');profileBanner.className='profile-banner '+(BIP_PARENT_TEST?'test':'private');profileBanner.innerHTML=BIP_PARENT_TEST?'<strong>ΔΟΚΙΜΗ ΓΟΝΕΑ · ξεχωριστή πρόοδος</strong><button data-act="parent-test-exit">Έξοδος</button>':'<span>ΜΠΙΠ v1.3.1</span>';document.body.prepend(profileBanner);
 if(BIP_PARENT_TEST){profileBanner.querySelector('button').onclick=ACT['parent-test-exit'];document.body.classList.add('parent-test-profile');}
 window.addEventListener('pagehide',()=>persistFlight());
 const stateBeforeFlight=window.__bipQA.state;window.__bipQA.state=()=>({...stateBeforeFlight(),profile:BIP_PARENT_TEST?'parent_test':'child',flight:flight?JSON.parse(JSON.stringify(flight)):null,flightJournal:JSON.parse(JSON.stringify(flightJournal))});window.__bipQA.flight={tasks:BipExpeditions,engine:BipFlight};window.__bipQA.exportData=kind=>exportData(kind);
