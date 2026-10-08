@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bip-pwa-v121-endless-20261007';
+const CACHE_NAME = 'bip-pwa-v13-20261008-3dd5fd4';
 const CACHE_PREFIX = 'bip-pwa-';
 const APP_PREFIX = '/agis-learning-games/bip/';
 const CORE = [
@@ -14,7 +14,7 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(CORE))
-      .then(() => self.skipWaiting())
+      
   );
 });
 
@@ -22,7 +22,7 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
       .then(keys => Promise.all(
-        keys.filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
+        keys.filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME && key !== 'bip-pwa-v121-endless-20261007')
             .map(key => caches.delete(key))
       ))
       .then(() => self.clients.claim())

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ΜΠΙΠ και το εργαστήρι των ρομπότ</title>
+<title>Private candidate · ΜΠΙΠ και το εργαστήρι των ρομπότ</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#190e45">
 <meta name="application-name" content="ΜΠΙΠ">
@@ -646,12 +646,492 @@ button.pedestal{position:relative;display:block;margin:0 auto;padding:0;border:0
 @media(prefers-reduced-motion:reduce){.worked-turn{animation:none;transform:rotate(var(--turn))}.turn-cue{animation:none}}
 @media(max-height:450px){.home{overflow-y:auto;justify-content:flex-start}.home .hero{width:70px}.home h1.logo{width:190px}.home{gap:8px}.adaptive .mission{padding:10px;gap:10px}}
 
+.profile-banner{flex:none;min-height:28px;padding:5px 14px;display:flex;align-items:center;justify-content:center;gap:18px;background:#181332;color:#c6d9ee;font-size:12px;font-weight:700;z-index:50}.profile-banner.test{background:#ffdb54;color:#141224;font-size:14px;border-bottom:3px solid #141224}.profile-banner button{border:2px solid #141224;border-radius:8px;background:white;padding:5px 12px;font-weight:900;min-height:34px}body{display:flex;flex-direction:column}#app{flex:1;min-height:0}
+.flight-level-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.flight-level-list .btn{font-size:14px;display:flex;flex-direction:column;max-width:100%;padding:10px}.flight-level-list small{color:#a8cef4}.flight-story-form{padding:10px;margin-bottom:12px;background:#241947;border:2px solid #8bd6ff;border-radius:14px}.flight-story-form small{display:block;line-height:1.4;margin-top:7px}.flight-entry p{padding:0 16px;font-size:15px}.flight-story-form .flight-transform{width:100%;min-height:58px;background:linear-gradient(130deg,#ffcf22,#ff8a4a);color:#11102c;font-size:18px;border-color:#090622}
+@media(max-width:600px){.flight-level-list{grid-template-columns:1fr}}
+
+/* ---------- expedition screen: shared ---------- */
+.screen.flight{overflow-y:auto!important;max-width:1240px;gap:8px;padding:8px 12px 14px}
+.flight .talk{gap:8px;margin:0}
+.flight .talk .face{width:40px;height:48px}
+.flight .talk .bubble{font-size:15px;line-height:1.35;padding:7px 12px}
+.flight-layout{display:flex;flex-direction:column;gap:10px;width:100%;min-width:0}
+.flight-stage{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.board-frame{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px;background:#100d26;border:3px solid #050414;border-radius:20px;box-shadow:6px 7px 0 #07051a,0 0 30px #7fe9ff22;max-width:100%}
+.flight-board{position:relative;max-width:100%;aspect-ratio:var(--cols)/var(--rows);border-radius:12px;overflow:hidden;border:3px solid #050414;background:#2b2160}
+.flight-cells{display:grid;grid-template-columns:repeat(var(--cols),1fr);grid-template-rows:repeat(var(--rows),1fr);height:100%}
+.flight-cell{display:grid;place-items:center;position:relative;min-width:0;min-height:0}
+.flight-cell>svg{width:84%;height:84%}
+.flight-cell.fl-floor{background:#8f84dc;box-shadow:inset 0 0 0 1px #6457b8}
+.flight-cell.fl-floor.fl-alt{background:#988de2}
+.flight-cell.wall{background:radial-gradient(circle at 16% 18%,#8c86c9 0 2px,transparent 3px),radial-gradient(circle at 84% 18%,#8c86c9 0 2px,transparent 3px),linear-gradient(#433c78,#2c2654);box-shadow:inset 0 5px 0 #5f58a4,inset 0 -6px 0 #17132f,inset 0 0 0 1px #100d26}
+.flight-cell.gap{background:radial-gradient(ellipse at 50% 60%,#04030c 30%,#0e0b28 75%);box-shadow:inset 0 4px 0 #8fd3ff55,inset 0 -4px 0 #8fd3ff55}
+.flight-cell.gap>svg{width:70%;height:70%}
+.flight-cell.fl-goal{background:#2f6e64;box-shadow:inset 0 0 0 4px #7dffbc}
+.flight-cell.delivery{background:#2a6a52;box-shadow:inset 0 0 0 4px #7dffbc}
+.flight-cell.box-target{box-shadow:inset 0 0 0 4px #ffdb54}
+.flight-cell.box-target::after{content:'';position:absolute;inset:22%;border:3px dashed #ffdb54;border-radius:6px;opacity:.85;pointer-events:none}
+.fx-goal{display:grid;place-items:center;width:84%;height:84%}.fx-goal svg{width:100%;height:100%}
+.fx-delivered{position:relative;width:84%;height:84%}.fx-delivered svg{position:absolute;inset:0;width:100%;height:100%}.fx-delivered svg+svg{inset:30% 0 0 30%;width:70%;height:70%}
+.fx-switch{display:grid;place-items:center;width:70%;aspect-ratio:1;border-radius:50%;background:#ffdb54;color:#17142a;border:3px solid #0e0c22;box-shadow:0 4px 0 #8a6a00;font-weight:900;font-size:calc(var(--cell,60px)*.3);line-height:1}
+.fx-switch small{font-size:.55em;margin-top:-.15em}
+.fx-switch.on{background:#36c47e;color:#fff;box-shadow:0 1px 0 #0e5a36;transform:translateY(3px)}
+.flight-robot{position:absolute;display:grid;place-items:center;z-index:3;pointer-events:none;transition:left .22s ease-out,top .22s ease-out}
+.flight-robot::before{content:'';position:absolute;left:18%;right:18%;bottom:4%;height:12%;border-radius:50%;background:#0006}
+.flight-robot.jet::before{bottom:-2%;opacity:.5}
+.flight-robot .robot{width:96%;height:100%;overflow:visible;position:relative}
+.flight-robot .jetsvg{width:100%;height:100%;overflow:visible;position:relative;filter:drop-shadow(0 0 8px #7fe9ffaa);transform:translateY(-6%)}
+.flight-carried{position:absolute;right:-6%;bottom:-2%;width:46%;height:46%}.flight-carried svg{width:100%;height:100%}
+.flight-morph{animation:flight-morph .45s ease-out}
+.flight-trajectory{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
+.flight-trajectory polyline{stroke:#ffdb54;stroke-width:.07;fill:none;stroke-dasharray:.14 .08}
+.flight-trajectory text{font-size:.24px;font-weight:900;fill:white;text-anchor:middle;paint-order:stroke;stroke:#120e29;stroke-width:.045}
+.flight-trajectory text.blocked{fill:#ff5994}
+.flight-objectives{display:flex;flex-wrap:wrap;white-space:nowrap;gap:6px;justify-content:center;font-size:15px;font-weight:900;color:#fff}
+.flight-objectives>span{display:inline-flex;align-items:center;gap:4px;background:#2a2353;border:2px solid #4b3f8c;border-radius:999px;padding:3px 10px;min-height:30px}
+.flight-objectives>span.low{background:#6b1738;border-color:#ff6399}
+.fx-mini{display:inline-block;width:20px;height:20px}.fx-mini svg{width:100%;height:100%}
+.flight-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;color:#dfe6ff;font-size:13px;font-weight:700}
+.flight-legend>span{display:inline-flex;align-items:center;gap:6px}
+.fx-swatch{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:6px;background:#6a5bb8;border:2px solid #0e0c22;--cell:24px}
+.fx-swatch svg{width:90%;height:90%}.fx-swatch.wall{background:linear-gradient(#433c78,#2c2654)}.fx-swatch.gap{background:#06051a}.fx-swatch.box-target{border:2px dashed #ffdb54;background:#6a5bb8}
+.fx-swatch .fx-switch{width:90%;font-size:11px;border-width:1px;box-shadow:none}
+.flight-status{margin:0;background:#151133;border-left:5px solid #7fe9ff;border-radius:10px;padding:8px 12px;font-size:16px;font-weight:700;line-height:1.4;color:#fff;min-height:44px;display:flex;align-items:center}
+
+/* mode chooser: two concrete ways to play */
+.flight-mode{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.flight-mode .btn{flex-direction:row;justify-content:flex-start;text-align:left;gap:8px;min-height:60px;padding:6px 10px;font-style:normal;background:#2a2353;color:#cfd6f5;border-color:#090722;box-shadow:0 4px 0 #090722}
+.flight-mode .btn b{display:block;font-size:17px;color:#fff;line-height:1.15}
+.flight-mode .btn small{display:block;font-size:12px;font-weight:700;line-height:1.25;color:#b9c3ea}
+.flight-mode .mode-ic{font-size:26px;line-height:1;flex:none}
+.flight-mode .btn.on{background:#ffdb54;color:#17142a;box-shadow:0 4px 0 #8a6a00,0 0 0 3px #fff inset}
+.flight-mode .btn.on b,.flight-mode .btn.on small{color:#17142a}
+.flight-mode .btn[disabled]:not(.on){opacity:.4}
+
+/* direction pad and hands */
+.flight-dpad{display:grid;grid-template-columns:repeat(3,var(--pad,64px));grid-template-rows:repeat(2,var(--pad,64px));gap:8px;justify-content:center}
+.flight-dpad .btn{width:auto;min-height:0;padding:2px;display:flex;flex-direction:column;gap:0;font-size:22px;font-style:normal;position:relative}
+.flight-dpad .btn .ic{width:30px;height:30px}
+.flight-dpad .btn small{font-size:11px;font-weight:800}
+.flight-dpad.adds .btn::after{content:'+';position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;background:#ffdb54;color:#17142a;border:2px solid #0e0c22;font-size:16px;line-height:17px;font-style:normal}
+.direction-U{grid-column:2;grid-row:1}.direction-L{grid-column:1;grid-row:2}.direction-D{grid-column:2;grid-row:2}.direction-R{grid-column:3;grid-row:2}
+.flight-interact{flex-direction:row!important;gap:8px!important;min-height:64px!important;font-style:normal!important;background:#f3e9d2!important;color:#17142a!important;padding:6px 12px!important;text-align:left}
+.flight-interact .hand-ic{font-size:28px;line-height:1}
+.flight-interact b{display:block;font-size:17px}.flight-interact small{display:block;font-size:12px;font-weight:700;color:#4b4f6e}
+.flight-interact.dim{opacity:.6}
+
+/* program tape */
+.flight-tape{display:flex;flex-direction:column;gap:8px;width:100%}
+.flight-program{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-height:64px;padding:8px;background:#0e0b26;border:3px dashed #7fe9ff88;border-radius:14px}
+.tape-empty{color:#b9c3ea;font-size:14px;font-weight:700;padding:0 6px}
+.flight-block{width:48px;height:54px;border:3px solid #090724;border-radius:10px;background:#2770d3;color:white;position:relative;display:grid;place-items:center;padding:2px 2px 14px;font-size:20px}
+.flight-block .ic{width:24px;height:24px}
+.flight-block.cmd-T{background:linear-gradient(130deg,#ffcf22,#ff8a4a);color:#17142a}
+.flight-block.cmd-A{background:#e9ecff;color:#17142a}
+.flight-block small{position:absolute;bottom:1px;font-size:11px;font-weight:900}
+.flight-block.selected{outline:4px solid #ffdb54;transform:translateY(-3px)}
+.flight-block.hot{outline:4px solid #7dffbc}
+.flight-run{display:grid;grid-template-columns:auto auto auto 1fr;gap:8px}
+.flight-run .btn{min-height:52px;font-size:15px;font-style:normal;padding:4px 12px;flex-direction:row}
+.flight-run .btn.go{font-size:20px;min-height:56px;margin:0}
+.flight-footer{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.flight-footer .btn{min-height:46px;font-size:14px;font-style:normal;padding:4px 12px;flex-direction:row;background:#2a2353;color:#e6eaff;border-color:#090722;box-shadow:0 4px 0 #090722}
+.flight-footer .btn .ic{width:18px;height:18px}
+
+.flight-transform.cue{animation:flight-cue 1.2s ease-in-out infinite}
+
+/* round transformation button */
+.morph-pad{position:relative;width:var(--morph,128px)!important;height:var(--morph,128px)!important;min-height:0!important;border-radius:50%!important;padding:6px!important;display:flex!important;flex-direction:column!important;gap:0!important;background:radial-gradient(circle at 35% 30%,#ffe36a,#ff8a4a 70%)!important;color:#17142a!important;border:4px solid #050414!important;box-shadow:0 7px 0 #050414!important;font-style:normal!important}
+.morph-pad i{width:56%;height:46%;display:grid;place-items:center}.morph-pad i svg{width:auto!important;height:100%!important;max-width:100%;overflow:hidden!important}.morph-pad b{position:relative;z-index:1;margin-top:2px}
+.morph-pad b{font-size:16px;letter-spacing:.03em;line-height:1.1}
+.mp-swap{position:absolute;top:-6px;right:-6px;width:36px;height:36px;border-radius:50%;background:#7fe9ff;border:3px solid #050414;display:grid;place-items:center}.mp-swap .ic{width:20px;height:20px}
+
+@keyframes flight-morph{0%{transform:scale(1,.3);filter:brightness(2) drop-shadow(0 0 15px #7fe9ff)}45%{transform:scale(.45,1.2) rotate(-10deg)}75%{transform:scale(1.15,.8)}100%{transform:scale(1)}}
+@keyframes flight-cue{0%,100%{box-shadow:0 5px 0 #050414,0 0 0 0 #ffdb54aa}50%{box-shadow:0 5px 0 #050414,0 0 0 10px #ffdb5400}}
+@media(prefers-reduced-motion:reduce){.flight-morph,.flight-transform.cue{animation:none}.flight-robot{transition:none}.flight-transform.cue{outline:4px solid #ffdb54}}
+
+/* ---------- handheld composition: screen above, thumbs below ---------- */
+.handheld .flight-mode{max-width:620px}
+.handheld .flight-mode .btn{min-height:52px}
+.handheld .board-frame .flight-status{width:100%;font-size:15px;min-height:40px;border-left-width:4px}
+.handheld .flight-tape{max-width:900px;align-self:center}
+.handheld .gamepad{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:12px;padding:12px 14px;background:#241c4c;border:3px solid #08061a;border-radius:26px;box-shadow:6px 6px 0 #070519;width:100%;max-width:900px;align-self:center}
+.handheld .gp-left{display:flex;justify-content:flex-start}
+.handheld .gp-right{display:flex;align-items:center;justify-content:flex-end;gap:12px}
+.handheld .flight-dpad{--pad:66px}
+.handheld .flight-interact{flex-direction:column!important;width:92px;min-height:92px!important;border-radius:50%!important;justify-content:center;text-align:center;padding:4px!important}
+.handheld .flight-interact small{display:none}
+@media(max-width:480px){.handheld .flight-dpad{--pad:50px;gap:6px}.handheld{--morph:90px}.handheld .gp-right{gap:6px}.handheld .flight-interact{width:58px;min-height:58px!important}.morph-pad b{font-size:14px}.handheld .flight-interact b{font-size:14px}.handheld .gamepad{gap:6px;padding:8px}.flight-mode .btn small{display:none}.handheld .gamepad{padding:10px}}
+@media(orientation:landscape) and (min-width:700px){
+ .handheld .flight-layout{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"mode stage right" "left stage right" "tape tape tape" "foot foot foot";grid-template-rows:auto 1fr auto auto;align-items:center;column-gap:14px;row-gap:8px}
+ .handheld .flight-mode{grid-area:mode;grid-template-columns:1fr;width:230px;align-self:end}
+ .handheld .flight-mode .btn{min-height:56px}
+ .handheld .gp-left{align-self:start}
+ .handheld .gamepad{display:contents}
+ .handheld .gp-left{grid-area:left;padding:12px;background:#241c4c;border:3px solid #08061a;border-radius:26px;box-shadow:6px 6px 0 #070519}
+ .handheld .gp-right{grid-area:right;flex-direction:column;padding:12px;background:#241c4c;border:3px solid #08061a;border-radius:26px;box-shadow:6px 6px 0 #070519}
+ .handheld .flight-stage{grid-area:stage}.handheld .flight-tape{grid-area:tape}.handheld .flight-footer{grid-area:foot}
+ .handheld .flight-tape{max-width:none;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center}.handheld .flight-tape .fine{grid-column:1/-1;margin:0;order:-1}.handheld .flight-run{grid-template-columns:auto auto auto minmax(150px,auto)}
+ .handheld .flight-dpad{--pad:58px}.handheld{--morph:118px}.handheld .flight-interact{width:84px;min-height:84px!important}
+}
+.fx-form{background:#ffdb54!important;color:#17142a;border-color:#8a6a00!important}.fx-form.is-jet{background:#7fe9ff!important;border-color:#1b6f86!important}
+@media(orientation:portrait) and (min-width:700px){.handheld .flight-dpad{--pad:78px;gap:10px}.handheld{--morph:150px}.handheld .flight-interact{width:106px;min-height:106px!important}.handheld .flight-dpad .btn .ic{width:36px;height:36px}.morph-pad b{font-size:19px}}
+
 </style>
 </head>
 <body>
 <div id="app"></div>
 <script>
 (()=>{'use strict';
+const BipProfiles=(()=>{const PARENT_PREFIX='agis-parent-test:bip:';
+const DELETED='\u0000parent-profile-deleted';
+
+/** Copy-on-write test profile. Every consumer receives this adapter, including
+ * boot migration, timers, restores, original-game saves and future sidecars. */
+function profileStorage(raw,parentTest=false){
+ if(!parentTest)return raw;
+ return {
+  getItem(key){const own=raw.getItem(PARENT_PREFIX+key);return own===DELETED?null:own===null?raw.getItem(key):own;},
+  setItem(key,value){raw.setItem(PARENT_PREFIX+key,String(value));},
+  removeItem(key){raw.setItem(PARENT_PREFIX+key,DELETED);}
+ };
+}
+
+/** Known fields are validated by the legacy shaper; unknown extension fields
+ * survive candidate loads and writes. Arrays follow the shaper's validation. */
+function preserveUnknown(previous,known){
+ const object=v=>v&&typeof v==='object'&&!Array.isArray(v);
+ if(!object(known))return known;
+ const result=Object.assign({},object(previous)?previous:{},known);
+ for(const key of Object.keys(known))if(object(known[key]))result[key]=preserveUnknown(object(previous)?previous[key]:null,known[key]);
+ return result;
+}
+
+/** All restore writes are staged first. Recovery includes new sidecars, and
+ * progress changes begin only after the exact recovery snapshot succeeds. */
+function commitProfileEntries(storage,entries){
+ const before=Object.fromEntries(Object.keys(entries).map(k=>[k,storage.getItem(k)]));
+ storage.setItem('bip-restore-backup-before',JSON.stringify(before));
+ try{for(const [key,value] of Object.entries(entries))storage.setItem(key,value);}
+ catch(error){for(const [key,value] of Object.entries(before)){try{if(value===null)storage.removeItem(key);else storage.setItem(key,value);}catch{}}throw error;}
+}
+function flightEpisodeMeta(candidate,task,continued=false){
+ const retrieval=candidate.mode==='retrieval';
+ return {...candidate,...task,...task.metadata,item_id:'a:'+task.family+':'+task.seed,replay_key:'flight:'+task.id,kind:'flight',mode:candidate.mode||task.metadata?.mode||'spatial',cognitive_demand:retrieval?'recall':task.metadata?.cognitive_demand||task.cognitive_demand||candidate.cognitive_demand,parameters:{seed:task.seed,band:task.band},challenge_origin:continued?'continued_challenge':candidate.challenge_origin||(retrieval?'scheduled_retrieval':'new_challenge')};
+}
+
+return {PARENT_PREFIX,profileStorage,preserveUnknown,commitProfileEntries,flightEpisodeMeta};})();
+const BIP_PARENT_TEST=new URLSearchParams(location.search).get('parent-test')==='1';
+let rawDeviceStorage;try{rawDeviceStorage=globalThis['local'+'Storage'];}catch{rawDeviceStorage={getItem(){throw Error('unavailable')},setItem(){throw Error('unavailable')},removeItem(){throw Error('unavailable')}};}
+const profileStorage=BipProfiles.profileStorage(rawDeviceStorage,BIP_PARENT_TEST);
+const BipFlight=(()=>{/** Pure, one-cell expedition simulation. No storage, rendering or adaptive state. */
+const FLIGHT_COMMANDS = Object.freeze(['U','D','L','R','T','A']);
+const directions={U:[0,-1],D:[0,1],L:[-1,0],R:[1,0]};
+const at=(a,b)=>a.x===b.x&&a.y===b.y;
+const clone=x=>JSON.parse(JSON.stringify(x));
+const tile=(task,p)=>task.grid[p.y]?.[p.x]??'#';
+const hasAll=(state,ids=[])=>ids.every(id=>state.switches.includes(id));
+function passable(task,state,p,form){
+ if(tile(task,p)==='#')return 'wall';
+ if(tile(task,p)==='~'&&form==='robot')return 'gap';
+ if((task.gates||[]).some(g=>at(g,p)&&!hasAll(state,g.requires)))return 'gate';
+ return null;
+}
+function victory(task,state){
+ return at(state.robot,task.goal)&&state.robot.form===(task.goal.form||'robot')&&hasAll(state,task.requiredSwitches)&&state.cargo.every(c=>c.delivered)&&(task.boxGoals||[]).every(g=>state.boxes.some(b=>b.id===g.id&&at(b,g)))&&state.transforms>=(task.minTransforms||0);
+}
+function createFlightState(task){
+ const state={version:1,taskId:task.id,robot:{...task.start,form:task.start.form||'robot'},boxes:clone(task.boxes||[]),cargo:clone(task.cargo||[]).map(c=>({...c,delivered:false})),carrying:null,switches:[],actions:0,fuelUsed:0,transforms:0,won:false,status:'ready',event:null};
+ state.won=victory(task,state);return state;
+}
+function flightStep(task,input,command){
+ const state=clone(input);
+ const refuse=reason=>{state.status='blocked';state.event={type:'blocked',reason};return state;};
+ if(state.taskId!==task.id)return refuse('mission');
+ if(state.won)return state;
+ if(!FLIGHT_COMMANDS.includes(command))return refuse('command');
+ if(state.actions>=(task.limits?.actions??Infinity))return refuse('actions');
+ let event='move';let fuel=0;
+ if(command==='T'){
+  if(state.carrying)return refuse('cargo');
+  const form=state.robot.form==='robot'?'jet':'robot';
+  if(form==='robot'&&tile(task,state.robot)==='~')return refuse('landing');
+  const blocked=passable(task,state,state.robot,form);if(blocked)return refuse(blocked);
+  state.robot.form=form;state.transforms++;event='transform';
+ }else if(command==='A'){
+  if(state.robot.form!=='robot')return refuse('ground-only');
+  const control=(task.switches||[]).find(s=>at(s,state.robot)&&!state.switches.includes(s.id));
+  if(control){if(!hasAll(state,control.requires))return refuse('dependency');state.switches.push(control.id);state.switches.sort();event='switch';}
+  else if(state.carrying){
+   const cargo=state.cargo.find(c=>c.id===state.carrying);
+   if(!at(cargo.goal,state.robot))return refuse('delivery');
+   cargo.delivered=true;cargo.x=state.robot.x;cargo.y=state.robot.y;state.carrying=null;event='deliver';
+  }else{
+   const cargo=state.cargo.find(c=>!c.delivered&&at(c,state.robot));
+   if(!cargo)return refuse('nothing');
+   if((cargo.requiresBoxes||[]).some(id=>!(task.boxGoals||[]).some(g=>g.id===id&&state.boxes.some(b=>b.id===id&&at(b,g)))))return refuse('crate-first');
+   state.carrying=cargo.id;event='pickup';
+  }
+ }else{
+  const [dx,dy]=directions[command];const target={x:state.robot.x+dx,y:state.robot.y+dy};
+  const blocked=passable(task,state,target,state.robot.form);if(blocked)return refuse(blocked);
+  const box=state.boxes.find(b=>at(b,target));
+  if(box){
+   if(state.robot.form!=='robot'||state.carrying)return refuse('box');
+   const beyond={x:target.x+dx,y:target.y+dy};
+   if(passable(task,state,beyond,'robot')||state.boxes.some(b=>at(b,beyond))||state.cargo.some(c=>!c.delivered&&at(c,beyond)))return refuse('box');
+   box.x=beyond.x;box.y=beyond.y;event='push';
+  }
+  if(state.robot.form==='jet')fuel=1;
+  if(state.fuelUsed+fuel>(task.limits?.fuel??Infinity))return refuse('fuel');
+  state.robot.x=target.x;state.robot.y=target.y;
+  if(state.carrying){const cargo=state.cargo.find(c=>c.id===state.carrying);cargo.x=target.x;cargo.y=target.y;}
+ }
+ state.actions++;state.fuelUsed+=fuel;state.won=victory(task,state);state.status=state.won?'won':'ok';state.event={type:event,command};return state;
+}
+function replayFlight(task,commands){return commands.reduce((state,c)=>flightStep(task,state,c),createFlightState(task));}
+function stateKey(state,task){
+ return JSON.stringify([state.robot,state.boxes,state.cargo,state.carrying,state.switches,Math.min(state.transforms,task.minTransforms||0),task.limits?.fuel!=null?state.fuelUsed:0]);
+}
+/** Bounded breadth-first search, independent of authored solutions and hints. */
+function solveFlight(task,{maxStates=60000,maxDepth=90,commands=FLIGHT_COMMANDS}={}){
+ const initial=createFlightState(task);if(initial.won)return [];
+ const queue=[{state:initial,parent:-1,command:null,depth:0}];const seen=new Set([stateKey(initial,task)]);
+ for(let index=0;index<queue.length&&queue.length<=maxStates;index++){
+  const node=queue[index];if(node.depth>=maxDepth)continue;
+  for(const command of commands){
+   const state=flightStep(task,node.state,command);if(state.status==='blocked')continue;
+   const key=stateKey(state,task);if(seen.has(key))continue;
+   const entry={state,parent:index,command,depth:node.depth+1};queue.push(entry);seen.add(key);
+   if(state.won){const path=[];let cursor=queue.length-1;while(queue[cursor].parent>=0){path.push(queue[cursor].command);cursor=queue[cursor].parent;}return path.reverse();}
+   if(queue.length>=maxStates)return null;
+  }
+ }
+ return null;
+}
+function validateFlight(task){
+ const errors=[];const point=p=>p&&Number.isInteger(p.x)&&Number.isInteger(p.y)&&p.y>=0&&p.y<task.grid.length&&p.x>=0&&p.x<task.grid[0].length;
+ if(!task||!Array.isArray(task.grid)||!task.grid.length||!task.grid.every(r=>typeof r==='string'&&r.length===task.grid[0].length))return {valid:false,errors:['grid'],solution:null,minActions:null,requiresTransformation:false};
+ for(const collection of ['boxes','boxGoals','cargo','switches','gates','requiredSwitches'])if(task[collection]!=null&&(!Array.isArray(task[collection])||(collection!=='requiredSwitches'&&task[collection].some(o=>!o||typeof o!=='object'))))errors.push(collection);
+ if(errors.length)return {valid:false,errors,solution:null,minActions:null,requiresTransformation:false};
+ if(!task.id)errors.push('id');
+ if(!point(task.start)||tile(task,task.start)==='#'||(tile(task,task.start)==='~'&&task.start.form!=='jet'))errors.push('start');
+ if(!point(task.goal)||tile(task,task.goal)==='#'||(tile(task,task.goal)==='~'&&task.goal.form!=='jet'))errors.push('goal');
+ for(const collection of ['boxes','cargo','switches','gates'])for(const item of task[collection]||[]){if(!point(item)||tile(task,item)==='#')errors.push(collection);if(collection==='cargo'&&(!point(item.goal)||tile(task,item.goal)==='#'||tile(task,item.goal)==='~'))errors.push('cargo-goal');}
+ for(const collection of ['boxes','cargo','switches']){
+  const objects=task[collection]||[];
+  if(objects.some(o=>typeof o.id!=='string'||!o.id)||new Set(objects.map(o=>o.id)).size!==objects.length)errors.push('object-id');
+ }
+ for(const goal of task.boxGoals||[])if(!point(goal)||tile(task,goal)==='#'||tile(task,goal)==='~'||!(task.boxes||[]).some(b=>b.id===goal.id))errors.push('box-goal');
+ for(const cargo of task.cargo||[])if(cargo.requiresBoxes!=null&&(!Array.isArray(cargo.requiresBoxes)||cargo.requiresBoxes.some(id=>!(task.boxGoals||[]).some(g=>g.id===id))))errors.push('cargo-locker');
+ if(task.start?.form&&!['robot','jet'].includes(task.start.form)||task.goal?.form&&!['robot','jet'].includes(task.goal.form))errors.push('form');
+ const controls=new Set((task.switches||[]).map(s=>s.id));
+ for(const item of [...(task.switches||[]),...(task.gates||[])])if(item.requires!=null&&(!Array.isArray(item.requires)||item.requires.some(id=>!controls.has(id))))errors.push('dependency');
+ if((task.requiredSwitches||[]).some(id=>!controls.has(id)))errors.push('required-switch');
+ for(const key of ['actions','fuel'])if(task.limits?.[key]!=null&&(!Number.isInteger(task.limits[key])||task.limits[key]<0))errors.push('limits');
+ if(errors.length)return {valid:false,errors,solution:null,minActions:null,requiresTransformation:false};
+ const solution=solveFlight(task);if(!solution)errors.push('unsolvable-or-search-bound');
+ const withoutTransforms=solution?solveFlight({...task,minTransforms:0},{commands:FLIGHT_COMMANDS.filter(c=>c!=='T')}):null;
+ return {valid:errors.length===0,errors,solution,minActions:solution?.length??null,requiresTransformation:!!solution&&!withoutTransforms};
+}
+
+return {createFlightState,flightStep,replayFlight,solveFlight,validateFlight};})();
+const BipExpeditions=(()=>{const {createFlightState,flightStep,replayFlight,solveFlight,validateFlight}=BipFlight;
+
+const CONTENT_VERSION='1.3-expeditions-1';
+const definitions=[
+ ['flight-route','Διαδρομές στον αέρα','spatial_reasoning','spatial',['problem_decomposition'],[], 'Η μορφή αλλάζει στο ίδιο τετράγωνο. Το ρομπότ περπατά, το τζετ περνά τα κενά.'],
+ ['flight-switches','Οι πύλες του σταθμού','deductive_logic','reasoning',['problem_decomposition'],[], 'Οι διακόπτες δουλεύουν μόνο με το ρομπότ. Ο ένας μπορεί να χρειάζεται τον άλλο.'],
+ ['flight-cargo','Το συνεργείο των κιβωτίων','spatial_reasoning','exploration',['constraint_reasoning'],[], 'Σπρώξε το κιβώτιο στον στόχο του και παράδωσε το δέμα. Με δέμα δεν πετάμε.'],
+ ['flight-budget','Μετρημένη ενέργεια','constraint_reasoning','reasoning',['arithmetic_strategy'],['spatial_reasoning'], 'Μέτρησε τις πτήσεις και τις κινήσεις πριν ξεκινήσεις. Οι αλλαγές μορφής μετρούν ως κινήσεις.'],
+ ['flight-repair','Βρες τη χαλασμένη εντολή','error_detection','debug',['spatial_reasoning'],['spatial_reasoning'], 'Μία εντολή στο σχέδιο είναι χαλασμένη. Δοκίμασε, βρες τη θέση της και άλλαξέ την.'],
+ ['flight-alternatives','Δύο δρόμοι για τη βάση','problem_decomposition','create',['spatial_reasoning','transfer'],['spatial_reasoning'], 'Βρες δύο διαφορετικούς δρόμους. Ποιον προτιμάς και γιατί;']
+];
+const flightCatalog=definitions.map(([family,title,primary_skill,mode,secondary_skills,prerequisites,lesson])=>({item_id:'flight:'+family,family,title,lesson,primary_skill,mode,secondary_skills,prerequisites,nominal_difficulty:1,cognitive_demand:mode==='debug'?'debug':mode==='create'?'transfer':'apply',representation:'spatial',novelty_level:1,kind:'flight',domain:'math_logic',content_version:CONTENT_VERSION,generator_version:'flight-curated-1',validator_version:'flight-bfs-1'}));
+const blank=(w,h=5)=>Array.from({length:h},()=>Array(w).fill('#'));
+const line=(g,y,left,right)=>{for(let x=left;x<=right;x++)g[y][x]='.';};
+const rows=g=>g.map(r=>r.join(''));
+const min=(band)=>[0,6,8,10,12][band];
+const commandNames={U:'Πάνω ↑',D:'Κάτω ↓',L:'Αριστερά ←',R:'Δεξιά →',T:'Αλλαγή μορφής',A:'Χρήση αντικειμένου'};
+
+/** Six reviewed topology templates; seed changes functional parameters, not just labels. */
+function construct(family,seed,band,variant){
+ const meta=flightCatalog.find(m=>m.family===family);if(!meta)throw new Error('Unknown expedition family: '+family);
+ const w=7+variant;const g=blank(w);line(g,1,1,w-2);line(g,3,1,w-2);
+ const task={...meta,id:`${family}:b${band}:s${seed}`,item_id:`flight:${family}:${band}:${seed}`,seed,band,difficulty:band,nominal_difficulty:band,surface_id:`${family}:${band}:${variant}`,parameters:{width:w,variant},start:{x:1,y:1},goal:{x:1,y:3},switches:[],gates:[],boxes:[],boxGoals:[],cargo:[],requiredSwitches:[],limits:{},minimumActions:min(band),requiresTransformation:family!=='flight-cargo'};
+ if(family==='flight-route'){
+  g[2][w-2]='.';g[1][3]='~';g[3][w-4]='~';
+  if(band>=3&&w>=9)g[1][w-3]='~';
+  task.prompt='Πέρνα τα κενά και γύρισε στη βάση ως ρομπότ. Σκέψου πού θα απογειωθείς και πού θα προσγειωθείς.';
+ }else if(family==='flight-switches'){
+  g[2][w-2]='.';g[1][3]='~';
+  task.switches=[{id:'a',x:1,y:1},{id:'b',x:w-2,y:1,requires:['a']},{id:'c',x:w-2,y:3,requires:['b']}];
+  task.gates=[{x:w-3,y:3,requires:['c']}];task.requiredSwitches=['a','b','c'];
+  if(band>=3){task.switches.push({id:'d',x:2,y:3,requires:['c']});task.requiredSwitches.push('d');}
+  task.prompt='Άναψε τους διακόπτες με τη σωστή σειρά και άνοιξε την πύλη. Πέτα μόνο για το κενό.';
+ }else if(family==='flight-cargo'){
+  for(let x=1;x<w-1;x++)g[1][x]='#';const bx=3+variant%2;g[1][bx]='.';g[2][bx]='.';
+  task.start={x:bx,y:3};task.goal={x:w-2,y:3};task.boxes=[{id:'box',x:bx,y:2}];task.boxGoals=[{id:'box',x:bx,y:1}];
+  task.cargo=[{id:'parcel',x:1,y:3,goal:{x:w-2,y:3},requiresBoxes:['box']}];
+  task.prompt='Σπρώξε το κιβώτιο στη θέση του επάνω. Πάρε το δέμα από αριστερά και παράδωσέ το στη βάση δεξιά.';
+ }else if(family==='flight-budget'){
+  for(let x=1;x<w-1;x++)g[3][x]='#';g[1][3]='~';g[1][4]='~';task.goal={x:w-2,y:1};
+  // A tempting, longer safe-floor spur competes with a tight flight allowance.
+  g[2][1]='.';g[3][1]='.';g[3][2]='.';g[2][2]='.';
+  if(band>=3&&w>=9)g[1][w-3]='~';
+  const gapCount=g[1].filter(t=>t==='~').length;
+  task.limits={fuel:gapCount+(band>=3?2:1),actions:w-3+(band>=3?4:2)};
+  task.minimumActions=6;task.prompt='Φτάσε στη βάση με την ενέργεια που έχεις. Περπάτησε όπου μπορείς και πέτα μόνο όσο χρειάζεται.';
+ }else if(family==='flight-repair'){
+  g[2][w-2]='.';g[1][2+variant%(w-4)]='~';
+  if(band>=3)g[3][2]='~';
+  task.prompt='Το σχέδιο έχει μία χαλασμένη εντολή αλλαγής μορφής. Βρες τη θέση της και επισκεύασέ το.';
+ }else{
+  g[2][1]='.';g[2][w-2]='.';g[1][2+variant%(w-4)]='~';g[3][w-3-variant%(w-4)]='~';
+  task.start={x:1,y:2};task.goal={x:w-2,y:2};
+  task.prompt='Φτάσε στη βάση από πάνω ή από κάτω. Μετά δοκίμασε τον άλλο δρόμο και σύγκρινε τα σχέδιά σου.';
+  const crossing=Array(w-3).fill('R');
+  task.alternativePrograms=[['U','T',...crossing,'T','D'],['D','T',...crossing,'T','U']];
+ }
+ task.grid=rows(g);
+ const solution=solveFlight(task);if(!solution)throw new Error('Reviewed template unsolvable: '+task.id);
+ if(family==='flight-repair'){
+  task.repairIndex=solution.indexOf('T');task.repairCommand='T';task.initialProgram=[...solution];task.initialProgram[task.repairIndex]='A';
+ }
+ task.hints=[task.lesson,'Κοίτα πρώτα τη βάση και όσα πρέπει να ετοιμάσεις πριν φτάσεις εκεί.',family==='flight-cargo'?'Το κιβώτιο πρέπει να μπει στην επάνω εσοχή πριν μεταφέρεις το δέμα.':'Σημείωσε τα κενά και τους διακόπτες που απαιτούν ρομπότ.',`Η πρώτη χρήσιμη εντολή είναι: ${commandNames[solution[0]]}.`,`Ένα ολοκληρωμένο σχέδιο: ${solution.map(c=>commandNames[c]).join(' · ')}.`];
+ task.explanation=family==='flight-budget'?'Η πτήση χρησιμοποιεί ενέργεια. Το περπάτημα αφήνει περισσότερη ενέργεια για τα κενά.':task.lesson;
+ const signature=structuralSignature(task);let hash=2166136261;
+ for(let i=0;i<signature.length;i++)hash=Math.imul(hash^signature.charCodeAt(i),16777619)>>>0;
+ task.structural_signature=signature;task.surface_id='flight-shape:'+hash.toString(16);
+ return task;
+}
+
+function structuralSignature(task){
+ // Identity, prompts and hints do not count as new content; mechanics and topology do.
+ return JSON.stringify({grid:task.grid,start:task.start,goal:task.goal,switches:task.switches||[],gates:task.gates||[],boxes:task.boxes||[],boxGoals:task.boxGoals||[],cargo:task.cargo||[],requiredSwitches:task.requiredSwitches||[],limits:task.limits||{},repair:task.initialProgram||null});
+}
+function validateExpedition(task){
+ const base=validateFlight(task);
+ if(!task)return base;
+ const report={...base,errors:[...base.errors]};
+ if(base.minActions!=null&&base.minActions<(task.minimumActions||6))report.errors.push('below-minimum-difficulty');
+ if(task.requiresTransformation&&!base.requiresTransformation)report.errors.push('transformation-not-required');
+ if(task.family==='flight-repair'){
+  if(!Array.isArray(task.initialProgram)||!Number.isInteger(task.repairIndex)||replayFlight(task,task.initialProgram).won)report.errors.push('repair-not-broken');
+  else {const fixed=[...task.initialProgram];fixed[task.repairIndex]=task.repairCommand;if(!replayFlight(task,fixed).won)report.errors.push('repair-not-localizable');}
+ }
+ if(task.family==='flight-alternatives'&&(!task.alternativePrograms||task.alternativePrograms.length<2||task.alternativePrograms.some(p=>!replayFlight(task,p).won)))report.errors.push('missing-alternative');
+ report.valid=report.errors.length===0;return report;
+}
+function generateExpedition(family,seed=1,band=1){
+ if(!flightCatalog.some(m=>m.family===family))throw new Error('Unknown expedition family: '+family);
+ if(!Number.isInteger(seed)||seed<0||seed>0xffffffff)throw new Error('Seed must be a uint32');
+ band=Math.max(1,Math.min(4,Math.floor(Number(band)||1)));
+ const variant=Math.max(family==='flight-alternatives'&&band===4?4:0,band-1+((Math.imul(seed,1664525)+1013904223)>>>0)%4);
+ const task=construct(family,seed,band,variant);const report=validateExpedition(task);
+ if(!report.valid)throw new Error('Expedition generation rejected: '+report.errors.join(', '));return task;
+}
+
+// Individually named reviewed instances, not thirty reskins of one generated puzzle.
+const authoredNames={
+ 'flight-route':['Πρώτη απογείωση','Η μικρή επιστροφή','Δύο πλατφόρμες','Το μακρύ φαράγγι','Τρεις αλλαγές σχεδίου'],
+ 'flight-switches':['Το πρώτο σήμα','Η αλυσίδα του σταθμού','Η ανατολική πύλη','Τέσσερα σήματα','Ο μεγάλος σταθμός'],
+ 'flight-cargo':['Το πρώτο δέμα','Η στενή εσοχή','Το μακρύ συνεργείο','Πρώτα το κιβώτιο','Η τελική παράδοση'],
+ 'flight-budget':['Μικρή μπαταρία','Δύο κενά','Μέτρησε την πτήση','Το τελευταίο καύσιμο','Η μεγάλη διαδρομή'],
+ 'flight-repair':['Το ξεχασμένο κουμπί','Η δεύτερη δοκιμή','Επισκευή στον αέρα','Δύο περάσματα','Το σχέδιο του μηχανικού'],
+ 'flight-alternatives':['Πάνω ή κάτω','Δύο γέφυρες','Άλλος δρόμος','Διάλεξε διαδρομή','Εξήγησε το σχέδιό σου']
+};
+const authoredChallenges=flightCatalog.flatMap(meta=>authoredNames[meta.family].map((title,i)=>{
+ const task=construct(meta.family,100+i,[1,1,2,3,4][i],i);
+ task.id=`${meta.family}:curated-${i+1}`;task.item_id='flight:'+task.id;task.title=title;task.curated=true;task.curated_index=i+1;
+ const report=validateExpedition(task);if(!report.valid)throw new Error('Curated expedition rejected: '+task.id+' '+report.errors.join(','));return task;
+}));
+if(new Set(authoredChallenges.map(structuralSignature)).size!==authoredChallenges.length)throw new Error('Duplicate curated expedition structure');
+
+return {flightCatalog,authoredChallenges,generateExpedition,validateExpedition,structuralSignature};})();
+const BipFlightPlanning=(()=>{const {createFlightState,flightStep,replayFlight,solveFlight,validateFlight}=BipFlight;
+
+/** A route is a loop-erased spatial path. Stationary form changes, failed
+ * commands and retracing a previously visited cell do not create variety. */
+function routeSignature(task,commands){
+ let state=createFlightState(task);const cells=[`${state.robot.x},${state.robot.y}`];
+ for(const command of commands){
+  const next=flightStep(task,state,command),cell=`${next.robot.x},${next.robot.y}`;
+  if(cell!==cells.at(-1)){const seen=cells.indexOf(cell);if(seen>=0)cells.splice(seen+1);else cells.push(cell);}
+  state=next;
+ }
+ return cells.join(';');
+}
+
+return {routeSignature};})();
+const BipFlightCheckpoint=(()=>{/** Validate a complete mission snapshot, independently of its bounded UI trail.
+ * No storage access, mutation, repair, or reset is performed here. The caller
+ * validates the authored task separately and retains rejected save bytes. */
+function validFlightCheckpoint(task,state){
+ try{
+  const object=value=>value&&typeof value==='object'&&!Array.isArray(value);
+  const same=(a,b)=>a.x===b.x&&a.y===b.y;
+  const count=value=>Number.isSafeInteger(value)&&value>=0;
+  if(!object(task)||!object(state)||state.version!==1||typeof task.id!=='string'||state.taskId!==task.id)return false;
+  if(!Array.isArray(task.grid)||!task.grid.length||!task.grid.every(row=>typeof row==='string'&&row.length===task.grid[0].length))return false;
+  const point=p=>object(p)&&Number.isInteger(p.x)&&Number.isInteger(p.y)&&p.y>=0&&p.y<task.grid.length&&p.x>=0&&p.x<task.grid[p.y].length;
+  const floor=p=>point(p)&&task.grid[p.y][p.x]!=='#'&&task.grid[p.y][p.x]!=='~';
+  for(const key of ['boxes','cargo','switches'])if(!Array.isArray(state[key]))return false;
+  for(const key of ['boxes','boxGoals','cargo','switches','gates','requiredSwitches'])if(task[key]!=null&&!Array.isArray(task[key]))return false;
+  if(!point(state.robot)||!['robot','jet'].includes(state.robot.form))return false;
+  if(task.grid[state.robot.y][state.robot.x]==='#'||state.robot.form==='robot'&&!floor(state.robot))return false;
+  if(!['actions','fuelUsed','transforms'].every(key=>count(state[key])))return false;
+  if(state.transforms>state.actions||state.fuelUsed>state.actions-state.transforms)return false;
+  if(state.actions>(task.limits?.actions??Infinity)||state.fuelUsed>(task.limits?.fuel??Infinity))return false;
+  const initialForm=task.start.form||'robot';
+  const expectedForm=state.transforms%2===0?initialForm:initialForm==='robot'?'jet':'robot';
+  if(state.robot.form!==expectedForm)return false;
+  const controls=new Map((task.switches||[]).map(control=>[control.id,control]));
+  if(new Set(state.switches).size!==state.switches.length||state.switches.some(id=>typeof id!=='string'||!controls.has(id))||state.switches.length>state.actions)return false;
+  if(state.switches.some(id=>(controls.get(id).requires||[]).some(required=>!state.switches.includes(required))))return false;
+  const locked=p=>(task.gates||[]).some(gate=>same(gate,p)&&(gate.requires||[]).some(id=>!state.switches.includes(id)));
+  if(locked(state.robot))return false;
+  const matchingIds=(saved,authored)=>saved.length===authored.length&&new Set(saved.map(item=>item.id)).size===saved.length&&saved.every(item=>object(item)&&typeof item.id==='string'&&authored.some(original=>original.id===item.id));
+  if(!matchingIds(state.boxes,task.boxes||[])||!matchingIds(state.cargo,task.cargo||[]))return false;
+  const boxPositions=new Set();
+  for(const box of state.boxes){
+   if(!floor(box)||locked(box)||same(box,state.robot))return false;
+   const key=box.x+','+box.y;if(boxPositions.has(key))return false;boxPositions.add(key);
+  }
+  if(state.carrying!==null&&(typeof state.carrying!=='string'||!state.cargo.some(cargo=>cargo.id===state.carrying)))return false;
+  const placed=id=>(task.boxGoals||[]).some(goal=>goal.id===id&&state.boxes.some(box=>box.id===id&&same(box,goal)));
+  for(const cargo of state.cargo){
+   const original=(task.cargo||[]).find(item=>item.id===cargo.id);
+   if(!floor(cargo)||typeof cargo.delivered!=='boolean'||!point(cargo.goal)||!same(cargo.goal,original.goal)||cargo.goal.form!==original.goal.form)return false;
+   if(JSON.stringify(cargo.requiresBoxes||[])!==JSON.stringify(original.requiresBoxes||[]))return false;
+   if(cargo.delivered){if(state.carrying===cargo.id||!same(cargo,cargo.goal))return false;}
+   else if(state.carrying===cargo.id){if(state.robot.form!=='robot'||!same(cargo,state.robot)||(cargo.requiresBoxes||[]).some(id=>!placed(id)))return false;}
+   else if(!same(cargo,original))return false;
+  }
+  const victory=point(task.goal)&&same(state.robot,task.goal)&&state.robot.form===(task.goal.form||'robot')&&(task.requiredSwitches||[]).every(id=>state.switches.includes(id))&&state.cargo.every(cargo=>cargo.delivered)&&(task.boxGoals||[]).every(goal=>placed(goal.id))&&state.transforms>=(task.minTransforms||0);
+  if(typeof state.won!=='boolean'||state.won!==victory)return false;
+  if(!['ready','ok','blocked','won'].includes(state.status)||state.status==='ready'&&state.actions!==0||state.status==='won'&&!state.won||state.won&&state.status!=='won'&&state.status!=='ready')return false;
+  if(state.status==='ready'){if(state.event!==null)return false;}
+  else{
+   if(!object(state.event))return false;
+   if(state.status==='blocked'){if(state.event.type!=='blocked'||typeof state.event.reason!=='string')return false;}
+   else if(!['move','push','transform','switch','pickup','deliver'].includes(state.event.type)||!['U','D','L','R','T','A'].includes(state.event.command))return false;
+  }
+  return true;
+ }catch{return false;}
+}
+
+function validFlightSession(task,saved){
+ try{
+  const commands=new Set(['U','D','L','R','T','A']);
+  const coordinate=v=>typeof v==='string'&&/^\d+,\d+$/.test(v)&&(()=>{const [x,y]=v.split(',').map(Number);return y<task.grid.length&&x<task.grid[y].length&&task.grid[y][x]!=='#';})();
+  const path=values=>Array.isArray(values)&&values.length>0&&values.length<=task.grid.length*task.grid[0].length&&values.every(coordinate);
+  return !!saved&&validFlightCheckpoint(task,saved.state)&&path(saved.routeCells)&&Array.isArray(saved.routes)&&saved.routes.length<=2&&saved.routes.every(v=>typeof v==='string'&&path(v.split(';')))&&Array.isArray(saved.trail)&&saved.trail.length<=240&&saved.trail.every(v=>commands.has(v))&&Array.isArray(saved.program)&&saved.program.length<=80&&saved.program.every(v=>commands.has(v))&&Number.isInteger(saved.next)&&saved.next>=0&&saved.next<=saved.program.length&&['live','plan'].includes(saved.mode)&&Number.isInteger(saved.hint)&&saved.hint>=0&&saved.hint<=5&&typeof saved.completed==='boolean'&&(!saved.completed||saved.state.won);
+ }catch{return false;}
+}
+
+return {validFlightCheckpoint,validFlightSession};})();
+
 const AgisEngine=(()=>{// Pure, domain-neutral heuristics; evidence describes tasks, never a child trait.
 const DAY = 86400000;
 const num = (v, fallback = 0) => Number.isFinite(v) && v >= 0 ? v : fallback;
@@ -1908,17 +2388,18 @@ const fresh=()=>({v:SAVE_V,epoch:0,t:0,stars:{},skill:{studs:0,tower:0,pattern:0
 function shape(s){const f=fresh();if(!s||typeof s!=='object')return f;
   const o=Object.assign(f,s,{stars:Object.assign({},s.stars),seen:Object.assign({},s.seen),skill:Object.assign(f.skill,s.skill),robot:Object.assign(f.robot,s.robot),bots:Object.assign({},s.bots),tut:Object.assign({},s.tut),tutAt:Object.assign({},s.tutAt),got:Object.assign({},s.got)});
   o.v=s.v||1;return migrateSave(o);}
-function loadLocal(){try{return shape(JSON.parse(localStorage.getItem(KEY)||'null'));}catch(e){return fresh();}}
-let bipStorage;try{bipStorage=localStorage;}catch{bipStorage={getItem(){throw Error('unavailable')},setItem(){throw Error('unavailable')}};}
+function loadLocal(){try{return shape(JSON.parse(profileStorage.getItem(KEY)||'null'));}catch(e){return fresh();}}
+const shapedCore=shape;shape=raw=>BipProfiles.preserveUnknown(raw,shapedCore(raw));
+let bipStorage;try{bipStorage=profileStorage;}catch{bipStorage={getItem(){throw Error('unavailable')},setItem(){throw Error('unavailable')}};}
 const MIG=BipMigration.migrateStorage(bipStorage,shape,shapeLog,AgisEngine.createState,AgisEngine.sanitizeState,BipTasks.SKILLS);
 let ST=MIG.core;
-function persistLocal(){try{localStorage.setItem(KEY,JSON.stringify(ST));}catch(e){MIG.warnings=['Οι αλλαγές δεν αποθηκεύτηκαν. Κρατήστε εξαγωγή JSON πριν κλείσετε.'];}}
+function persistLocal(){try{profileStorage.setItem(KEY,JSON.stringify(ST));}catch(e){MIG.warnings=['Οι αλλαγές δεν αποθηκεύτηκαν. Κρατήστε εξαγωγή JSON πριν κλείσετε.'];}}
 function save(){ST.t=Date.now();persistLocal();cloudPush();}
 
 const LKEY='bip-log-v12';
 let LOG=MIG.log;
 let logDirty=false,lastInput=Date.now(),lastTick=Date.now();
-function flushLog(){if(!logDirty)return;logDirty=false;try{localStorage.setItem(LKEY,JSON.stringify(LOG));}catch(e){}}
+function flushLog(){if(!logDirty)return;logDirty=false;try{profileStorage.setItem(LKEY,JSON.stringify(LOG));}catch(e){}}
 const logE=(type,id,x)=>{logEvent(LOG,Date.now(),type,id,x);logDirty=true;adaptiveLegacyEvent(type,id,x);};
 let cloudRef=null,cloudBusy=false,cloudDirty=false,cloudTimer=0;
 function mergeSave(r){
@@ -3178,7 +3659,7 @@ let AS=AgisEngine.continueSession(AD.sessions,Date.now(),'bip-'+Date.now().toStr
 let pendingLegacyHelp=null;
 let TR=null,mission=null,missionReturn=null,lastPacing='',lastAdaptiveOffer=0,replayIntent=null;
 let activeLast=Date.now(),activeWasHidden=document.hidden,pendingRestore=null,resumeEpisode=null;
-const safeAdaptive=()=>{try{if(!MIG.adaptiveWritable)return;const at=AD.sessions.findIndex(s=>s.session_id===AS.session_id);if(at<0)AD.sessions.push(AS);else AD.sessions[at]=AS;AD.sessions=AD.sessions.slice(-60);localStorage.setItem(BipMigration.KEYS.adaptive,JSON.stringify(AD));}catch{MIG.warnings=['Οι αλλαγές δεν αποθηκεύτηκαν. Κρατήστε εξαγωγή JSON πριν κλείσετε.'];}};
+const safeAdaptive=()=>{try{if(!MIG.adaptiveWritable)return;const at=AD.sessions.findIndex(s=>s.session_id===AS.session_id);if(at<0)AD.sessions.push(AS);else AD.sessions[at]=AS;AD.sessions=AD.sessions.slice(-60);profileStorage.setItem(BipMigration.KEYS.adaptive,JSON.stringify(AD));}catch{MIG.warnings=['Οι αλλαγές δεν αποθηκεύτηκαν. Κρατήστε εξαγωγή JSON πριν κλείσετε.'];}};
 function metaLevel(id,d){return BipMetadata.metaLevel(id,d||LEVELS.find(l=>l.id===id)?.def||{t:id?.split(':')[1]||'code'});}
 function tickActive(now=Date.now(),hidden=document.hidden){
  const dt=AgisEngine.activeDelta(activeLast,now,lastInput,hidden||activeWasHidden);activeLast=now;if(!dt)return;
@@ -3344,7 +3825,7 @@ const originalParents=parents;parents=function(){tickActive();safeAdaptive();ori
  $('#bip-restore-file').addEventListener('change',async event=>{try{const file=event.target.files[0];if(!file)return;pendingRestore=await file.text();const p=BipBackup.parseBackup(pendingRestore,shape,shapeLog,AgisEngine.sanitizeState,BipTasks.SKILLS);$('#expbox').innerHTML=`<p>Αντίγραφο με ${Object.keys(p.progress.stars).length} εργασίες. Η επαναφορά αντικαθιστά την τωρινή πρόοδο και πρώτα κρατά αντίγραφο.</p><button class="btn" data-act="ad-restore">Επαναφορά αυτού του αντιγράφου</button>`;}catch(e){pendingRestore=null;$('#expbox').textContent=e.message;}});
 };
 exportData=function(kind){tickActive();safeAdaptive();if(kind==='legacy-csv')return logCSV(LOG);if(kind==='csv')return AgisEngine.eventsCSV([...AD.events,...AD.raw_events]);
- const storage={};for(const k of ['bip-save-v1','bip-log-v1','bip-save-v12','bip-log-v12','agis-adaptive-v1','bip-v11-backup-save','bip-v11-backup-log','agis-adaptive-v1-backup-schema1','agis-adaptive-v1-backup-corrupt'])try{storage[k]=localStorage.getItem(k);}catch{}
+ const storage={};for(const k of ['bip-save-v1','bip-log-v1','bip-save-v12','bip-log-v12','agis-adaptive-v1','bip-v11-backup-save','bip-v11-backup-log','agis-adaptive-v1-backup-schema1','agis-adaptive-v1-backup-corrupt'])try{storage[k]=profileStorage.getItem(k);}catch{}
  return JSON.stringify(BipBackup.backupPayload(ST,LOG,AD,Date.now(),storage,LAB),null,1);
 };
 ACT.exp=async d=>{const file=BipBackup.exportFile(d.f,exportData(d.f),dayKey(Date.now()));const box=$('#expbox');if(box){box.innerHTML=`<p class="fine">${esc(file.name)} · Αν χρειαστεί, αντιγράψτε το κείμενο:</p><textarea readonly rows="6"></textarea><p role="status" id="export-status"></p>`;$('textarea',box).value=file.data;}const result=await BipBackup.saveFile(file);if($('#export-status'))$('#export-status').textContent=result==='shared'?'Το αρχείο κοινοποιήθηκε.':result==='downloaded'?'Το αρχείο στάλθηκε στις λήψεις.':result==='cancelled'?'Η κοινοποίηση ακυρώθηκε. Το κείμενο παραμένει διαθέσιμο.':'Αντιγράψτε το κείμενο για αποθήκευση.';};
@@ -3358,6 +3839,218 @@ window.addEventListener('pageshow',event=>{if(event.persisted&&resumeEpisode){be
 safeAdaptive();
 // Read-only debug surface for reproducible QA; no progress mutation or unlock API.
 window.__bipQA={state:()=>JSON.parse(JSON.stringify({core:ST,log:LOG,adaptive:AD,lab:LAB,endless_unlocked:endlessUnlocked(),session:AS,trial:TR,mission,screen:S.screen})),engine:AgisEngine,tasks:BipTasks,exportData};
+
+/* Main-game transformations. Existing story/adaptive engines remain the owners
+ * of skill evidence and rewards; only expedition state lives in this sidecar. */
+const FLIGHT_KEY='bip-flight-v1';
+const flightLabels={U:'↑ Πάνω',D:'↓ Κάτω',L:'← Αριστερά',R:'→ Δεξιά',T:'ROBOT ↔ JET',A:'Χειρισμός'};
+const flightReason={wall:'Ο τοίχος είναι ψηλός. Βρες άλλον δρόμο.',edge:'Εδώ τελειώνει ο χάρτης.',gap:'Γκρεμός! Το τζετ πετάει από πάνω.',cargo:'Κρατάς φορτίο. Παράδωσέ το πριν πετάξεις.',carrying:'Κρατάς φορτίο. Παράδωσέ το πριν πετάξεις.',landing:'Για να προσγειωθείς χρειάζεσαι στερεό έδαφος.',ground:'Οι διακόπτες και το φορτίο θέλουν χέρια ρομπότ.',gate:'Η πύλη χρειάζεται τους διακόπτες της.',fuel:'Κράτα καύσιμο για την πτήση.',budget:'Δοκίμασε ένα σχέδιο με λιγότερες κινήσεις.','ground-only':'Οι διακόπτες και το φορτίο χρειάζονται χέρια ρομπότ.',dependency:'Πάτησε πρώτα τον διακόπτη που χρειάζεται αυτός.',actions:'Οι κινήσεις τελείωσαν. Δοκίμασε μικρότερο σχέδιο.',box:'Το κιβώτιο χρειάζεται χέρια και ελεύθερο χώρο.',delivery:'Το δέμα παραδίδεται στην πράσινη σημαία.',nothing:'Δεν υπάρχει χειρισμός εδώ. Δοκίμασε σε διακόπτη ή δέμα.','crate-first':'Βάλε πρώτα το κιβώτιο στη θέση του.',blocked:'Δεν χωράω εδώ. Δοκίμασε άλλο σχέδιο.'};
+let flight=null,flightGeneration=0;
+function freshFlightJournal(){return {schema_version:1,content_version:'1.3',completed:{},recent_signatures:[],generated_count:0,current:null};}
+function loadFlightJournal(){
+ let raw;try{raw=profileStorage.getItem(FLIGHT_KEY);if(!raw)return freshFlightJournal();const value=JSON.parse(raw);if(value?.schema_version!==1||!value.completed||!Array.isArray(value.recent_signatures))throw Error('unknown expedition save');return {...value,completed:{...value.completed},recent_signatures:value.recent_signatures.filter(x=>typeof x==='string').slice(-120),generated_count:Math.max(0,Number(value.generated_count)||0)};}
+ catch{try{if(raw&&profileStorage.getItem(FLIGHT_KEY+'-unreadable')===null)profileStorage.setItem(FLIGHT_KEY+'-unreadable',raw);}catch{}MIG.warnings.push('Το αντίγραφο αποστολής διατηρήθηκε. Η παλιά πρόοδος παραμένει ασφαλής.');return freshFlightJournal();}
+}
+let flightJournal=loadFlightJournal();
+function persistFlight(){
+ if(flight)flightJournal.current={task:flight.task,state:flight.state,routeCells:flight.routeCells,trail:flight.trail.slice(-240),program:flight.program.slice(0,80),next:flight.next,mode:flight.mode,hint:flight.hint,trial:!flight.completed&&TR?{hint:Math.max(flight.hint,TR.hint||0),resets:TR.resets||0,attempts:TR.attempts||0,prior_attempts:TR.prior_attempts||0}:null,completed:flight.completed,routes:flight.routes,manualActions:flight.manualActions,routeModes:flight.routeModes};
+ try{profileStorage.setItem(FLIGHT_KEY,JSON.stringify(flightJournal));return true;}catch{MIG.warnings=['Η αποστολή δεν αποθηκεύτηκε. Κρατήστε εξαγωγή JSON πριν κλείσετε.'];return false;}
+}
+const flightEntries=BipExpeditions.flightCatalog.map(meta=>({...meta,item_id:'a:'+meta.family,kind:'flight',content_version:'1.3',representation:'spatial',nominal_difficulty:meta.nominal_difficulty||1}));
+BipTasks.catalog.push(...flightEntries);
+const priorStartMission=startMission;startMission=function(c){if(c.kind==='flight'||c.family?.startsWith('flight-'))return startFlight(c);return priorStartMission(c);};
+const previousTimeCategory=BipMetadata.timeCategory;BipMetadata.timeCategory=(screen,meta,flags)=>screen==='flight'?(meta.cognitive_demand==='debug'?'logic_debugging':'adaptive_missions'):previousTimeCategory(screen,meta,flags);
+/* Mastery evidence: only a program the child built and ran without first
+ * driving the route counts as independent construction. Driving (stepwise
+ * feedback after every move) is real success but weaker evidence, so it is
+ * stored with explicit fields and enters the engine as feedback-supported. */
+const flightExecutionModes=['program','program_after_manual','manual'];
+function flightRouteMode(f){return f.mode!=='plan'?'manual':f.manualActions>0?'program_after_manual':'program';}
+function flightExecutionMode(f){const modes=f.task.family==='flight-alternatives'&&f.routeModes?.length?f.routeModes:[flightRouteMode(f)];return modes.includes('manual')?'manual':modes.includes('program_after_manual')?'program_after_manual':'program';}
+function flightEvidence(execution,f){const base={execution_mode:execution,manual_actions:f.manualActions||0};if(execution==='program')return {...base,support_type:'none'};return {...base,support_type:'stepwise_feedback',first_attempt:false,solved_independently:false,mastery_evidence_type:execution==='manual'?'manual_navigation':'program_after_exploration'};}
+function startFlight(c,task=null,saved=null){
+ finishEpisode();flightGeneration++;S.runId++;S.running=false;S.lesson=null;S.studio=false;S.D=null;S.lvl=null;S.at=null;mission=null;S.screen='flight';closeOv();
+ if(!task){
+  const band=c.nominal_difficulty||AD.skills[c.primary_skill]?.band||1,seed=(Date.now()^Math.imul(++flightJournal.generated_count,2654435761))>>>0;
+  for(let i=0;i<256;i++){const candidate=BipExpeditions.generateExpedition(c.family,(seed+i)>>>0,band),signature=BipExpeditions.structuralSignature(candidate);if(BipExpeditions.validateExpedition(candidate).valid&&!flightJournal.recent_signatures.slice(-12).includes(signature)){task=candidate;flightJournal.recent_signatures=[...flightJournal.recent_signatures,signature].slice(-120);break;}}
+ }
+ if(!task||!BipExpeditions.validateExpedition(task).valid){return priorStartMission({...BipTasks.catalog.find(x=>x.family==='shortest'),challenge_origin:'varied_continuation'});}
+ if(saved?.state&&!BipFlightCheckpoint.validFlightSession(task,saved))throw Error('Μη έγκυρη θέση αποστολής.');
+ const state=saved?.state?JSON.parse(JSON.stringify(saved.state)):saved?BipFlight.replayFlight(task,saved.trail||[]):BipFlight.createFlightState(task);
+ flight={task,state,routeCells:saved?.routeCells?.slice()||(saved?BipFlightPlanning.routeSignature(task,saved.trail||[]).split(';'):[`${task.start.x},${task.start.y}`]),trail:saved?.trail?.slice()||[],program:saved?.program?.slice()||task.initialProgram?.slice()||[],next:saved?.next||0,mode:saved?.mode||(task.initialProgram?'plan':'live'),hint:saved?.hint||0,completed:!!saved?.completed,running:!!(saved&&saved.mode==='plan'&&saved.next>0&&saved.next<saved.program?.length&&state.status!=='blocked'&&!saved.completed),paused:!!(saved&&saved.mode==='plan'&&saved.next>0&&saved.next<saved.program?.length&&state.status!=='blocked'&&!saved.completed),executing:false,status:saved?'Το σχέδιό σου συνεχίζεται από εδώ.':task.lesson||'Ρομπότ για χέρια και έδαφος. Τζετ για πτήση!',routes:saved?.routes||[],preview:false,selected:null,manualActions:Number.isSafeInteger(saved?.manualActions)&&saved.manualActions>=0?saved.manualActions:saved?.mode==='live'?(saved.trail?.length||0):0,routeModes:Array.isArray(saved?.routeModes)?saved.routeModes.filter(m=>flightExecutionModes.includes(m)).slice(0,2):[],cue:!Object.keys(flightJournal.completed).length&&!state.transforms};
+ beginTrial(BipProfiles.flightEpisodeMeta(c,task,!!saved),saved?.trial);
+ persistFlight();renderFlight();speak(task.prompt);
+}
+function curatedFlight(task){const entry=flightEntries.find(x=>x.family===task.family);startFlight({...entry,challenge_origin:flightJournal.completed[task.id]?'child_requested_repeat':'new_challenge'},task);}
+function startFlightTour(){const ordered=[0,1,2,3,4].flatMap(i=>BipExpeditions.flightCatalog.map(c=>BipExpeditions.authoredChallenges.filter(t=>t.family===c.family)[i]));const task=ordered.find(t=>!flightJournal.completed[t.id]);if(task)return curatedFlight(task);startRecommended();}
+function resumeFlight(){const current=flightJournal.current;if(!current)return startFlightTour();try{if(!Array.isArray(current.trail)||current.trail.length>240||current.trail.some(x=>!Object.hasOwn(flightLabels,x)))throw Error('bad checkpoint');startFlight(flightEntries.find(x=>x.family===current.task.family)||current.task,current.task,current);}catch{MIG.warnings.push('Το σχέδιο παραμένει στην εξαγωγή. Διάλεξε μια νέα αποστολή.');go('map');}}
+function flightSprite(form){return form==='jet'?jetSVG(ST.robot):robotSVG(ST.robot);}
+/* v1.3 UX pass: "handheld" composition, chosen over a docked-console
+ * alternative after side-by-side screenshots (qa/ux/UX_COMPARISON.md): the
+ * board is the screen, D-pad under the left thumb, transformation under the
+ * right. Board sprites are expedition-specific; frozen story art is untouched. */
+const FLIGHT_SPRITES={
+ parcel:`<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M7 14l13-6 13 6v14l-13 6-13-6z" fill="#46b8ff" stroke="#0e0c22" stroke-width="2.4" stroke-linejoin="round"/><path d="M7 14l13 6 13-6M20 20v14" fill="none" stroke="#0e0c22" stroke-width="2"/><path d="M13.5 11l13 6v6" fill="none" stroke="#ffdb54" stroke-width="3.2" stroke-linecap="round"/></svg>`,
+ delivery:`<svg viewBox="0 0 40 40" aria-hidden="true"><ellipse cx="20" cy="32" rx="15" ry="5" fill="#2fbf7a" stroke="#0e0c22" stroke-width="2"/><path d="M14 32V7" stroke="#0e0c22" stroke-width="3" stroke-linecap="round"/><path d="M15 8h16l-4.5 5.5L31 19H15z" fill="#7dffbc" stroke="#0e0c22" stroke-width="2" stroke-linejoin="round"/></svg>`,
+ gate:open=>`<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="4" y="5" width="32" height="30" rx="4" fill="${open?'#1f5a45':'#5b1734'}" stroke="#0e0c22" stroke-width="2.4"/>${[11,20,29].map(x=>`<path d="M${x} 8v24" stroke="${open?'#7dffbc':'#ff6399'}" stroke-width="4" stroke-linecap="round" ${open?'stroke-dasharray="3 7"':''}/>`).join('')}</svg>`,
+ gap:`<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 15c5-4 10 4 15 0s10 4 15 0M5 26c5-4 10 4 15 0s10 4 15 0" fill="none" stroke="#8fd3ff" stroke-width="2.4" stroke-linecap="round" opacity=".75"/></svg>`
+};
+function flightCrop(t){const w=t.grid[0].length,h=t.grid.length;const ring=t.grid[0].split('').every(c=>c==='#')&&t.grid[h-1].split('').every(c=>c==='#')&&t.grid.every(r=>r[0]==='#'&&r[w-1]==='#');return ring&&w>2&&h>2?{ox:1,oy:1,w:w-2,h:h-2}:{ox:0,oy:0,w,h};}
+// Cell size is chosen from the space the rest of the layout actually needs.
+function flightCellSize(c){
+ const vw=innerWidth,vh=innerHeight,planned=flight.mode==='plan',portrait=vh>=vw*1.05;
+ let w,h;
+ if(portrait){w=Math.min(vw,1180)-24;h=vh-(planned?560:420);}
+ else{w=Math.min(vw,1240)-420;h=vh-(planned?470:370);}
+ return Math.max(30,Math.floor(Math.min(w/c.w,Math.max(h,c.h*34)/c.h,118)));
+}
+function flightLegendHTML(t){
+ const items=[];const has=k=>Array.isArray(t[k])&&t[k].length;
+ const c=flightCrop(t);if(t.grid.slice(c.oy,c.oy+c.h).some(r=>r.slice(c.ox,c.ox+c.w).includes('#')))items.push(['<span class="fx-swatch wall"></span>','Τοίχος']);
+ if(t.grid.some(r=>r.includes('~')))items.push(['<span class="fx-swatch gap">'+FLIGHT_SPRITES.gap+'</span>','Γκρεμός · μόνο JET']);
+ if(has('switches'))items.push(['<span class="fx-swatch"><span class="fx-switch">⚡</span></span>','Διακόπτης · ROBOT']);
+ if(has('gates'))items.push(['<span class="fx-swatch">'+FLIGHT_SPRITES.gate(false)+'</span>','Πύλη']);
+ if(has('boxes'))items.push(['<span class="fx-swatch">'+CRATE+'</span>','Κιβώτιο · σπρώξε']);
+ if(has('boxGoals'))items.push(['<span class="fx-swatch box-target"></span>','Θέση κιβωτίου']);
+ if(has('cargo'))items.push(['<span class="fx-swatch">'+FLIGHT_SPRITES.parcel+'</span>','Δέμα · ✋ πάρε']);
+ if(has('cargo'))items.push(['<span class="fx-swatch">'+FLIGHT_SPRITES.delivery+'</span>','Παράδοση']);
+ items.push(['<span class="fx-swatch">'+gearSVG()+'</span>','Βάση']);
+ return `<div class="flight-legend" aria-label="Τι υπάρχει στον χάρτη">${items.map(([i,l])=>`<span>${i}${l}</span>`).join('')}</div>`;
+}
+function flightGridHTML(){
+ const f=flight,t=f.task,s=f.state,c=flightCrop(t),size=flightCellSize(c);
+ let ghost=[];if(f.preview){let state=BipFlight.createFlightState(t);ghost=[state.robot];for(const command of f.program){state=BipFlight.flightStep(t,state,command);ghost.push({...state.robot,blocked:state.status==='blocked'});if(state.won)break;}}
+ const cells=[];
+ for(let y=c.oy;y<c.oy+c.h;y++)for(let x=c.ox;x<c.ox+c.w;x++){
+  const cell=t.grid[y][x];
+  const box=s.boxes.find(b=>b.x===x&&b.y===y),cargo=s.cargo.find(q=>!q.delivered&&q.x===x&&q.y===y&&s.carrying!==q.id),delivered=s.cargo.find(q=>q.delivered&&q.x===x&&q.y===y),sw=t.switches?.find(q=>q.x===x&&q.y===y),gate=t.gates?.find(q=>q.x===x&&q.y===y),goal=t.goal.x===x&&t.goal.y===y,boxGoal=t.boxGoals?.some(q=>q.x===x&&q.y===y),delivery=t.cargo?.some(q=>q.goal.x===x&&q.goal.y===y);
+  const on=sw&&s.switches.includes(sw.id),open=gate&&gate.requires.every(id=>s.switches.includes(id));
+  const marker=cell==='#'?'':box?CRATE:cargo?FLIGHT_SPRITES.parcel:sw?`<span class="fx-switch ${on?'on':''}">${on?'✓':'⚡'}<small>${esc(sw.id.toUpperCase())}</small></span>`:gate?FLIGHT_SPRITES.gate(open):goal?`<span class="fx-goal">${gearSVG()}</span>`:delivery?(delivered?`<span class="fx-delivered">${FLIGHT_SPRITES.delivery}${FLIGHT_SPRITES.parcel}</span>`:FLIGHT_SPRITES.delivery):cell==='~'?FLIGHT_SPRITES.gap:'';
+  cells.push(`<div class="flight-cell ${cell==='#'?'wall':cell==='~'?'gap':'fl-floor'} ${(x+y)%2?'fl-alt':''} ${delivery?'delivery':''} ${boxGoal?'box-target':''} ${goal?'fl-goal':''}">${marker}</div>`);
+ }
+ const rx=s.robot.x-c.ox,ry=s.robot.y-c.oy;
+ return `<div class="flight-board ${f.mode==='plan'?'is-plan':'is-live'}" style="--cols:${c.w};--rows:${c.h};--cell:${size}px;width:${size*c.w}px" role="img" aria-label="Χάρτης αποστολής: Μπιπ ${s.robot.form==='jet'?'τζετ':'ρομπότ'}"><div class="flight-cells">${cells.join('')}</div>${ghost.length?`<svg class="flight-trajectory" viewBox="0 0 ${c.w} ${c.h}" preserveAspectRatio="none" aria-label="Διαδρομή του δικού σου προγράμματος"><polyline points="${ghost.map(p=>`${p.x-c.ox+.5},${p.y-c.oy+.5}`).join(' ')}"/>${ghost.map((p,i)=>`<text x="${p.x-c.ox+.5}" y="${p.y-c.oy+.62}" class="${p.blocked?'blocked':''}">${i}</text>`).join('')}</svg>`:''}<div class="flight-robot ${s.robot.form} ${f.animate?'flight-morph':''}" style="left:${100*rx/c.w}%;top:${100*ry/c.h}%;width:${100/c.w}%;height:${100/c.h}%">${flightSprite(s.robot.form)}${s.carrying?`<span class="flight-carried">${FLIGHT_SPRITES.parcel}</span>`:''}</div></div>`;
+}
+function flightObjectivesHTML(){const f=flight,t=f.task,s=f.state,chips=[`<span class="fx-form is-${s.robot.form}">${s.robot.form==='jet'?'✈ Τώρα: JET':'▣ Τώρα: ROBOT'}</span>`];
+ if(t.requiredSwitches?.length)chips.push(`<span title="Διακόπτες">⚡ ${s.switches.length}/${t.requiredSwitches.length}</span>`);
+ if(s.cargo.length)chips.push(`<span title="Δέματα"><i class="fx-mini">${FLIGHT_SPRITES.parcel}</i> ${s.cargo.filter(c=>c.delivered).length}/${s.cargo.length}</span>`);
+ chips.push(`<span title="Κινήσεις">👣 ${s.actions}${t.limits?.actions?' / '+t.limits.actions:''}</span>`);
+ if(t.limits?.fuel!=null)chips.push(`<span title="Καύσιμο" class="${t.limits.fuel-s.fuelUsed<=1?'low':''}">🔋 ${Math.max(0,t.limits.fuel-s.fuelUsed)}</span>`);
+ return `<div class="flight-objectives">${chips.join('')}</div>`;
+}
+// The transformation is an action button showing the form you will BECOME.
+function flightMorphButtonHTML(disabled){const jet=flight.state.robot.form==='jet';
+ return `<button class="btn flight-transform morph-pad ${jet?'is-jet':'is-robot'} ${flight.cue?'cue':''}" data-act="flight-transform" ${disabled?'disabled':''} aria-label="ROBOT ↔ JET · γίνε ${jet?'ROBOT':'JET'}"><i>${jet?robotSVG(ST.robot):jetSVG(ST.robot)}</i><b>Γίνε ${jet?'ROBOT':'JET'}</b><span class="mp-swap">${I.morph}</span></button>`;}
+function flightModeHTML(){const f=flight,t=f.task,planned=f.mode==='plan';
+ return `<div class="flight-mode" role="tablist" aria-label="Πώς παίζω"><button class="btn mode-live ${!planned?'on':''}" role="tab" aria-selected="${!planned}" data-act="flight-live" ${f.running||t.initialProgram?'disabled':''}><span class="mode-ic">🕹️</span><span><b>Οδηγώ</b><small>κάθε κουμπί, μία κίνηση τώρα</small></span></button><button class="btn mode-plan ${planned?'on':''}" role="tab" aria-selected="${planned}" data-act="flight-plan" ${f.running?'disabled':''}><span class="mode-ic">🧩</span><span><b>Φτιάχνω πρόγραμμα</b><small>εντολές στη σειρά, μετά ΠΑΜΕ</small></span></button></div>`;}
+function flightPadHTML(locked){const f=flight,plan=f.mode==='plan';
+ return `<div class="flight-dpad ${plan?'adds':''}">${['U','L','D','R'].map(c=>`<button class="btn bl direction-${c}" data-act="flight-command" data-c="${c}" ${locked||f.completed?'disabled':''} aria-label="${flightLabels[c]}">${I.arrow(c)}<small>${DN[c]}</small></button>`).join('')}</div>`;}
+function flightHandHTML(locked){const f=flight,jet=f.state.robot.form==='jet';
+ return `<button class="btn flight-interact ${jet?'dim':''}" data-act="flight-command" data-c="A" ${locked||f.completed?'disabled':''} aria-label="Χέρια: πάρε, δώσε, διακόπτης"><span class="hand-ic">✋</span><span><b>Χέρια</b><small>πάρε · δώσε · πάτα</small></span></button>`;}
+function flightProgramHTML(){const f=flight,t=f.task;
+ return `<div class="flight-tape"><div class="flight-program" aria-label="Το πρόγραμμά σου">${f.program.map((c,i)=>`<button class="flight-block cmd-${c} ${i===f.next&&f.running?'hot':''} ${f.selected===i?'selected':''}" data-act="flight-select" data-i="${i}" ${f.running?'disabled':''} aria-label="${i+1}. ${flightLabels[c]}">${['U','D','L','R'].includes(c)?I.arrow(c):c==='T'?I.morph:'✋'}<small>${i+1}</small></button>`).join('')||'<span class="tape-empty">Πάτα βελάκια: μπαίνουν εδώ στη σειρά.</span>'}</div>${t.initialProgram?'<p class="fine">Ο Μπιπ μπέρδεψε μία εντολή. Δείξε τη θέση της και αντικατάστησέ την!</p>':''}<div class="flight-run"><button class="btn" data-act="flight-undo" aria-label="Σβήσε την τελευταία" ${f.running?'disabled':''}>${I.undo}</button><button class="btn" data-act="flight-preview" ${f.running?'disabled':''}>👣 Ίχνος</button><button class="btn" data-act="flight-step" ${f.running&&!f.paused?'disabled':''}>▶│ Βήμα</button><button class="btn go" data-act="flight-run">${f.running?(f.paused?'▶ Συνέχεια':'❚❚ Παύση'):'▶ ΠΑΜΕ!'}</button></div></div>`;}
+function renderFlight(){if(!flight||S.screen!=='flight')return;const f=flight,t=f.task;
+ const planned=f.mode==='plan',locked=f.running&&!f.paused,lockedForm=locked||f.completed;
+ const status=`<p class="flight-status" role="status" aria-live="polite">${esc(f.status)}</p>`;
+ const footer=`<div class="flight-footer"><button class="btn" data-act="flight-replay">${I.redo}Ξανά</button><button class="btn" data-act="flight-list">☰ Αποστολές</button><button class="btn" data-act="home">☕ Διάλειμμα</button></div>`;
+ const head=`<header class="bar"><button class="btn sq" data-act="map" aria-label="Πίσω στα επεισόδια">${I.back}</button><div class="ttl">${esc(t.title)}</div><button class="btn sq yl" data-act="flight-hint" aria-label="Μικρή βοήθεια">${I.bulb}</button></header>`;
+ const body=`<div class="flight-layout">${flightModeHTML()}<section class="flight-stage"><div class="board-frame">${flightObjectivesHTML()}${flightGridHTML()}${status}</div>${flightLegendHTML(t)}</section>${planned?flightProgramHTML():''}<section class="gamepad"><div class="gp-left">${flightPadHTML(locked)}</div><div class="gp-right">${flightMorphButtonHTML(lockedForm)}${flightHandHTML(locked)}</div></section>${footer}</div>`;
+ const scroller=document.querySelector('.screen.flight'),top=scroller?scroller.scrollTop:0;
+ app.innerHTML=`<div class="screen flight handheld ${planned?'planning':'driving'}">${head}${talkHTML(t.prompt)}${body}</div>`;
+ fitFlightBoard();
+ if(top)document.querySelector('.screen.flight').scrollTop=top;
+}
+/* Measure the space the rest of the screen really uses and give the board all
+ * that remains (secondary footer actions may scroll). Width always wins. */
+function fitFlightBoard(){
+ const sc=document.querySelector('.screen.flight'),board=sc?.querySelector('.flight-board'),stage=sc?.querySelector('.flight-stage');if(!board)return;
+ const c=flightCrop(flight.task),frame=board.parentElement,cs=getComputedStyle(frame);
+ const padX=parseFloat(cs.paddingLeft)+parseFloat(cs.paddingRight)+parseFloat(cs.borderLeftWidth)*2+6;
+ const maxW=Math.max(120,Math.min(stage.clientWidth,sc.clientWidth-24)-padX);
+ const footer=sc.querySelector('.flight-footer'),boardH=board.getBoundingClientRect().height;
+ const others=sc.scrollHeight-boardH-(footer?footer.getBoundingClientRect().height+8:0);
+ const available=sc.clientHeight-others;
+ const cell=Math.floor(Math.max(Math.min(maxW/c.w,48),Math.min(maxW/c.w,available/c.h,118)));
+ board.style.width=cell*c.w+'px';board.style.setProperty('--cell',cell+'px');
+}
+let flightResizeTimer=0;addEventListener('resize',()=>{clearTimeout(flightResizeTimer);flightResizeTimer=setTimeout(()=>{if(flight&&S.screen==='flight')renderFlight();},120);});
+function applyFlight(command,manual=false){const f=flight;if(!f||f.completed)return;if(manual)f.manualActions=Math.min(1e6,(f.manualActions||0)+1);const before=f.state;f.state=BipFlight.flightStep(f.task,before,command);f.trail.push(command);f.trail=f.trail.slice(-240);const cell=`${f.state.robot.x},${f.state.robot.y}`;if(cell!==f.routeCells.at(-1)){const seen=f.routeCells.indexOf(cell);if(seen>=0)f.routeCells.splice(seen+1);else f.routeCells.push(cell);}f.animate=f.state.event?.type==='transform';
+ f.cue=f.state.status==='blocked'&&['gap','landing','ground','ground-only','cargo','carrying'].includes(f.state.event?.reason)?true:command==='T'&&f.state.status!=='blocked'?false:f.cue;
+ rawInteraction(f.state.status==='blocked'?'flight_blocked':'flight_action',{command,form:f.state.robot.form,reason:f.state.event?.reason});
+ f.status=f.state.status==='blocked'?(flightReason[f.state.event?.reason]||'Δεν γίνεται ακόμα. Έλεγξε μορφή, διακόπτες και έδαφος.'):command==='T'?(f.state.robot.form==='jet'?'Φτερά έξω! Πετάμε!':'Προσγείωση! Χέρια έτοιμα!'):command==='A'?'Χέρια σε δουλειά!':'Η εντολή έγινε. Ποιο είναι το επόμενο βήμα;';
+ if(f.state.status==='blocked')sfx.no();else if(command==='T')sfx.morph();else if(command==='A')sfx.pick();else f.state.robot.form==='jet'?sfx.hop():sfx.step();
+ persistFlight();renderFlight();f.animate=false;if(f.state.won)flightWon();
+}
+function flightWon(){const f=flight,t=f.task;
+ if(t.initialProgram){const edits=t.initialProgram.filter((c,i)=>c!==f.program[i]).length;if(f.mode!=='plan'||f.program.length!==t.initialProgram.length||edits!==1){f.status='Επισκεύασε ακριβώς μία εντολή και δοκίμασε το σχέδιο.';return renderFlight();}}
+ if(t.family==='flight-alternatives'){
+  const route=f.routeCells.join(';');if(!f.routes.includes(route)){f.routes.push(route);f.routeModes=[...(f.routeModes||[]),flightRouteMode(f)].slice(0,2);}
+  if(f.routes.length<2){flightGeneration++;f.status='Πρώτος δρόμος βρέθηκε! Βρες δεύτερο διαφορετικό δρόμο.';f.state=BipFlight.createFlightState(t);f.routeCells=[`${t.start.x},${t.start.y}`];f.trail=[];f.next=0;f.running=false;f.paused=false;f.executing=false;persistFlight();return renderFlight();}
+ }
+ const execution=flightExecutionMode(f);f.completed=true;f.executing=false;f.running=false;f.paused=false;rawInteraction('attempt',{ok:true});finishEpisode('success',{debug_repaired:!!t.initialProgram,transforms:f.state.transforms,routes:f.routes.length,...flightEvidence(execution,f)});
+ const stars=f.hint?1:3;flightJournal.completed[t.id]=Math.max(flightJournal.completed[t.id]||0,stars);ST.stars['flight:'+t.id]=Math.max(ST.stars['flight:'+t.id]||0,stars);ST.stars['a:'+t.family]=Math.max(ST.stars['a:'+t.family]||0,stars);save();claimRewards();persistFlight();renderFlight();sfx.win();
+ overlay(`<div class="burst">${burstSVG()}<span>ΠΕΤΥΧΕ!</span></div><div class="smallbot">${flightSprite(f.state.robot.form)}</div><p>Το σχέδιό σου δούλεψε! ${stars} ⭐</p>${AgisEngine.sessionPlan(AS,Date.now()).offer_break?'<p>Έκανες πολλά σχέδια! Θέλεις λίγο νερό ή ήρεμο παιχνίδι;</p>':''}<p class="fine">${esc(t.explanation||'Πότε χρειάστηκες χέρια και πότε φτερά;')}</p>${execution==='program'?'':'<p>Το οδήγησες! Μπορείς να το φτιάξεις και ως πρόγραμμα από την αρχή;</p>'}<div class="row">${execution==='program'?'':'<button class="btn yl" data-act="flight-replay-plan">🧩 Φτιάχνω πρόγραμμα</button>'}<button class="btn go" data-act="flight-tour">Επόμενη περιπέτεια</button><button class="btn" data-act="adaptive-next">Άλλο παιχνίδι</button><button class="btn" data-act="flight-replay">Ξανά</button><button class="btn" data-act="home">Διάλειμμα</button></div>`);
+}
+function appendFlight(command){if(!flight||flight.running||flight.completed)return;if(flight.selected!==null){flight.program[flight.selected]=command;flight.selected=null;}else if(!flight.task.initialProgram&&flight.program.length<80)flight.program.push(command);else{flight.status='Πρώτα δείξε την εντολή που θέλεις να αλλάξεις.';}flight.preview=false;rawInteraction('edit',{command});persistFlight();renderFlight();}
+async function executeFlight(single=false){
+ const f=flight;if(!f||f.completed)return;const token=flightGeneration;
+ if(f.running&&!single){f.paused=!f.paused;renderFlight();if(f.paused||f.executing)return;}
+ if(!f.running){if(!f.program.length){f.status='Βάλε πρώτα εντολές στο σχέδιο.';return renderFlight();}f.state=BipFlight.createFlightState(f.task);f.routeCells=[`${f.task.start.x},${f.task.start.y}`];f.trail=[];f.next=0;f.running=true;f.paused=single;f.preview=false;}
+ if(!single){if(f.executing)return;f.executing=true;}
+ do{
+  if(!f.running||token!==flightGeneration||flight!==f||S.screen!=='flight')return;
+  if(f.paused&&!single){await sleep(80);continue;}
+  if(f.next>=f.program.length)break;
+  const command=f.program[f.next++];applyFlight(command);if(f.completed||!f.running)return;
+  if(f.state.status==='blocked'){flightGeneration++;f.executing=false;rawInteraction('attempt',{ok:false,error_tags:[f.state.event?.reason||'blocked']});f.running=false;f.paused=false;persistFlight();return renderFlight();}
+  if(single){if(f.next>=f.program.length){flightGeneration++;f.executing=false;f.running=false;f.paused=false;if(!f.state.won){rawInteraction('attempt',{ok:false,error_tags:['unfinished_plan']});f.status='Το σχέδιο τελείωσε. Έλεγξε τι λείπει πριν δοκιμάσεις ξανά.';}}else f.paused=true;persistFlight();renderFlight();return;}
+  await sleep(matchMedia('(prefers-reduced-motion: reduce)').matches?80:360);
+ }while(f.running&&f.next<f.program.length);
+ if(token!==flightGeneration||flight!==f||S.screen!=='flight')return;
+ f.executing=false;f.running=false;f.paused=false;if(!f.state.won){rawInteraction('attempt',{ok:false,error_tags:['unfinished_plan']});f.status='Το σχέδιο τελείωσε. Έλεγξε τι λείπει πριν δοκιμάσεις ξανά.';}persistFlight();renderFlight();
+}
+Object.assign(ACT,{
+ 'flight-tour':()=>startFlightTour(),
+ 'flight-resume':()=>resumeFlight(),
+ 'flight-list':()=>overlay(`<h2>Περιπέτειες ROBOT ↔ JET</h2><p>Διάλεξε μια αποστολή ή συνέχισε την ιστορία σου.</p><div class="flight-level-list">${BipExpeditions.authoredChallenges.map((t,i)=>`<button class="btn" data-act="flight-level" data-i="${i}"><span>${i+1}. ${esc(t.title)}</span><small>${flightJournal.completed[t.id]?'⭐'.repeat(flightJournal.completed[t.id]):esc(flightEntries.find(c=>c.family===t.family)?.title||'Περιπέτεια')}</small></button>`).join('')}</div><button class="btn yl" data-act="closeov">Κλείσιμο</button>`,'par'),
+ 'flight-level':d=>curatedFlight(BipExpeditions.authoredChallenges[+d.i]),
+ 'flight-command':d=>{if(!flight||flight.completed||flight.running&&!flight.paused)return;flight.mode==='plan'?appendFlight(d.c):applyFlight(d.c,true);},
+ 'flight-transform':()=>{if(!flight||flight.completed||flight.running&&!flight.paused)return;flight.mode==='plan'?appendFlight('T'):applyFlight('T',true);},
+ 'flight-plan':()=>{if(!flight||flight.running||flight.mode==='plan')return;flight.mode='plan';flight.program=flight.task.initialProgram?.slice()||[];flight.state=BipFlight.createFlightState(flight.task);flight.routeCells=[`${flight.task.start.x},${flight.task.start.y}`];flight.trail=[];persistFlight();renderFlight();speak('Φτιάχνω πρόγραμμα. Βάζω εντολές στη σειρά. Μετά πατάω ΠΑΜΕ.');},
+ 'flight-live':()=>{if(!flight||flight.running||flight.task.initialProgram)return;flight.mode='live';flight.preview=false;persistFlight();renderFlight();speak('Οδηγώ. Κάθε κουμπί κάνει μία κίνηση τώρα.');},
+ 'flight-select':d=>{if(!flight||flight.running)return;flight.selected=+d.i;renderFlight();},
+ 'flight-undo':()=>{if(!flight||flight.running||flight.task.initialProgram)return;flight.program.pop();flight.selected=null;flight.preview=false;rawInteraction('edit',{action:'undo'});persistFlight();renderFlight();},
+ 'flight-preview':()=>{if(!flight||flight.running)return;flight.preview=!flight.preview;if(flight.preview){flight.hint=Math.max(1,flight.hint);TR.hint=Math.max(1,TR.hint);rawInteraction('hint',{level:1,kind:'own_program_preview'});}renderFlight();},
+ 'flight-hint':()=>{if(!flight)return;flight.hint=Math.min(5,flight.hint+1);rawInteraction('hint',{level:flight.hint});flight.status=(flight.task.hints?.[flight.hint-1]||'Σκέψου ποια μορφή χρειάζεται το επόμενο εμπόδιο.').replace(/\b[UDLRTA]\b/g,c=>flightLabels[c]);persistFlight();renderFlight();},
+ 'flight-replay-plan':()=>{if(!flight)return;const task=flight.task;startFlight({...flightEntries.find(c=>c.family===task.family),challenge_origin:'child_requested_repeat'},task);if(flight&&!task.initialProgram){flight.mode='plan';flight.program=[];persistFlight();renderFlight();}},
+ 'flight-step':()=>executeFlight(true),'flight-run':()=>executeFlight(false),
+ 'flight-replay':()=>{if(!flight)return;const task=flight.task;startFlight({...flightEntries.find(c=>c.family===task.family),challenge_origin:'child_requested_repeat'},task);},
+ 'parent-test-enter':()=>{tickActive();safeAdaptive();flushLog();const url=new URL(location.href);url.searchParams.set('parent-test','1');location.assign(url.href);},
+ 'parent-test-exit':()=>{const url=new URL(location.href);url.searchParams.delete('parent-test');location.assign(url.href);}
+});
+const mapBeforeFlight=renderMap;renderMap=function(){mapBeforeFlight();const section=document.createElement('section');section.className='issue k-blue flight-entry';section.innerHTML=`<h2><span class="no">✈</span><span class="nm">Περιπέτειες ROBOT ↔ JET</span></h2><p>Χέρια για κατασκευές. Φτερά για καινούργιους δρόμους.</p><div class="xtra"><button class="btn go" data-act="flight-tour">${I.morph}Πάμε στην περιπέτεια!</button>${flightJournal.current&&!flightJournal.current.completed?'<button class="btn yl" data-act="flight-resume">Συνέχισε το σχέδιό μου</button>':''}<button class="btn" data-act="flight-list">${BipExpeditions.authoredChallenges.length} αποστολές · διάλεξε</button></div>`;$('.screen.map').insertBefore(section,$('.screen.map').children[1]);};
+const homeBeforeFlight=renderHome;renderHome=function(){homeBeforeFlight();if(flightJournal.current&&!flightJournal.current.completed){const b=document.createElement('button');b.className='btn yl';b.dataset.act='flight-resume';b.textContent='Συνέχισε την περιπέτειά μου';$('.home').append(b);}};
+const goBeforeFlight=go;go=function(screen){if(S.screen==='flight'){flightGeneration++;if(flight){flight.running=false;flight.paused=false;persistFlight();}flight=null;}goBeforeFlight(screen);};
+const startBeforeFlight=startPlay;startPlay=function(lv,def){flightGeneration++;flight=null;startBeforeFlight(lv,def);};
+// Prominent control in original authored jet episodes. This remains a program
+// instruction: its animated preview explains what the queued command will do.
+const sideBeforeFlight=renderSide;renderSide=function(){sideBeforeFlight();if(!S.lesson&&!S.studio&&!S.D&&S.def?.forms?.includes('jet')){const panel=document.createElement('div');panel.className='flight-story-form';panel.innerHTML=`<button class="btn flight-transform" data-act="story-form" ${S.running?'disabled':''}>${I.morph}ROBOT ↔ JET</button><small>Πρόσθεσε μεταμόρφωση στο σχέδιό σου. Το τζετ πετά δύο τετράγωνα.</small>`;$('.side')?.prepend(panel);}};
+ACT['story-form']=()=>{if(S.running||S.lesson||!S.def?.forms?.includes('jet'))return;let form='bot';for(const block of S.prog)if(block.t==='tf'&&block.to)form=block.to;const target=form==='jet'?'bot':'jet';const before=JSON.stringify(S.prog);addCmd({t:'tf',to:target});if(JSON.stringify(S.prog)!==before){const r=$('#rob');if(r){setForm(r,target);r.classList.remove('morph');void r.offsetWidth;r.classList.add('morph');}sfx.morph();}};
+const parentBeforeFlight=parents;parents=function(){parentBeforeFlight();const section=document.createElement('section');section.innerHTML=`<h3>Parent Test Mode</h3><p>Η δοκιμή χρησιμοποιεί ξεχωριστό προφίλ. Δεν αλλάζει πρόοδο, αστέρια ή στοιχεία μάθησης του παιδιού.</p><button class="btn yl" data-act="${BIP_PARENT_TEST?'parent-test-exit':'parent-test-enter'}">${BIP_PARENT_TEST?'Έξοδος στη συνεδρία παιδιού':'Έναρξη απομονωμένης δοκιμής'}</button><p class="fine">${Object.keys(flightJournal.completed).length} ολοκληρωμένες νέες περιπέτειες. Πρόοδος προφίλ: ${BIP_PARENT_TEST?'δοκιμή γονέα':'παιδί'}.</p>`;$('.dlg.par')?.prepend(section);};
+const exportBeforeFlight=exportData;exportData=function(kind){persistFlight();const previous=exportBeforeFlight(kind);if(kind==='legacy-csv'&&!BIP_PARENT_TEST)return previous;if(kind==='json'){const value=JSON.parse(previous);value.version='1.3-private';value.profile=BIP_PARENT_TEST?'parent_test':'child';value.flight=flightJournal;value.schema_versions.flight=1;value.storage[FLIGHT_KEY]=profileStorage.getItem(FLIGHT_KEY);return JSON.stringify(value,null,2);}return 'profile,content_version,'+previous.split('\n').map((line,i)=>i===0?line:`${BIP_PARENT_TEST?'parent_test':'child'},1.3,${line}`).join('\n');};
+ACT['ad-restore']=()=>{try{
+ if(!pendingRestore)return;const parsed=JSON.parse(pendingRestore),journal=parsed.flight;
+ if(journal){if(journal.schema_version!==1||!journal.completed||typeof journal.completed!=='object'||Array.isArray(journal.completed)||Object.values(journal.completed).some(v=>!Number.isInteger(v)||v<1||v>3)||!Array.isArray(journal.recent_signatures)||journal.recent_signatures.length>120||journal.recent_signatures.some(v=>typeof v!=='string')||!Number.isInteger(journal.generated_count)||journal.generated_count<0)throw Error('Μη έγκυρο αντίγραφο πτήσης.');const c=journal.current;if(c&&(!BipExpeditions.validateExpedition(c.task).valid||!BipFlightCheckpoint.validFlightSession(c.task,c)))throw Error('Μη έγκυρη θέση αποστολής.');}
+ const staged={},staging={getItem:k=>Object.hasOwn(staged,k)?staged[k]:profileStorage.getItem(k),setItem:(k,v)=>{staged[k]=String(v);},removeItem:k=>{delete staged[k];}};
+ const p=BipBackup.restoreBackup(staging,pendingRestore,shape,shapeLog,AgisEngine.sanitizeState,BipTasks.SKILLS);delete staged['bip-restore-backup-before'];if(journal)staged[FLIGHT_KEY]=JSON.stringify(journal);
+ BipProfiles.commitProfileEntries(profileStorage,staged);
+ ST=p.progress;LOG=p.log;AD=p.adaptive;LAB=BipLab.loadLabState(profileStorage);AS=AgisEngine.continueSession(AD.sessions,Date.now(),'bip-'+Date.now().toString(36));MIG.adaptiveWritable=true;pendingRestore=null;TR=null;mission=null;flightGeneration++;flight=null;if(journal)flightJournal=journal;parents();
+ }catch(e){if($('#expbox'))$('#expbox').textContent='Δεν ολοκληρώθηκε η επαναφορά: '+e.message;}};
+
+const profileBanner=document.createElement('div');profileBanner.className='profile-banner '+(BIP_PARENT_TEST?'test':'private');profileBanner.innerHTML=BIP_PARENT_TEST?'<strong>ΔΟΚΙΜΗ ΓΟΝΕΑ · ξεχωριστή πρόοδος</strong><button data-act="parent-test-exit">Έξοδος</button>':'<span>Ιδιωτική υποψήφια έκδοση · 1.3</span>';document.body.prepend(profileBanner);
+if(BIP_PARENT_TEST){profileBanner.querySelector('button').onclick=ACT['parent-test-exit'];document.body.classList.add('parent-test-profile');}
+window.addEventListener('pagehide',()=>persistFlight());
+const stateBeforeFlight=window.__bipQA.state;window.__bipQA.state=()=>({...stateBeforeFlight(),profile:BIP_PARENT_TEST?'parent_test':'child',flight:flight?JSON.parse(JSON.stringify(flight)):null,flightJournal:JSON.parse(JSON.stringify(flightJournal))});window.__bipQA.flight={tasks:BipExpeditions,engine:BipFlight};window.__bipQA.exportData=kind=>exportData(kind);
 
 /* ---------- boot ---------- */
 try{if('speechSynthesis' in window)window.speechSynthesis.getVoices();}catch(e){}
@@ -3373,13 +4066,6 @@ greetRewards();
 
 })();
 </script>
-<script>
-/* Public PWA shell only: game state/storage keys are untouched. */
-if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(function () {});
-  });
-}
-</script>
+<script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js', {scope:'./'}).catch(()=>{});</script>
 </body>
 </html>
