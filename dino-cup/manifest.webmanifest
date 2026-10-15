@@ -1,0 +1,25 @@
+{
+  "id": "/agis-learning-games/dino-cup/",
+  "name": "DINO CUP — Ποδόσφαιρο",
+  "short_name": "DINO CUP",
+  "lang": "el",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#102638",
+  "background_color": "#102638",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
