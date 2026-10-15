@@ -5,11 +5,14 @@ Public playable releases from Agis Learning Lab, intended for educational use. D
 - [ΜΠΙΠ v1.2 Adaptive](https://kkougiou.github.io/agis-learning-games/bip/)
 - [RoboMorph Academy](https://kkougiou.github.io/agis-learning-games/robomorph/)
 - [LEXIS — Το Αρχείο των Χαμένων Λέξεων](https://kkougiou.github.io/agis-learning-games/lexis/)
+- [DINOBOTS — Το νησί των ρομπότ-δεινοσαύρων](https://kkougiou.github.io/agis-learning-games/dinobots/)
 - [All games](https://kkougiou.github.io/agis-learning-games/)
 
 Progress is stored locally in your browser. Clearing browser or site data may erase progress. Different browsers, devices, and Home Screen installations may have separate storage.
 
 LEXIS supports Home Screen installation in Chrome. Open its stable URL, use Chrome’s **Install app** or **Add to Home screen** option, then load it once while online for offline access. On Android Chrome, the installed app and browser share LEXIS storage when using the same browser profile and origin; other browsers or profiles may store progress separately. LEXIS updates preserve its existing storage keys. Audio pronunciation and physical-device behavior still need human review.
+
+DINOBOTS supports Home Screen installation in Chrome in the same way. Its 3D library (three.js r128, MIT licence) is served from the game folder, so after one online load it also plays offline. Progress on this site is separate from any earlier claude.ai copy. To move it, use the parent area: export (Εξαγωγή) there, then import (Εισαγωγή) here. Physical-device behaviour still needs human review.
 
 ## Updating a game
 
