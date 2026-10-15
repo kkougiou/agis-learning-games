@@ -1,47 +1,96 @@
-name: Prepare DINO CUP distribution
+name: Verify live DINO CUP
 on:
   push:
     branches: ['deploy/dino-cup-20261015']
 permissions:
-  contents: write
+  contents: read
 jobs:
-  prepare:
+  live:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-      - name: Verify and unpack approved public files
-        env:
-          APPROVED_DIST: 'https://sdmntprcentralus.oaiusercontent.com/files/00000000-1fc0-81f5-a671-328836e25ad4/raw?se=2026-10-15T15%3A07%3A06Z&sp=r&sv=2026-02-06&sr=b&scid=3a442694-d926-57ca-ad05-2abd8bd1a054&skoid=82a3371f-2f6c-4f81-8a78-2701b362559b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-15T05%3A15%3A32Z&ske=2026-10-16T05%3A15%3A32Z&sks=b&skv=2026-02-06&sig=1z2NIlD3FGk6WhWbKcIX06lorZrj5WjXcnTwl6%2BHJy4%3D'
+          persist-credentials: false
+      - name: Verify seven live release hashes
+        run: |
+          mkdir -p /tmp/dino-cup-live
+          python - <<'PY'
+          from pathlib import Path
+          import urllib.request,hashlib,json,time
+          base='https://kkougiou.github.io/agis-learning-games/dino-cup/'
+          results={}
+          for f in Path('dino-cup').iterdir():
+              expected=hashlib.sha256(f.read_bytes()).hexdigest()
+              for attempt in range(12):
+                  try:
+                      req=urllib.request.Request(base+f.name+'?verify='+str(time.time_ns()),headers={'Cache-Control':'no-cache'})
+                      raw=urllib.request.urlopen(req,timeout=30).read()
+                      assert hashlib.sha256(raw).hexdigest()==expected
+                      break
+                  except Exception:
+                      if attempt==11:raise
+                      time.sleep(5)
+              results[f.name]=expected
+              print('PASS live hash',f.name)
+          Path('/tmp/dino-cup-live/hashes.json').write_text(json.dumps(results,indent=2))
+          PY
+      - name: Browser dependencies
+        run: |
+          python -m pip install playwright==1.57.0
+          python -m playwright install --with-deps chromium
+      - name: Live game restart and isolated storage
         run: |
           python - <<'PY'
-          import os,urllib.request,io,zipfile,hashlib,json
           from pathlib import Path
-          raw=urllib.request.urlopen(os.environ['APPROVED_DIST'],timeout=60).read()
-          assert hashlib.sha256(raw).hexdigest()=='4f2d033d293ecd15f066228467aa5c38a1d6e1d5a8b9e90dd5bae76b51bca747'
-          expected={'manifest.webmanifest':'a808ae6b3ef81a72d9ba95ff500914f4944fa7ffd32630902d7ae901fa84364c','index.html':'2adf9f065d184dff1b732f18588f7a1bd2dfea93f9271508480e7e6c6a9dbc7c','three.min.js':'9274bbcec8d96168626c732b5d31c775aa8cfb7eaa0599bec0c175908a2c1ce2','sw.js':'b9846c14dd80fe2c588858fb914eaf164b8ab057f8f04c820ef56b935ec2adb6','icon.svg':'33deb3ac9f8dc4b620832bbef04fcd58837727151a8cf5740ac04c8de986963a','icon-512.png':'f59f1567f79cc9a4ab42603b17aa3ee21fb879def0dc94f30cea42bb3bbb9cc2','icon-192.png':'7e28e08f33004b51c6b956bc18e73056b700e98458e86e076c11a9de74fa25c4'}
-          z=zipfile.ZipFile(io.BytesIO(raw));assert set(z.namelist())==set(expected)
-          out=Path('dino-cup');out.mkdir(exist_ok=False)
-          for name,sha in expected.items():
-              data=z.read(name);assert hashlib.sha256(data).hexdigest()==sha,name
-              (out/name).write_bytes(data)
-          h=(out/'index.html').read_text()
-          for bad in ['/home/','/mnt/','/tmp/','@gmail','scratchpad','/*@']:assert bad not in h,bad
-          assert "KEY='agis.dinocup.v1'" in h
-          assert 'agis.dinobots.save' not in h and 'bip-save-v1' not in h
-          assert json.loads((out/'manifest.webmanifest').read_text())['id']=='/agis-learning-games/dino-cup/'
-          assert "PREFIX='agis-dinocup-'" in (out/'sw.js').read_text()
-          print('PASS: all seven hashes, independent save/cache/installation identity and distribution allowlist')
+          import json
+          from playwright.sync_api import sync_playwright
+          checks=[]
+          def check(name,ok):
+              assert ok,name
+              checks.append(name);print('PASS',name,flush=True)
+          with sync_playwright() as p:
+              b=p.chromium.launch(args=['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage'])
+              c=b.new_context(viewport={'width':800,'height':1280},has_touch=True)
+              page=c.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+              page.goto('https://kkougiou.github.io/agis-learning-games/dino-cup/')
+              page.wait_for_function('window.DinoCup && DinoCup.ready && DinoCup.renderer.info.render.calls>0')
+              check('live independent game identity',page.title()=='DINO CUP — Arcade Football' and page.evaluate('DinoCup.saveKey==="agis.dinocup.v1"'))
+              page.evaluate('''async()=>{localStorage.setItem('agis.dinobots.save','PRESERVE');localStorage.setItem('bip-save-v1','PRESERVE');await caches.open('dinobots-pwa-preserve');}''')
+              page.locator('#play').tap();page.wait_for_function('DinoCup.state.phase==="play"')
+              check('live ten players',page.evaluate('DinoCup.state.players.length===10'))
+              page.keyboard.down('ArrowUp');page.wait_for_timeout(550);page.keyboard.up('ArrowUp')
+              check('live movement',page.evaluate('DinoCup.state.players[0].x>-1.5'))
+              page.screenshot(path='/tmp/dino-cup-live/tablet.png')
+              page.locator('#pause').tap();t=page.evaluate('DinoCup.state.elapsed');page.wait_for_timeout(300)
+              check('live paused clock',page.evaluate('DinoCup.state.elapsed')==t)
+              page.reload();page.wait_for_function('DinoCup.ready')
+              check('live interrupted match resume',page.locator('#continue').is_visible())
+              page.locator('#continue').tap();page.wait_for_timeout(100)
+              # Deterministic end-of-half fixture; production transitions and UI remain real.
+              page.evaluate('DinoCup.state.phase="play";DinoCup.state.elapsed=DinoCup.state.halfSeconds-.01')
+              page.wait_for_function('DinoCup.state.phase==="halftime" && !document.getElementById("dialog").hidden')
+              check('halftime UI',page.locator('#dialogTitle').inner_text()=='ΗΜΙΧΡΟΝΟ')
+              page.locator('#resume').tap();page.wait_for_function('DinoCup.state.half===2 && DinoCup.state.phase==="play"')
+              page.evaluate('DinoCup.state.elapsed=DinoCup.state.halfSeconds-.01')
+              page.wait_for_function('DinoCup.state.phase==="ended" && !document.getElementById("rematch").hidden')
+              check('full-time UI and rematch',page.locator('#rematch').is_visible())
+              page.locator('#rematch').tap();page.wait_for_function('DinoCup.state.phase==="play" && DinoCup.state.half===1')
+              check('fresh rematch score',page.evaluate('DinoCup.state.score[0]===0 && DinoCup.state.score[1]===0'))
+              page.locator('#pause').tap()
+              page.wait_for_function('navigator.serviceWorker.controller!==null')
+              check('scoped live service worker',page.evaluate('navigator.serviceWorker.controller.scriptURL==="https://kkougiou.github.io/agis-learning-games/dino-cup/sw.js"'))
+              c.set_offline(True);page.reload();page.wait_for_function('DinoCup.ready')
+              check('live offline boot retains match',page.locator('#continue').is_visible())
+              check('other games data preserved',page.evaluate('localStorage.getItem("agis.dinobots.save")==="PRESERVE" && localStorage.getItem("bip-save-v1")==="PRESERVE"'))
+              check('other games cache preserved',page.evaluate('caches.has("dinobots-pwa-preserve")'))
+              check('no uncaught live errors',not errors)
+              b.close()
+          Path('/tmp/dino-cup-live/checks.json').write_text(json.dumps({'passed':len(checks),'checks':checks},indent=2))
           PY
-      - name: Commit distribution to staging branch only
-        run: |
-          test "$GITHUB_REF" = 'refs/heads/deploy/dino-cup-20261015'
-          git diff --exit-code 67fc15831d140a7d61993b224ed6de502909ce5c -- bip dinobots dinobots-test lexis robomorph index.html README.md
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add dino-cup
-          git diff --cached --check
-          git commit -m 'build(dino-cup): verified standalone 0.1.0 distribution [skip ci]'
-          git push origin HEAD:refs/heads/deploy/dino-cup-20261015
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dino-cup-live-verification
+          path: /tmp/dino-cup-live/
+          retention-days: 14
