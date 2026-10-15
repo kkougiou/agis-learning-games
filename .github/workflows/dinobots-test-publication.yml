@@ -1,0 +1,112 @@
+name: Prepare isolated DINOBOTS TEST
+on:
+  push:
+    branches: ['deploy/dinobots-test-20261015']
+permissions:
+  contents: write
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare approved distribution only
+        env:
+          APPROVED_DISTRIBUTION: 'https://sdmntprukwest.oaiusercontent.com/files/00000000-b96c-8243-ae23-9332f7e11e1d/raw?se=2026-10-15T13%3A48%3A27Z&sp=r&sv=2026-02-06&sr=b&scid=2e660353-f181-5862-926d-16e45bf3dc4b&skoid=8981e47a-681f-4a6a-b86c-73d6347614b7&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-15T07%3A15%3A16Z&ske=2026-10-16T07%3A15%3A16Z&sks=b&skv=2026-02-06&sig=En6UsI0Wd6RawGaZ4H2Co7bjF9MFLUdT9yYYPwaP3rk%3D'
+        run: |
+          python - <<'PY'
+          import os, urllib.request, zipfile, io, hashlib, json
+          from pathlib import Path
+          data=urllib.request.urlopen(os.environ['APPROVED_DISTRIBUTION'],timeout=60).read()
+          assert hashlib.sha256(data).hexdigest()=='2881675c581dd2df3b881a30527521edfe1919cb8fa54c747fd08e6ca088a830'
+          z=zipfile.ZipFile(io.BytesIO(data)); out=Path('dinobots-test'); out.mkdir()
+          names=['index.html','manifest.webmanifest','sw.js','three.min.js','icon-192.png','icon-512.png','icon-maskable-512.png']
+          for name in names: (out/name).write_bytes(z.read('dinobots-playable/'+name))
+          h=(out/'index.html').read_text()
+          assert hashlib.sha256(h.encode()).hexdigest()=='477cf49b168f6d1266eb15f6ba85fbbce013f991f7d517d2b9f0c28b1a065b4f'
+          assert h.count('agis.dinobots.save')==1 and h.count('agis.dinobots.engine')==1
+          h=h.replace('agis.dinobots.save','agis.dinobots.test.save').replace('agis.dinobots.engine','agis.dinobots.test.engine')
+          h=h.replace('<title>DINOBOTS</title>','<title>DINOBOTS TEST — 0.3.1</title>\n<meta name="robots" content="noindex,nofollow">')
+          h=h.replace('ο ΜΠΙΠ στο νησί ${esc(ST.island)}','Δοκιμαστική έκδοση · ο ΜΠΙΠ στο νησί ${esc(ST.island)}')
+          h=h.replace('Όλα μένουν στη συσκευή και στον λογαριασμό σας στο claude.ai. Η εξαγωγή γίνεται μόνο όταν την πατήσετε.','Δοκιμαστική έκδοση: η πρόοδος αποθηκεύεται χωριστά, σε αυτή τη συσκευή. Η εξαγωγή γίνεται μόνο όταν την πατήσετε.')
+          assert hashlib.sha256(h.encode()).hexdigest()=='4e77746b2081507b90b80ed8865d7614d37d8056915eab4003ab71217dc5ca57'
+          for bad in ['/home/','/mnt/','/tmp/','@gmail','scratchpad']: assert bad not in h
+          (out/'index.html').write_text(h)
+          m=json.loads((out/'manifest.webmanifest').read_text())
+          m.update(name='DINOBOTS TEST — Δοκιμαστική έκδοση',short_name='DINOBOTS TEST',id='/agis-learning-games/dinobots-test/',description='Δοκιμαστική έκδοση 0.3.1 με σταθερά χειριστήρια και χωριστή πρόοδο.')
+          (out/'manifest.webmanifest').write_text(json.dumps(m,ensure_ascii=False,indent=2)+'\n')
+          sw=(out/'sw.js').read_text().replace('dinobots-pwa-','dinobots-test-pwa-')
+          sw=sw.replace('4e2248ecae',hashlib.sha256(h.encode()+(out/'three.min.js').read_bytes()).hexdigest()[:10])
+          (out/'sw.js').write_text(sw)
+          for f in names[3:]: assert (out/f).read_bytes()==(Path('dinobots')/f).read_bytes()
+          assert sorted(p.name for p in out.iterdir())==sorted(names)
+          Path('/tmp/test-publish-hashes.json').write_text(json.dumps({p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in out.iterdir()},indent=2))
+          print('Prepared seven distribution files; existing games untouched.')
+          PY
+      - name: Browser dependencies
+        run: |
+          python -m pip install playwright==1.57.0
+          python -m playwright install --with-deps chromium
+      - name: Verify storage, installation identity and offline isolation
+        run: |
+          python - <<'PY'
+          import json, threading, http.server, socketserver, shutil
+          from pathlib import Path
+          from playwright.sync_api import sync_playwright
+          root=Path('/tmp/dinobots-site'); target=root/'agis-learning-games/dinobots-test'
+          target.parent.mkdir(parents=True); shutil.copytree('dinobots-test',target)
+          class H(http.server.SimpleHTTPRequestHandler):
+              def __init__(self,*a,**kw): super().__init__(*a,directory=str(root),**kw)
+              def log_message(self,*a): pass
+          server=socketserver.TCPServer(('127.0.0.1',8877),H)
+          threading.Thread(target=server.serve_forever,daemon=True).start()
+          checks=[]
+          def check(name,ok):
+              assert ok,name
+              checks.append(name); print('PASS',name,flush=True)
+          with sync_playwright() as p:
+              b=p.chromium.launch(args=['--no-sandbox','--disable-dev-shm-usage'])
+              c=b.new_context(viewport={'width':800,'height':1280},has_touch=True)
+              page=c.new_page(); errors=[]; page.on('pageerror',lambda e:errors.append(str(e)))
+              page.goto('http://localhost:8877/')
+              page.evaluate('''async()=>{localStorage.setItem('agis.dinobots.save','ORIGINAL_UNTOUCHED');localStorage.setItem('agis.dinobots.engine','ORIGINAL_ENGINE');const c=await caches.open('dinobots-pwa-production-sentinel');await c.put('/sentinel',new Response('kept'));}''')
+              page.goto('http://localhost:8877/agis-learning-games/dinobots-test/')
+              page.wait_for_function('window.__dino && __dino.GAME_V === "0.3.1"')
+              check('candidate identity',page.title()=='DINOBOTS TEST — 0.3.1')
+              check('isolated save keys',page.evaluate('__dino.SKEY==="agis.dinobots.test.save" && __dino.EKEY==="agis.dinobots.test.engine"'))
+              page.evaluate('__dino.ST.voice=false;__dino.ST.sound=false;__dino.ST.chap=1;__dino.go("map");__dino.save()')
+              check('eight stationary region controls',page.locator('[data-stable-region]').count()==8)
+              check('production saves intact',page.evaluate('localStorage.getItem("agis.dinobots.save")==="ORIGINAL_UNTOUCHED" && localStorage.getItem("agis.dinobots.engine")==="ORIGINAL_ENGINE"'))
+              page.wait_for_function('navigator.serviceWorker.controller!==null',timeout=20000)
+              check('worker scope',page.evaluate('navigator.serviceWorker.controller.scriptURL.endsWith("/agis-learning-games/dinobots-test/sw.js")'))
+              check('production cache intact',page.evaluate('caches.has("dinobots-pwa-production-sentinel")'))
+              m=page.evaluate('fetch("./manifest.webmanifest").then(r=>r.json())')
+              check('distinct installation identity',m['id']=='/agis-learning-games/dinobots-test/')
+              for w,h in [(1280,800),(390,844),(800,1280)]:
+                  page.set_viewport_size({'width':w,'height':h}); page.evaluate('__dino.go("home")')
+                  check('layout '+str(w)+'x'+str(h),page.evaluate('document.documentElement.scrollWidth<=innerWidth'))
+              page.evaluate('__dino.ST.stars=19;__dino.save()')
+              c.set_offline(True); page.reload();page.wait_for_function('window.__dino && __dino.ST.stars===19')
+              check('offline restart preserves test save',True)
+              check('offline restart preserves production save',page.evaluate('localStorage.getItem("agis.dinobots.save")==="ORIGINAL_UNTOUCHED"'))
+              check('no uncaught game errors',not errors)
+              b.close()
+          server.shutdown()
+          Path('/tmp/test-publish-checks.json').write_text(json.dumps({'passed':len(checks),'checks':checks},indent=2))
+          PY
+      - name: Commit only the isolated test distribution
+        run: |
+          test "$GITHUB_REF" = 'refs/heads/deploy/dinobots-test-20261015'
+          git diff --exit-code 861830188f64209a99e58b624f6634cbf9a90004 -- bip robomorph lexis dinobots index.html README.md
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add dinobots-test
+          git diff --cached --check
+          git commit -m 'build: verified isolated DINOBOTS TEST 0.3.1 [skip ci]'
+          git push origin HEAD:refs/heads/deploy/dinobots-test-20261015
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dinobots-test-publication-checks
+          path: /tmp/test-publish-*.json
+          retention-days: 7
