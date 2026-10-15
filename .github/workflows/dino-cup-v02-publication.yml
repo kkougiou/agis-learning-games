@@ -1,0 +1,41 @@
+name: Stage tested DINO CUP 0.2.0
+on:
+  push:
+    branches: ['deploy/dino-cup-v02-fairplay-20261015']
+permissions:
+  contents: write
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract exact approved public artifact
+        env:
+          DISTRIBUTION_URL: 'https://sdmntpritalynorth.oaiusercontent.com/files/00000000-e5bc-8246-a4d3-6a2e3787ec60/raw?se=2026-10-15T17%3A41%3A38Z&sp=r&sv=2026-02-06&sr=b&scid=0a2e02b6-62a2-5082-b5e2-f875c4dee8e2&skoid=82a3371f-2f6c-4f81-8a78-2701b362559b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-15T05%3A59%3A28Z&ske=2026-10-16T05%3A59%3A28Z&sks=b&skv=2026-02-06&sig=xyltSdKC8gh9kqUQx4YoY3JIrWH6IYds2lzcfY8jIdQ%3D'
+        run: |
+          python - <<'PY'
+          import os,urllib.request,hashlib,zipfile,io,json
+          from pathlib import Path
+          raw=urllib.request.urlopen(os.environ['DISTRIBUTION_URL'],timeout=60).read()
+          assert hashlib.sha256(raw).hexdigest()=='a83d4103a376ba4fd40667398c4dd51b8501b09e38fa92e6257f27a1e79dac6e'
+          expected={'index.html':'96c00cc1b3f337b91fb784649b43333b8255f32d8af1aaa8e0dea4d9f5a68985','sw.js':'6f94b295d13c8ffb36ee2ab81d1644440ae4b34a2a37f7e6f373c7e680b349bb','three.min.js':'9274bbcec8d96168626c732b5d31c775aa8cfb7eaa0599bec0c175908a2c1ce2','manifest.webmanifest':'a808ae6b3ef81a72d9ba95ff500914f4944fa7ffd32630902d7ae901fa84364c','icon.svg':'33deb3ac9f8dc4b620832bbef04fcd58837727151a8cf5740ac04c8de986963a','icon-192.png':'beb7b833e1e04a3724ea2b74345b965479db7a8e367b6ed5acb5983b82b0f715','icon-512.png':'ba630fe75584def29927f16e0b2ad64d9dccd1bcfd4bc2fc9316b5154e331f27'}
+          z=zipfile.ZipFile(io.BytesIO(raw));assert set(z.namelist())==set(expected)
+          out=Path('dino-cup');assert out.is_dir()
+          for name,digest in expected.items():
+              data=z.read(name);assert hashlib.sha256(data).hexdigest()==digest
+              (out/name).write_bytes(data)
+          h=(out/'index.html').read_text();assert "VERSION:'0.2.0'" in h and "agis.dinocup.v1" in h
+          for bad in ['/mnt/','/home/','scratchpad','@gmail']:assert bad not in h
+          print('Verified and staged 7 approved distribution files; no other game touched.')
+          PY
+      - name: Commit to isolated staging branch only
+        run: |
+          test "$GITHUB_REF" = 'refs/heads/deploy/dino-cup-v02-fairplay-20261015'
+          git diff --exit-code HEAD -- bip robomorph lexis dinobots dinobots-test index.html README.md
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add dino-cup
+          git diff --cached --check
+          git commit -m 'build(dino-cup): verified 0.2.0 fair play and arcade release [skip ci]'
+          git push origin HEAD:refs/heads/deploy/dino-cup-v02-fairplay-20261015
