@@ -1,74 +1,48 @@
-name: Prepare isolated DINOBOTS TEST
+name: Verify live DINOBOTS TEST
 on:
   push:
     branches: ['deploy/dinobots-test-20261015']
 permissions:
-  contents: write
-  actions: read
+  contents: read
 jobs:
-  prepare:
+  live:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
-      - name: Prepare approved distribution only
-        env:
-          APPROVED_DISTRIBUTION: 'https://sdmntprukwest.oaiusercontent.com/files/00000000-b96c-8243-ae23-9332f7e11e1d/raw?se=2026-10-15T13%3A48%3A27Z&sp=r&sv=2026-02-06&sr=b&scid=2e660353-f181-5862-926d-16e45bf3dc4b&skoid=8981e47a-681f-4a6a-b86c-73d6347614b7&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-15T07%3A15%3A16Z&ske=2026-10-16T07%3A15%3A16Z&sks=b&skv=2026-02-06&sig=En6UsI0Wd6RawGaZ4H2Co7bjF9MFLUdT9yYYPwaP3rk%3D'
-        run: |
-          python - <<'PY'
-          import os, urllib.request, zipfile, io, hashlib, json
-          from pathlib import Path
-          data=urllib.request.urlopen(os.environ['APPROVED_DISTRIBUTION'],timeout=60).read()
-          assert hashlib.sha256(data).hexdigest()=='2881675c581dd2df3b881a30527521edfe1919cb8fa54c747fd08e6ca088a830'
-          z=zipfile.ZipFile(io.BytesIO(data)); out=Path('dinobots-test'); out.mkdir()
-          names=['index.html','manifest.webmanifest','sw.js','three.min.js','icon-192.png','icon-512.png','icon-maskable-512.png']
-          for name in names: (out/name).write_bytes(z.read('dinobots-playable/'+name))
-          h=(out/'index.html').read_text()
-          assert hashlib.sha256(h.encode()).hexdigest()=='477cf49b168f6d1266eb15f6ba85fbbce013f991f7d517d2b9f0c28b1a065b4f'
-          assert h.count('agis.dinobots.save')==1 and h.count('agis.dinobots.engine')==1
-          h=h.replace('agis.dinobots.save','agis.dinobots.test.save').replace('agis.dinobots.engine','agis.dinobots.test.engine')
-          h=h.replace('<title>DINOBOTS</title>','<title>DINOBOTS TEST — 0.3.1</title>\n<meta name="robots" content="noindex,nofollow">')
-          h=h.replace('ο ΜΠΙΠ στο νησί ${esc(ST.island)}','Δοκιμαστική έκδοση · ο ΜΠΙΠ στο νησί ${esc(ST.island)}')
-          h=h.replace('Όλα μένουν στη συσκευή και στον λογαριασμό σας στο claude.ai. Η εξαγωγή γίνεται μόνο όταν την πατήσετε.','Δοκιμαστική έκδοση: η πρόοδος αποθηκεύεται χωριστά, σε αυτή τη συσκευή. Η εξαγωγή γίνεται μόνο όταν την πατήσετε.')
-          assert hashlib.sha256(h.encode()).hexdigest()=='4e77746b2081507b90b80ed8865d7614d37d8056915eab4003ab71217dc5ca57'
-          for bad in ['/home/','/mnt/','/tmp/','@gmail','scratchpad']: assert bad not in h
-          (out/'index.html').write_text(h)
-          m=json.loads((out/'manifest.webmanifest').read_text())
-          m.update(name='DINOBOTS TEST — Δοκιμαστική έκδοση',short_name='DINOBOTS TEST',id='/agis-learning-games/dinobots-test/',description='Δοκιμαστική έκδοση 0.3.1 με σταθερά χειριστήρια και χωριστή πρόοδο.')
-          (out/'manifest.webmanifest').write_text(json.dumps(m,ensure_ascii=False,indent=2)+'\n')
-          sw=(out/'sw.js').read_text().replace('dinobots-pwa-','dinobots-test-pwa-')
-          sw=sw.replace('4e2248ecae',hashlib.sha256(h.encode()+(out/'three.min.js').read_bytes()).hexdigest()[:10])
-          (out/'sw.js').write_text(sw)
-          for f in names[3:]: assert (out/f).read_bytes()==(Path('dinobots')/f).read_bytes()
-          assert sorted(p.name for p in out.iterdir())==sorted(names)
-          PY
-      - uses: actions/download-artifact@v4
         with:
-          name: dinobots-test-publication-checks
-          run-id: 38745342112
-          github-token: ${{ github.token }}
-          path: /tmp/checked-distribution
-      - name: Require exact match to the thirteen passing browser checks
+          persist-credentials: false
+      - name: Verify exact published bytes
         run: |
           python - <<'PY'
-          import json, hashlib
+          import urllib.request, hashlib, json, time
           from pathlib import Path
-          evidence=Path('/tmp/checked-distribution')
-          checks=json.loads((evidence/'test-publish-checks.json').read_text())
-          assert checks['passed']==13 and len(checks['checks'])==13
-          hashes=json.loads((evidence/'test-publish-hashes.json').read_text())
-          assert len(hashes)==7
-          for f,h in hashes.items(): assert hashlib.sha256((Path('dinobots-test')/f).read_bytes()).hexdigest()==h,f
-          print('Seven files match the exact distribution that passed all thirteen browser checks.')
+          base='https://kkougiou.github.io/agis-learning-games/'
+          checks=[]
+          paths=['dinobots-test/'+n for n in ['index.html','manifest.webmanifest','sw.js','three.min.js','icon-192.png','icon-512.png','icon-maskable-512.png']]+['dinobots/index.html','bip/index.html','robomorph/index.html','lexis/index.html']
+          for name in paths:
+              expected=hashlib.sha256(Path(name).read_bytes()).hexdigest()
+              for attempt in range(6):
+                  try:
+                      req=urllib.request.Request(base+name,headers={'Cache-Control':'no-cache','User-Agent':'DINOBOTS-release-verification'})
+                      with urllib.request.urlopen(req,timeout=15) as r:
+                          assert r.status==200
+                          found=hashlib.sha256(r.read()).hexdigest()
+                      assert found==expected, name+' hash mismatch'
+                      break
+                  except Exception:
+                      if attempt==5: raise
+                      time.sleep(3)
+              checks.append({'path':name,'sha256':found,'status':200})
+              print('PASS live',name,flush=True)
+          with urllib.request.urlopen(base+'dinobots-test/',timeout=15) as r:
+              h=hashlib.sha256(r.read()).hexdigest()
+              assert h==hashlib.sha256(Path('dinobots-test/index.html').read_bytes()).hexdigest()
+          print('PASS canonical game URL')
+          Path('/tmp/dinobots-test-live-receipt.json').write_text(json.dumps({'url':base+'dinobots-test/','public_commit':'67fc15831d140a7d61993b224ed6de502909ce5c','checks':checks},indent=2))
           PY
-      - name: Commit only the isolated test distribution
-        run: |
-          test "$GITHUB_REF" = 'refs/heads/deploy/dinobots-test-20261015'
-          git fetch --depth=1 origin 861830188f64209a99e58b624f6634cbf9a90004
-          git diff --exit-code 861830188f64209a99e58b624f6634cbf9a90004 -- bip robomorph lexis dinobots index.html README.md
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add dinobots-test
-          git diff --cached --check
-          git commit -m 'build: verified isolated DINOBOTS TEST 0.3.1 [skip ci]'
-          git push origin HEAD:refs/heads/deploy/dinobots-test-20261015
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dinobots-test-live-verification
+          path: /tmp/dinobots-test-live-receipt.json
+          retention-days: 7
