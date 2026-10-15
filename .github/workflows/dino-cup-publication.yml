@@ -1,0 +1,47 @@
+name: Prepare DINO CUP distribution
+on:
+  push:
+    branches: ['deploy/dino-cup-20261015']
+permissions:
+  contents: write
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify and unpack approved public files
+        env:
+          APPROVED_DIST: 'https://sdmntprcentralus.oaiusercontent.com/files/00000000-1fc0-81f5-a671-328836e25ad4/raw?se=2026-10-15T15%3A07%3A06Z&sp=r&sv=2026-02-06&sr=b&scid=3a442694-d926-57ca-ad05-2abd8bd1a054&skoid=82a3371f-2f6c-4f81-8a78-2701b362559b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-15T05%3A15%3A32Z&ske=2026-10-16T05%3A15%3A32Z&sks=b&skv=2026-02-06&sig=1z2NIlD3FGk6WhWbKcIX06lorZrj5WjXcnTwl6%2BHJy4%3D'
+        run: |
+          python - <<'PY'
+          import os,urllib.request,io,zipfile,hashlib,json
+          from pathlib import Path
+          raw=urllib.request.urlopen(os.environ['APPROVED_DIST'],timeout=60).read()
+          assert hashlib.sha256(raw).hexdigest()=='4f2d033d293ecd15f066228467aa5c38a1d6e1d5a8b9e90dd5bae76b51bca747'
+          expected={'manifest.webmanifest':'a808ae6b3ef81a72d9ba95ff500914f4944fa7ffd32630902d7ae901fa84364c','index.html':'2adf9f065d184dff1b732f18588f7a1bd2dfea93f9271508480e7e6c6a9dbc7c','three.min.js':'9274bbcec8d96168626c732b5d31c775aa8cfb7eaa0599bec0c175908a2c1ce2','sw.js':'b9846c14dd80fe2c588858fb914eaf164b8ab057f8f04c820ef56b935ec2adb6','icon.svg':'33deb3ac9f8dc4b620832bbef04fcd58837727151a8cf5740ac04c8de986963a','icon-512.png':'f59f1567f79cc9a4ab42603b17aa3ee21fb879def0dc94f30cea42bb3bbb9cc2','icon-192.png':'7e28e08f33004b51c6b956bc18e73056b700e98458e86e076c11a9de74fa25c4'}
+          z=zipfile.ZipFile(io.BytesIO(raw));assert set(z.namelist())==set(expected)
+          out=Path('dino-cup');out.mkdir(exist_ok=False)
+          for name,sha in expected.items():
+              data=z.read(name);assert hashlib.sha256(data).hexdigest()==sha,name
+              (out/name).write_bytes(data)
+          h=(out/'index.html').read_text()
+          for bad in ['/home/','/mnt/','/tmp/','@gmail','scratchpad','/*@']:assert bad not in h,bad
+          assert "KEY='agis.dinocup.v1'" in h
+          assert 'agis.dinobots.save' not in h and 'bip-save-v1' not in h
+          assert json.loads((out/'manifest.webmanifest').read_text())['id']=='/agis-learning-games/dino-cup/'
+          assert "PREFIX='agis-dinocup-'" in (out/'sw.js').read_text()
+          print('PASS: all seven hashes, independent save/cache/installation identity and distribution allowlist')
+          PY
+      - name: Commit distribution to staging branch only
+        run: |
+          test "$GITHUB_REF" = 'refs/heads/deploy/dino-cup-20261015'
+          git diff --exit-code 67fc15831d140a7d61993b224ed6de502909ce5c -- bip dinobots dinobots-test lexis robomorph index.html README.md
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add dino-cup
+          git diff --cached --check
+          git commit -m 'build(dino-cup): verified standalone 0.1.0 distribution [skip ci]'
+          git push origin HEAD:refs/heads/deploy/dino-cup-20261015
