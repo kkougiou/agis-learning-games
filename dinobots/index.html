@@ -376,7 +376,12 @@ body.flat #gl{visibility:hidden}
   .c3d{flex-direction:column}
   .c3d-left{flex:none}
   .c3d-left .runbar{margin-top:0}
-  .c3d-ed{width:auto;height:48vh;flex:none;margin-top:auto}
+  .c3d-ed{width:auto;height:32vh;flex:none;margin-top:auto}
+  .s3d .c3d-left .talk{font-size:.95rem}
+  .s3d .c3d-left{gap:8px}
+  .c3d-ed .ed-pal{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;max-height:none;flex:none;touch-action:pan-x}
+  .c3d-ed .ed-pal .b{flex:none}
+  .c3d-ed .ed-prog{min-height:70px}
   .hubscr .hubside{top:auto;bottom:12px;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));width:auto;flex-direction:row;overflow-x:auto}
   .hubscr .hubside h3{display:none}
   .hubscr .hubside .card{min-width:220px}
@@ -407,6 +412,12 @@ body.flat #gl{visibility:hidden}
 .arena3d .c3d.playing .c3d-ed{display:none}
 .score .sc b{white-space:nowrap}
 @media (max-width:520px){.score{font-size:1rem;gap:6px}.score .sc{gap:6px;flex-wrap:wrap;justify-content:center}.score .sc span{font-size:.85rem}.score .sc b{font-size:1.2rem}}
+/* museum (v0.3) */
+.mus3d .mbtns{gap:8px;flex-wrap:wrap}
+.mus3d .btn.on{background:var(--cyan);color:#1d1530}
+.mus3d .minfo{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border:3px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--yellow) 22%,var(--paper));line-height:1.35}
+.mus3d .minfo b{font-size:1.05rem}
+@media (max-aspect-ratio:1/1),(max-width:820px){.mus3d .opts{height:auto;max-height:46vh}}
 
 </style>
 </head>
@@ -1038,6 +1049,77 @@ body.flat #gl{visibility:hidden}
   const PATTERNS = [{ id: 'none', name: 'Καθαρό', at: 0 }, { id: 'stripes', name: 'Ρίγες', at: 15 }, { id: 'spots', name: 'Βούλες', at: 30 }, { id: 'bolt', name: 'Κεραυνός', at: 60 }, { id: 'stars', name: 'Αστέρια', at: 90 }];
   const ACCS = [{ id: 'none', name: 'Τίποτα', at: 0 }, { id: 'antenna', name: 'Κεραία', at: 10 }, { id: 'cap', name: 'Καπέλο', at: 25 }, { id: 'scarf', name: 'Κασκόλ', at: 40 }, { id: 'jet', name: 'Τζετ', at: 80 }, { id: 'crown', name: 'Κορώνα', at: 120 }];
   const SEC_AT = 15;           // second colour opens at 15 stars
+  /* v0.3 parts from the workshop (fixed star counts, like every other unlock) */
+  const ARMOURS = [{ name: 'Κλασική', at: 0 }, { name: 'Αγκάθια', at: 20 }, { name: 'Αγωνιστική', at: 50 }, { name: 'Βαριά', at: 85 }];
+  const TIPS = [{ name: 'Απλή', at: 0 }, { name: 'Ρόπαλο', at: 30 }, { name: 'Αγκάθια', at: 65 }, { name: 'Πύραυλος', at: 110 }];
+
+  /* Museum: what each Dinobot part does (robot) … */
+  const PARTS = {
+    head: ['Κεφάλι', 'Εδώ μέσα είναι ο υπολογιστής που τρέχει τα προγράμματά σου.'],
+    eye: ['Μάτι-κάμερα', 'Οι κάμερες βλέπουν τοίχους, νερό και χρώματα. Είναι οι αισθητήρες που ρωτάς με το ΑΝ!'],
+    jaw: ['Σαγόνι', 'Ένας άξονας το ανοιγοκλείνει, σαν δαγκάνα.'],
+    teeth: ['Δόντια', 'Μεταλλικά δόντια, στη θέση που είχε και ο αληθινός δεινόσαυρος.'],
+    neck: ['Λαιμός', 'Ένα έμβολο σηκώνει και κατεβάζει το κεφάλι.'],
+    torso: ['Θωράκιση', 'Οι πλάκες της θωράκισης προστατεύουν τα μηχανήματα από μέσα.'],
+    heart: ['Κρύσταλλος-καρδιά', 'Ο κρύσταλλος δίνει ενέργεια σε όλο το Dinobot.'],
+    joint: ['Άρθρωση', 'Οι αρθρώσεις γυρίζουν, όπως ο αγκώνας και το γόνατό σου.'],
+    piston: ['Έμβολο', 'Το έμβολο σπρώχνει και τραβάει, για να κινηθεί το πόδι.'],
+    cable: ['Καλώδιο', 'Τα καλώδια φέρνουν ρεύμα και μηνύματα από το κεφάλι στο σώμα.'],
+    leg: ['Πόδι', 'Δυνατά πόδια με μοτέρ, για περπάτημα και τρέξιμο.'],
+    foot: ['Πατούσα', 'Τα δάχτυλα κρατούν την ισορροπία.'],
+    claw: ['Νύχι', 'Κοφτερά νύχια για να πατάει σταθερά.'],
+    sickle: ['Κυρτό νύχι', 'Το μεγάλο κυρτό νύχι μένει ψηλά, για να μη στομώνει στο περπάτημα.'],
+    arm: ['Χέρι', 'Μικρά χέρια με νύχια για να πιάνει.'],
+    feather: ['Φτερά', 'Μεταλλικά φτερά, γιατί ο αληθινός Βελοσιράπτορας είχε φτερά!'],
+    tail: ['Ουρά', 'Η ουρά κρατά την ισορροπία όταν τρέχει.'],
+    tip: ['Εργαλείο ουράς', 'Το εργαλείο που διάλεξες στο εργαστήρι.'],
+    fins: ['Πτερύγια', 'Τα πτερύγια στην πλάτη βγάζουν έξω τη ζέστη από τα μοτέρ.'],
+    spikes: ['Αγκάθια', 'Αγκάθια για άμυνα.'],
+    frill: ['Γιακάς', 'Ο γιακάς προστατεύει τον λαιμό, και τα φωτάκια του δείχνουν αν το Dinobot είναι έτοιμο.'],
+    horn: ['Κέρατο', 'Σκληρά κέρατα, όπως του αληθινού Τρικεράτωπα.'],
+    beak: ['Ράμφος', 'Ράμφος για να κόβει φυτά, σαν του παπαγάλου.'],
+    plates: ['Πλάκες', 'Οι πλάκες στην πλάτη φωτίζουν όταν το Dinobot έχει ενέργεια.'],
+    bolt: ['Βίδα', 'Οι βίδες κρατούν τη θωράκιση στη θέση της.'],
+    skull: ['Σκελετός', 'Ο μεταλλικός σκελετός κρατά όλα τα κομμάτια μαζί.'],
+    spine: ['Σκελετός', 'Ο μεταλλικός σκελετός κρατά όλα τα κομμάτια μαζί.'],
+    ribs: ['Σκελετός', 'Ο μεταλλικός σκελετός κρατά όλα τα κομμάτια μαζί.'],
+    bone: ['Σκελετός', 'Ο μεταλλικός σκελετός κρατά όλα τα κομμάτια μαζί.']
+  };
+  /* … and what the real fossil shows (child-level, conservative; checked against standard references) */
+  const FOSSIL_FACTS = {
+    trex: {
+      skull: 'Το κρανίο του Τυραννόσαυρου ήταν περίπου ενάμισι μέτρο μακρύ, πιο μακρύ από ένα παιδί!',
+      teeth: 'Είχε περίπου 60 δόντια. Τα μεγαλύτερα ήταν σαν μπανάνες.',
+      arm: 'Τα χέρια του ήταν μικρά και είχαν μόνο δύο δάχτυλα.',
+      leg: 'Περπατούσε στα δύο δυνατά πίσω πόδια του.',
+      tail: 'Η μεγάλη ουρά ζύγιζε απέναντι από το βαρύ κεφάλι, σαν τραμπάλα.',
+      body: 'Τα πλευρά προστάτευαν την καρδιά και τους πνεύμονες.'
+    },
+    raptor: {
+      skull: 'Είχε μακρύ, στενό κεφάλι με κοφτερά δόντια.',
+      sickle: 'Το κυρτό νύχι στο δεύτερο δάχτυλο κάθε ποδιού ήταν περίπου 6 εκατοστά.',
+      arm: 'Στα κόκαλα των χεριών του βρέθηκαν σημάδια από φτερά.',
+      leg: 'Ήταν γρήγορος και περπατούσε στα δύο πόδια.',
+      tail: 'Η ουρά του ήταν σκληρή και ίσια, και τον βοηθούσε στις στροφές.',
+      body: 'Ήταν περίπου όσο ένας μεγάλος σκύλος.'
+    },
+    trike: {
+      skull: 'Το κρανίο του είναι από τα μεγαλύτερα κρανία ζώων της ξηράς που έχουν βρεθεί.',
+      horn: 'Τα δύο κέρατα πάνω από τα μάτια ήταν μέχρι ένα μέτρο μακριά.',
+      frill: 'Ο μεγάλος γιακάς ήταν φτιαγμένος από κόκαλο.',
+      beak: 'Το στόμα του τελείωνε σε ράμφος, σαν του παπαγάλου, για να κόβει φυτά.',
+      leg: 'Περπατούσε στα τέσσερα πόδια.',
+      body: 'Ήταν βαρύς σαν ελέφαντας.'
+    },
+    stego: {
+      plates: 'Είχε 17 πλάκες σε δύο σειρές στην πλάτη.',
+      spikes: 'Στην άκρη της ουράς είχε τέσσερα αγκάθια για να αμύνεται.',
+      skull: 'Το κεφάλι του ήταν πολύ μικρό για το μεγάλο σώμα του.',
+      leg: 'Τα μπροστινά πόδια του ήταν πιο κοντά από τα πίσω.',
+      tail: 'Στην άκρη της ουράς είχε τέσσερα αγκάθια για να αμύνεται.',
+      body: 'Έτρωγε φυτά που φύτρωναν χαμηλά.'
+    }
+  };
 
   /* Parent-facing names (calibrated, non-diagnostic). */
   const SKILL_EL = {
@@ -1058,7 +1140,7 @@ body.flat #gl{visibility:hidden}
 
   root.DinoContent = {
     SPECIES, FOSSIL_ORDER, BIOMES, FAMS, KIND_BADGE, HINTS, PRAISE, RETRY, CHAPTERS, AFTER_STORY, BUILDINGS,
-    CODE, COLORS, GLOWS, PATTERNS, ACCS, SEC_AT, SKILL_EL, MASTERY_EL, EVIDENCE_EL, MODE_EL, FAM_EL
+    CODE, COLORS, GLOWS, PATTERNS, ACCS, SEC_AT, ARMOURS, TIPS, PARTS, FOSSIL_FACTS, SKILL_EL, MASTERY_EL, EVIDENCE_EL, MODE_EL, FAM_EL
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = root.DinoContent;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
@@ -3025,7 +3107,7 @@ const App = (function () {
   const E = AgisEngine, G = DinoGen, C = DinoContent, A = DinoArt, I = A.I;
   const $ = s => document.querySelector(s), $$ = s => Array.from(document.querySelectorAll(s));
   const app = () => $('#app');
-  const SKEY = 'agis.dinobots.save', EKEY = 'agis.dinobots.engine', SAVE_V = 1, GAME_V = '0.2.0';
+  const SKEY = 'agis.dinobots.save', EKEY = 'agis.dinobots.engine', SAVE_V = 1, GAME_V = '0.3.0';
   const now = () => (App.clock ? App.clock() : Date.now());
 
   /* ---------- state ---------- */
@@ -4844,6 +4926,37 @@ const D3 = (function () {
     if (opts.flat) m.flatShading = true;
     matCache.set(k, m); return m;
   }
+  /* reflections for the metal Dinobots: a small studio environment, prefiltered once */
+  let envTex = null;
+  function env() {
+    if (envTex || !renderer) return envTex;
+    const pm = new THREE.PMREMGenerator(renderer), s = new THREE.Scene();
+    const geo = new THREE.SphereGeometry(10, 32, 16), pos = geo.attributes.position, cols = [];
+    const top = lin('#e6f6ff'), mid = lin('#8fb0d8'), hor = lin('#ffd9a8'), gnd = lin('#3b3552');
+    for (let i = 0; i < pos.count; i++) {
+      const y = pos.getY(i) / 10;
+      const c = y > 0.15 ? mid.clone().lerp(top, (y - 0.15) / 0.85) : y > -0.05 ? hor.clone().lerp(mid, (y + 0.05) / 0.2) : gnd.clone().lerp(hor, Math.max(0, 1 + y * 4));
+      cols.push(c.r, c.g, c.b);
+    }
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+    s.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
+    [[5, 7, 4, 5, 3, 6], [-6, 3, -3, 3, 4, 2.5], [0, 2, -8, 6, 1.5, 1.8], [-3, 6, 6, 2, 2, 2]].forEach(([x, y, z, w, h, k]) => {
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(k, k, k), side: THREE.DoubleSide }));
+      m.position.set(x, y, z); m.lookAt(0, 0, 0); s.add(m);
+    });
+    envTex = pm.fromScene(s, 0.03).texture; pm.dispose();
+    return envTex;
+  }
+  /* painted or bare metal (MeshStandardMaterial with the studio reflections); cached like toon() */
+  function metal(color, rough, metalness, opts) {
+    opts = opts || {};
+    const k = 'm|' + color + '|' + rough + '|' + metalness + '|' + (opts.emissive || '') + '|' + (opts.opacity == null ? '' : opts.opacity);
+    if (matCache.has(k)) return matCache.get(k);
+    const m = new THREE.MeshStandardMaterial({ color: lin(color), roughness: rough == null ? 0.4 : rough, metalness: metalness == null ? 0.5 : metalness, envMap: env(), envMapIntensity: 1.1 });
+    if (opts.emissive) { m.emissive = lin(opts.emissive); m.emissiveIntensity = opts.ei || 1; }
+    if (opts.opacity != null) { m.transparent = true; m.opacity = opts.opacity; m.depthWrite = false; }
+    matCache.set(k, m); return m;
+  }
   const glow = (color, intensity) => { const m = new THREE.MeshBasicMaterial({ color: lin(color) }); m.color.multiplyScalar(intensity || 1); return m; };
   const INK = '#1d1530';
   let inkMat = null;
@@ -5033,8 +5146,494 @@ const D3 = (function () {
   }
   function disposeTree(obj) { obj.traverse(o => { if (o.geometry && !o.userData.isOutline) o.geometry.dispose(); if (o.material && o.material.map) o.material.map.dispose(); }); }
 
-  return { lin, ok, supported, init, show, start, stop, resize, onFrame, toon, glow, outline, shadows, G, mesh, group, lights, setTime, orbit, pick, groundPoint,
+  return { lin, ok, supported, init, show, start, stop, resize, onFrame, toon, metal, env, glow, outline, shadows, G, mesh, group, lights, setTime, orbit, pick, groundPoint,
     addLabel, clearLabels, particles, canvasTex, textSprite, disposeTree, INK, get renderer() { return renderer; }, get active() { return active; }, get quality() { return quality; } };
+})();
+
+/* ---- games/dinobots/src/dinomech.js ---- */
+/* DINOBOTS "machine" Dinobots (v0.3): detailed procedural robot dinosaurs, original designs.
+ * Every Dinobot is built in four layers so the museum can take it apart and put it together again:
+ *   0 skeleton (inner frame; becomes the fossil),  1 mechanics (joints, pistons, cables, crystal heart),
+ *   2 armour (painted plates),                      3 anatomy (teeth, claws, horns, frill, plates: robot metal or fossil bone).
+ * Shapes follow the real animals: T. rex skull and tiny two-fingered arms, Velociraptor sickle claw and feathers,
+ * Triceratops frill and three horns, Stegosaurus 17 back plates and four tail spikes.
+ * Faces +Z, stands on y = 0, rig in the same shape as before (hips, body, head, jaw, legs[shin], tail[]). */
+/* global THREE, D3 */
+const DinoMech = (function () {
+  'use strict';
+  const { mesh, group } = D3;
+  const def = (v, d) => (v == null ? d : v);
+  const lerp = (a, b, t) => a + (b - a) * t;
+
+  /* ---------------- geometry (cached; identical parts share one geometry) ---------------- */
+  const cache = new Map();
+  const cg = (k, f) => { let g = cache.get(k); if (!g) { g = f(); cache.set(k, g); } return g; };
+  const r3 = v => Math.round(v * 1000) / 1000;
+
+  /* box with rounded edges and true normals; optional taper along z (back → front) and a droop ("lift") */
+  function rbox(w, h, d, r, o) {
+    o = o || {};
+    r = Math.max(0.004, Math.min(r, w / 2 - 0.002, h / 2 - 0.002, d / 2 - 0.002));
+    const key = ['rb', w, h, d, r, o.tx0, o.tx1, o.ty0, o.ty1, o.lift].map(v => (typeof v === 'number' ? r3(v) : v)).join('|');
+    return cg(key, () => {
+      const seg = 3, n = seg * 2 + 1;
+      const g = new THREE.BoxGeometry(1, 1, 1, n, n, n);
+      const pos = g.attributes.position, nor = g.attributes.normal;
+      const hw = [w / 2, h / 2, d / 2], inner = hw.map(v => v - r);
+      const remap = (u, i) => {
+        const k = Math.round((u + 0.5) * n);
+        if (k <= seg) return -hw[i] + (k / seg) * r;
+        if (k >= n - seg) return inner[i] + ((k - (n - seg)) / seg) * r;
+        return -inner[i] + ((k - seg) / (n - 2 * seg)) * 2 * inner[i];
+      };
+      const tx0 = def(o.tx0, 1), tx1 = def(o.tx1, 1), ty0 = def(o.ty0, 1), ty1 = def(o.ty1, 1), lift = o.lift || 0;
+      for (let i = 0; i < pos.count; i++) {
+        const p = [remap(pos.getX(i), 0), remap(pos.getY(i), 1), remap(pos.getZ(i), 2)];
+        const c = p.map((v, j) => Math.max(-inner[j], Math.min(inner[j], v)));
+        let dx = p[0] - c[0], dy = p[1] - c[1], dz = p[2] - c[2];
+        const L = Math.hypot(dx, dy, dz) || 1; dx /= L; dy /= L; dz /= L;
+        const x = c[0] + dx * r, y = c[1] + dy * r, z = c[2] + dz * r;
+        const t = (z + hw[2]) / d, sx = lerp(tx0, tx1, t), sy = lerp(ty0, ty1, t);
+        pos.setXYZ(i, x * sx, y * sy + lift * t, z);
+        const nx = dx / sx, ny = dy / sy, nl = Math.hypot(nx, ny, dz) || 1;
+        nor.setXYZ(i, nx / nl, ny / nl, dz / nl);
+      }
+      g.computeBoundingSphere();
+      return g;
+    });
+  }
+  /* capsule along Y (two radii), as a lathe */
+  function capsule(r0, r1, len, rs) {
+    return cg(['cap', r3(r0), r3(r1), r3(len), rs || 12].join('|'), () => {
+      const pts = [], n = 5;
+      for (let i = 0; i <= n; i++) { const a = -Math.PI / 2 + (i / n) * Math.PI / 2; pts.push(new THREE.Vector2(Math.max(0.0001, Math.cos(a) * r0), -len / 2 + Math.sin(a) * r0)); }
+      for (let i = 0; i <= n; i++) { const a = (i / n) * Math.PI / 2; pts.push(new THREE.Vector2(Math.max(0.0001, Math.cos(a) * r1), len / 2 + Math.sin(a) * r1)); }
+      return new THREE.LatheGeometry(pts, rs || 12);
+    });
+  }
+  const sph = (r, ws, hs) => cg(['s', r3(r), ws || 14, hs || 10].join('|'), () => new THREE.SphereGeometry(r, ws || 14, hs || 10));
+  const cyl = (rt, rb, h, s) => cg(['c', r3(rt), r3(rb), r3(h), s || 14].join('|'), () => new THREE.CylinderGeometry(rt, rb, h, s || 14));
+  const cone = (r, h, s) => cg(['k', r3(r), r3(h), s || 8].join('|'), () => new THREE.ConeGeometry(r, h, s || 8));
+  const ring = (r, t, arc) => cg(['t', r3(r), r3(t), r3(arc || 6.2832)].join('|'), () => new THREE.TorusGeometry(r, t, 6, 18, arc || Math.PI * 2));
+  const ico = r => cg('i|' + r3(r), () => new THREE.IcosahedronGeometry(r, 0));
+  /* flat plate from a 2D outline (u = forward, v = up), extruded sideways and bevelled */
+  function plate(key, pts, thick, bevel) {
+    return cg(['pl', key, r3(thick), r3(bevel || 0)].join('|'), () => {
+      const s = new THREE.Shape(); pts.forEach(([u, v], i) => (i ? s.lineTo(u, v) : s.moveTo(u, v))); s.closePath();
+      const b = bevel || 0;
+      const g = new THREE.ExtrudeGeometry(s, { depth: thick, bevelEnabled: b > 0, bevelThickness: b, bevelSize: b, bevelSegments: 2, curveSegments: 6 });
+      g.translate(0, 0, -thick / 2); g.rotateY(-Math.PI / 2);   // extrusion now runs along x (sideways), u along +z
+      g.computeVertexNormals(); g.computeBoundingSphere();
+      return g;
+    });
+  }
+  const finPts = (L, H) => [[L * 0.5, 0], [-L * 0.5, 0], [-L * 0.62, H * 0.7], [-L * 0.45, H], [L * 0.1, H * 0.35]];
+  const fin = (L, H, t) => plate('fin' + r3(L) + 'x' + r3(H), finPts(L, H), t || 0.025, 0.006);
+  /* Stegosaurus plate: broad base, widest low down, pointed top */
+  const leafPts = (W, H) => {
+    const N = 12, right = [], left = [];
+    for (let i = 0; i <= N; i++) { const t = i / N, half = W * 0.5 * Math.sin(Math.PI * (0.16 + 0.84 * Math.pow(t, 0.8))); right.push([half, t * H]); left.unshift([-half, t * H]); }
+    return right.concat(left.slice(1, -1));
+  };
+  const scallop = (R, n, kIn) => { const pts = []; for (let i = 0; i <= n * 2; i++) { const a = (i / (n * 2)) * Math.PI; const rr = i % 2 ? R * (kIn || 0.9) : R; pts.push([Math.cos(a) * rr, Math.sin(a) * rr]); } return pts; };
+
+  let haloTex = null;
+  function halo() {
+    if (haloTex) return haloTex;
+    const c = document.createElement('canvas'); c.width = c.height = 64;
+    const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.25, 'rgba(255,255,255,.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    x.fillStyle = gr; x.fillRect(0, 0, 64, 64);
+    haloTex = new THREE.CanvasTexture(c); return haloTex;
+  }
+
+  /* ---------------- materials ---------------- */
+  function mats(p, fossil) {
+    const bone = D3.metal('#e8d8b4', 0.82, 0.0);
+    return {
+      paint: D3.metal(p.col, 0.3, 0.35), paint2: D3.metal(p.sec, 0.34, 0.35),
+      frame: fossil ? bone : D3.metal('#a7b0c4', 0.32, 0.9), boneDark: D3.metal('#6b5a44', 0.9, 0),
+      dark: D3.metal('#2a2f47', 0.42, 0.75), chrome: D3.metal('#eef2f8', 0.12, 1.0), rubber: D3.metal('#1d2032', 0.75, 0.15),
+      ivory: D3.metal('#f3e9d0', 0.28, 0.25), gold: D3.metal('#ffcf4a', 0.22, 1.0),
+      eye: D3.glow(p.eye, 1.6), heart: D3.metal(p.eye, 0.1, 0.3, { emissive: p.eye, ei: 0.8 }), glass: D3.metal('#0e1430', 0.08, 0.6), bone
+    };
+  }
+
+  /* ---------------- build context ---------------- */
+  function ctx(p, cfg, opts) {
+    const fossil = !!opts.fossil, skel = fossil || !!opts.skel, low = opts.lod === 'low';
+    const M = mats(p, fossil), parts = [];
+    const nothing = () => new THREE.Group();          // parts that are not built in this mode still accept children harmlessly
+    function add(parent, layer, part, geo, mat, pos, rot, scale, fine) {
+      if (fossil && (layer === 1 || layer === 2)) return nothing();
+      if (!skel && layer === 0) return nothing();
+      if (low && fine) return nothing();
+      if (fossil) mat = layer === 0 && mat === M.dark ? M.boneDark : M.bone;
+      const m = mesh(geo, mat, pos, rot, scale);
+      m.userData.layer = layer; m.userData.part = part;
+      parent.add(m); parts.push(m);
+      return m;
+    }
+    const piv = (parent, pos) => { const g = group([], pos); parent.add(g); return g; };
+    /* a group at a with +Y pointing at b; returns { g, L } */
+    function between(parent, a, b) {
+      const A = new THREE.Vector3(...a), Bv = new THREE.Vector3(...b), d = Bv.clone().sub(A), L = d.length();
+      const g = piv(parent, a); g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+      return { g, L };
+    }
+    function piston(parent, a, b, r, part) {
+      const { g, L } = between(parent, a, b);
+      add(g, 1, part || 'piston', cyl(r, r, L * 0.56, 10), M.dark, [0, L * 0.28, 0]);
+      add(g, 1, part || 'piston', cyl(r * 0.5, r * 0.5, L * 0.5, 8), M.chrome, [0, L * 0.72, 0]);
+      add(g, 1, part || 'piston', cyl(r * 1.25, r * 1.25, r * 0.6, 10), M.chrome, [0, L * 0.56, 0], null, null, true);
+      return g;
+    }
+    function bone(parent, a, b, r, part) {
+      const { g, L } = between(parent, a, b);
+      add(g, 0, part || 'bone', capsule(r, r * 0.85, Math.max(0.01, L - r * 1.6), 8), M.frame, [0, L / 2, 0]);
+      return g;
+    }
+    function cable(parent, pts, r) {
+      if (low || fossil) return;
+      const key = 'cb|' + pts.map(q => q.map(r3).join(',')).join(';') + '|' + r;
+      const geo = cg(key, () => new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(q => new THREE.Vector3(...q))), 16, r, 6, false));
+      add(parent, 1, 'cable', geo, M.rubber);
+    }
+    function bolts(parent, list, r, axis) {
+      list.forEach(q => add(parent, 2, 'bolt', cyl(r, r, r * 0.8, 8), M.chrome, q, axis === 'x' ? [0, 0, Math.PI / 2] : axis === 'z' ? [Math.PI / 2, 0, 0] : null, null, true));
+    }
+    function joint(parent, pos, r, part) {
+      add(parent, 1, part || 'joint', sph(r, 12, 8), M.dark, pos);
+    }
+    function eye(parent, pos, side, size) {
+      const s = size || 1;
+      add(parent, 2, 'eye', rbox(0.05 * s, 0.075 * s, 0.11 * s, 0.018 * s), M.dark, pos);
+      add(parent, 1, 'eye', rbox(0.02 * s, 0.038 * s, 0.075 * s, 0.008 * s), M.eye, [pos[0] + side * 0.024 * s, pos[1], pos[2] + 0.005]);
+      if (!low && !fossil) {
+        const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: halo(), color: p.eye, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.85 }));
+        sp.scale.setScalar(0.16 * s); sp.position.set(pos[0] + side * 0.045 * s, pos[1], pos[2] + 0.01);
+        sp.userData.layer = 1; sp.userData.part = 'eye'; sp.userData.halo = true; parent.add(sp); parts.push(sp);
+      }
+    }
+    function vertebrae(parent, a, b, n, size, part) {
+      for (let i = 0; i < n; i++) {
+        const t = (i + 0.5) / n, q = [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
+        add(parent, 0, part || 'spine', rbox(size, size * 0.8, size * 0.8, size * 0.25), M.frame, q);
+        add(parent, 0, part || 'spine', rbox(size * 0.25, size * 0.9, size * 0.45, size * 0.1), M.frame, [q[0], q[1] + size * 0.75, q[2]], null, null, true);
+      }
+    }
+    function ribs(parent, z0, z1, n, y, rx, ry) {
+      for (let i = 0; i < n; i++) {
+        const t = n === 1 ? 0.5 : i / (n - 1), z = lerp(z0, z1, t), k = 1 - Math.abs(t - 0.45) * 0.7;
+        add(parent, 0, 'ribs', ring(1, 0.04 / Math.max(rx, ry), Math.PI * 0.92), M.frame, [0, y, z], [0, 0, Math.PI * 1.04], [rx * k, ry * k, 1]);
+      }
+    }
+    return { M, add, piv, between, piston, bone, cable, bolts, joint, eye, vertebrae, ribs, parts, fossil, skel, low, p, cfg };
+  }
+
+  /* ---------------- shared limbs ---------------- */
+  function legBiped(B, hips, x, s, o) {
+    o = o || {};
+    const { M, add, piv, joint, piston, bone } = B, sd = Math.sign(x);
+    const hip = piv(hips, [x, 0, 0]);
+    joint(hip, [0, 0, 0], 0.1 * s, 'joint');
+    add(hip, 1, 'joint', cyl(0.075 * s, 0.075 * s, 0.03, 16), M.chrome, [sd * 0.095 * s, 0, 0], [0, 0, Math.PI / 2]);
+    add(hip, 2, 'leg', rbox(0.2 * s, 0.4 * s, 0.3 * s, 0.085 * s, { ty0: 0.9, tx0: 0.9 }), M.paint, [0, -0.15 * s, 0.03 * s], [0.12, 0, 0]);
+    add(hip, 2, 'leg', rbox(0.035 * s, 0.24 * s, 0.2 * s, 0.014 * s), M.paint2, [sd * 0.105 * s, -0.13 * s, 0.03 * s], [0.12, 0, 0]);
+    B.bolts(hip, [[sd * 0.125 * s, -0.04 * s, 0.09 * s], [sd * 0.125 * s, -0.22 * s, 0.07 * s]], 0.014 * s, 'x');
+    bone(hip, [0, 0, 0], [0, -0.33 * s, -0.02 * s], 0.035 * s, 'leg');
+    const shin = piv(hip, [0, -0.33 * s, -0.02 * s]);
+    joint(shin, [0, 0, 0], 0.075 * s, 'joint');
+    piston(shin, [0, -0.02 * s, 0.0], [0, -0.25 * s, -0.05 * s], 0.035 * s, 'piston');
+    add(shin, 2, 'leg', rbox(0.11 * s, 0.24 * s, 0.06 * s, 0.025 * s), M.paint, [0, -0.13 * s, 0.05 * s], [-0.18, 0, 0]);
+    bone(shin, [0, 0, 0], [0, -0.27 * s, -0.05 * s], 0.025 * s, 'leg');
+    joint(shin, [0, -0.27 * s, -0.05 * s], 0.045 * s, 'joint');
+    const foot = piv(shin, [0, -0.27 * s, -0.05 * s]);
+    add(foot, 2, 'foot', rbox(0.12 * s, 0.05 * s, 0.12 * s, 0.02 * s), M.dark, [0, -0.035 * s, 0.01 * s]);
+    [-0.38, 0, 0.38].forEach((a, i) => {
+      const toe = piv(foot, [0, -0.035 * s, 0.04 * s]); toe.rotation.y = a;
+      add(toe, 2, 'foot', rbox(0.05 * s, 0.045 * s, 0.13 * s, 0.018 * s, { tx1: 0.8 }), M.paint2, [0, 0, 0.07 * s]);
+      add(toe, 0, 'foot', capsule(0.012 * s, 0.01 * s, 0.1 * s, 6), M.frame, [0, 0, 0.06 * s], [Math.PI / 2, 0, 0]);
+      add(toe, 3, 'claw', cone(0.02 * s, 0.07 * s, 6), M.chrome, [0, -0.005, 0.16 * s], [Math.PI / 2, 0, 0]);
+      if (o.sickle && i === (sd < 0 ? 2 : 0)) {
+        // Velociraptor: the big curved claw on the second toe, held up off the ground
+        add(toe, 3, 'sickle', ring(0.055 * s, 0.014 * s, Math.PI * 0.8), M.chrome, [0, 0.03 * s, 0.07 * s], [0, Math.PI / 2, 0.4]);
+      }
+    });
+    hip.userData.shin = shin;
+    return hip;
+  }
+  function legQuad(B, hips, x, y, z, s, h, front) {
+    const { M, add, piv, joint, piston, bone } = B, sd = Math.sign(x);
+    const leg = piv(hips, [x, y, z]);
+    joint(leg, [0, 0, 0], 0.13 * s, 'joint');
+    add(leg, 1, 'joint', cyl(0.095 * s, 0.095 * s, 0.03, 16), M.chrome, [sd * 0.12 * s, 0, 0], [0, 0, Math.PI / 2]);
+    add(leg, 2, 'leg', rbox(0.22 * s, h * 0.55, 0.26 * s, 0.08 * s), M.paint, [0, -h * 0.24, 0]);
+    add(leg, 2, 'leg', rbox(0.035 * s, h * 0.34, 0.18 * s, 0.014 * s), M.paint2, [sd * 0.115 * s, -h * 0.22, 0]);
+    B.bolts(leg, [[sd * 0.135 * s, -h * 0.1, 0.05 * s], [sd * 0.135 * s, -h * 0.34, -0.05 * s]], 0.015 * s, 'x');
+    bone(leg, [0, 0, 0], [0, -h + 0.06, front ? 0.03 : -0.02], 0.045 * s, 'leg');
+    joint(leg, [0, -h * 0.55, 0], 0.08 * s, 'joint');
+    piston(leg, [0, -h * 0.55, 0.06 * s], [0, -h + 0.08, 0.06 * s], 0.035 * s, 'piston');
+    add(leg, 2, 'leg', rbox(0.17 * s, h * 0.36, 0.18 * s, 0.05 * s, { tx0: 0.9 }), M.paint, [0, -h * 0.74, -0.02 * s]);
+    add(leg, 2, 'foot', cyl(0.15 * s, 0.17 * s, 0.08, 16), M.dark, [0, -h + 0.04, 0.02 * s]);
+    [-0.5, 0, 0.5].forEach(a => add(leg, 3, 'claw', rbox(0.05 * s, 0.05 * s, 0.07 * s, 0.02 * s), M.chrome, [Math.sin(a) * 0.14 * s, -h + 0.03, 0.02 * s + Math.cos(a) * 0.15 * s], [0, a, 0], null, true));
+    return leg;
+  }
+  function arm(B, parent, pos, s, fingers, feathers) {
+    const { M, add, piv, joint, bone } = B;
+    const a = piv(parent, pos); a.rotation.x = 0.5;
+    joint(a, [0, 0, 0], 0.035 * s, 'joint');
+    add(a, 2, 'arm', capsule(0.035 * s, 0.03 * s, 0.1 * s, 8), M.paint, [0, -0.07 * s, 0]);
+    bone(a, [0, 0, 0], [0, -0.13 * s, 0], 0.012 * s, 'arm');
+    const fa = piv(a, [0, -0.14 * s, 0]); fa.rotation.x = -1.1;
+    joint(fa, [0, 0, 0], 0.028 * s, 'joint');
+    add(fa, 2, 'arm', capsule(0.028 * s, 0.022 * s, 0.09 * s, 8), M.paint2, [0, -0.06 * s, 0]);
+    bone(fa, [0, 0, 0], [0, -0.12 * s, 0], 0.01 * s, 'arm');
+    for (let i = 0; i < fingers; i++) {
+      const off = (i - (fingers - 1) / 2) * 0.025 * s;
+      add(fa, 3, 'claw', cone(0.012 * s, 0.06 * s, 6), M.chrome, [off, -0.15 * s, 0.01 * s], [Math.PI, 0, 0]);
+    }
+    if (feathers) [0, 1, 2].forEach(i => add(fa, 2, 'feather', fin(0.16 * s, 0.07 * s, 0.012), M.paint2, [0, -0.03 * s - i * 0.035 * s, -0.025 * s], [Math.PI / 2 + 0.3, 0, 0], null, true));
+    return a;
+  }
+  /* a jointed tail; each segment pivots, the tip gets the chosen tail tool */
+  function tailChain(B, parent, pos, n, w0, len, o) {
+    const { M, add, piv, joint } = B; o = o || {};
+    const root = piv(parent, pos); let cur = root; const segs = [];
+    for (let i = 0; i < n; i++) {
+      const k = 1 - i / n, w = w0 * (0.35 + 0.65 * k), wn = w0 * (0.35 + 0.65 * (1 - (i + 1) / n));
+      const seg = piv(cur, [0, 0, i === 0 ? 0 : -len]);
+      joint(seg, [0, 0, 0], w * 0.36, 'joint');
+      add(seg, 2, 'tail', rbox(w, w * 0.84, len * 0.9, w * 0.3, { tx0: wn / w + 0.08, ty0: wn / w + 0.08 }), i % 2 && o.bands ? M.paint2 : M.paint, [0, 0, -len / 2]);
+      add(seg, 0, 'tail', rbox(w * 0.34, w * 0.3, len * 0.7, w * 0.08), M.frame, [0, 0, -len / 2]);
+      add(seg, 0, 'tail', rbox(w * 0.08, w * 0.45, len * 0.25, w * 0.03), M.frame, [0, w * 0.32, -len / 2], null, null, true);
+      if (!o.noFins) B.backs.push({ parent: seg, pos: [0, w * 0.42 * (wn / w + 0.08 + 1) / 2, -len / 2], s: w / w0 * 0.85, tail: true });
+      cur.add(seg); cur = seg; segs.push(seg);
+    }
+    return { root, segs, tip: cur, w: w0 * 0.35 };
+  }
+  /* tail tools from the workshop: club, spikes, thruster */
+  function tailTip(B, seg, w, len, tip) {
+    const { M, add } = B;
+    if (tip === 1) {
+      add(seg, 2, 'tip', sph(w * 1.15, 14, 10), M.dark, [0, 0, -len - w * 0.6], null, [1.15, 0.8, 1]);
+      [[1, 0], [-1, 0], [0, 1]].forEach(([x, y]) => add(seg, 2, 'tip', sph(w * 0.45, 10, 8), M.paint2, [x * w * 1.05, y * w * 0.7, -len - w * 0.6]));
+    } else if (tip === 2) {
+      [[0.6, 0.5], [-0.6, 0.5], [0.7, -0.1], [-0.7, -0.1]].forEach(([x, y]) => add(seg, 2, 'tip', cone(w * 0.28, w * 2.2, 8), M.chrome, [x * w, y * w, -len * 0.75], [0, 0, -Math.sign(x) * (Math.PI / 2 - 0.25 + y * 0.4)]));
+    } else if (tip === 3) {
+      add(seg, 2, 'tip', cyl(w * 0.7, w * 0.95, w * 1.2, 14), M.chrome, [0, 0, -len - w * 0.4], [Math.PI / 2, 0, 0]);
+      const f = add(seg, 2, 'tip', cone(w * 0.6, w * 2.4, 10), D3.glow('#ff8a1f', 1.5), [0, 0, -len - w * 2.1], [-Math.PI / 2, 0, 0]);
+      f.userData.flame = true;
+    }
+  }
+  /* back crest along every registered back point, in the chosen armour style */
+  function backCrest(B, style) {
+    const { M, add } = B;
+    B.backs.forEach((b, i) => {
+      const s = b.s || 1;
+      if (style === 1) add(b.parent, 2, 'spikes', cone(0.04 * s, 0.16 * s, 8), M.chrome, [b.pos[0], b.pos[1] + 0.06 * s, b.pos[2]], [-0.35, 0, 0]);
+      else add(b.parent, 2, 'fins', fin(0.16 * s, 0.1 * s, 0.022), i % 2 ? M.chrome : M.paint2, [b.pos[0], b.pos[1] - 0.01, b.pos[2]], null, null, true);
+    });
+  }
+  function addPattern(B, body, pat, size) {
+    const { M, add } = B, [w, h, d] = size;
+    if (pat === 'stripes') [-0.28, 0, 0.28].forEach(z => add(body, 2, 'torso', rbox(w * 1.06, h * 1.04, d * 0.08, 0.03), M.paint2, [0, 0, z * d]));
+    if (pat === 'spots') [[0.5, 0.2, 0.2], [-0.5, 0.15, -0.2], [0.5, -0.1, -0.25], [-0.5, 0.25, 0.25]].forEach(([x, y, z]) => add(body, 2, 'torso', sph(Math.min(w, h) * 0.12, 10, 8), M.paint2, [x * w * 1.0, y * h, z * d], null, [0.45, 1, 1]));
+    if (pat === 'bolt') [-1, 1].forEach(sd => add(body, 2, 'torso', plate('bolt', [[0.12, 0.12], [-0.02, 0.02], [0.04, 0.0], [-0.12, -0.12], [0.02, -0.02], [-0.04, 0]], 0.02, 0.004), D3.glow('#ffd21f', 1.3), [sd * w * 0.53, 0, 0]));
+    if (pat === 'stars') [[1, 0.2, 0.2], [-1, 0.1, -0.15], [1, -0.1, -0.25]].forEach(([sd, y, z]) => add(body, 2, 'torso', new THREE.OctahedronGeometry(Math.min(w, h) * 0.1, 0), D3.glow('#ffd21f', 1.3), [sd * w * 0.53, y * h, z * d]));
+  }
+  /* armour styles: 0 classic, 1 spiky, 2 racing (glowing side stripes), 3 heavy (extra shoulder plates) */
+  function armourStyle(B, rig, style, size) {
+    const { M, add } = B, [w, h, d] = size;
+    if (style === 2) [-1, 1].forEach(sd => { add(rig.body, 2, 'torso', rbox(0.02, 0.035, d * 0.8, 0.008), M.eye, [sd * w * 0.53, h * 0.12, 0]); add(rig.body, 2, 'torso', rbox(0.02, 0.02, d * 0.6, 0.006), M.eye, [sd * w * 0.53, -h * 0.05, 0]); });
+    if (style === 3) [-1, 1].forEach(sd => { add(rig.body, 2, 'torso', rbox(w * 0.32, h * 0.5, d * 0.38, 0.05, { ty0: 0.8 }), M.paint2, [sd * w * 0.45, h * 0.1, d * 0.22]); B.bolts(rig.body, [[sd * w * 0.62, h * 0.2, d * 0.15], [sd * w * 0.62, h * 0.2, d * 0.3]], 0.018, 'x'); });
+  }
+
+  /* ---------------- species ---------------- */
+  function trex(B) {
+    const { M, add, piv, piston, cable, bone, eye, joint } = B;
+    const root = new THREE.Group();
+    const hips = piv(root, [0, 0.66, 0]);
+    const body = piv(hips, [0, 0.14, 0.1]); body.rotation.x = -0.22;
+    const size = [0.46, 0.46, 0.74];
+    add(body, 2, 'torso', rbox(0.46, 0.46, 0.74, 0.13, { tx0: 0.82, ty0: 0.78, ty1: 1.04 }), M.paint);
+    add(body, 2, 'torso', rbox(0.3, 0.1, 0.5, 0.04), M.paint2, [0, -0.24, 0.04]);
+    [-1, 1].forEach(sd => { add(body, 2, 'torso', rbox(0.04, 0.24, 0.4, 0.015), M.paint2, [sd * 0.24, 0.02, 0.04]); B.bolts(body, [[sd * 0.262, 0.11, -0.1], [sd * 0.262, 0.11, 0.18], [sd * 0.262, -0.07, -0.1], [sd * 0.262, -0.07, 0.18]], 0.014, 'x'); });
+    add(body, 1, 'heart', ico(0.075), M.heart, [0, -0.07, 0.36]); add(body, 2, 'torso', cyl(0.079, 0.079, 0.03, 18), M.glass, [0, -0.07, 0.330], [Math.PI / 2, 0, 0]);
+    add(body, 2, 'torso', ring(0.085, 0.022), M.dark, [0, -0.07, 0.375]);
+    B.vertebrae(body, [0, 0.12, -0.34], [0, 0.12, 0.34], 6, 0.07);
+    B.ribs(body, -0.2, 0.25, 5, 0.1, 0.2, 0.28);
+    [-0.24, -0.08, 0.08, 0.24].forEach((z, i) => B.backs.push({ parent: body, pos: [0, 0.205 + i * 0.012, z], s: 1 - i * 0.08 }));
+    // neck
+    const n1 = B.between(hips, [0, 0.3, 0.36], [0, 0.5, 0.52]);
+    add(n1.g, 2, 'neck', capsule(0.15, 0.12, 0.1, 14), M.paint, [0, n1.L * 0.4, 0], null, [1, 1, 1.1]);
+    add(n1.g, 1, 'joint', ring(0.115, 0.025), M.dark, [0, n1.L * 0.85, 0], [Math.PI / 2, 0, 0]);
+    piston(hips, [0, 0.2, 0.4], [0, 0.42, 0.6], 0.03);
+    cable(hips, [[0.12, 0.3, 0.22], [0.15, 0.47, 0.4], [0.1, 0.6, 0.48]], 0.016);
+    cable(hips, [[-0.12, 0.3, 0.22], [-0.15, 0.47, 0.4], [-0.1, 0.6, 0.48]], 0.016);
+    B.vertebrae(hips, [0, 0.36, 0.4], [0, 0.52, 0.54], 3, 0.06, 'neck');
+    // head
+    const head = piv(hips, [0, 0.56, 0.56]);
+    add(head, 2, 'head', rbox(0.36, 0.28, 0.6, 0.08, { tx1: 0.72, ty1: 0.72 }), M.paint, [0, 0.06, 0.2]);
+    add(head, 2, 'head', rbox(0.12, 0.045, 0.44, 0.018, { tx1: 0.55 }), M.chrome, [0, 0.198, 0.13]);
+    [-1, 1].forEach(sd => add(head, 2, 'head', rbox(0.08, 0.05, 0.15, 0.02), M.paint2, [sd * 0.14, 0.17, 0.2], [0, 0, sd * 0.35]));
+    eye(head, [-0.162, 0.1, 0.2], -1); eye(head, [0.162, 0.1, 0.2], 1);
+    [-1, 1].forEach(sd => add(head, 2, 'head', cyl(0.018, 0.018, 0.03, 8), M.dark, [sd * 0.05, 0.155, 0.45], [0.5, 0, 0], null, true));
+    add(head, 0, 'skull', rbox(0.28, 0.2, 0.52, 0.05, { tx1: 0.7, ty1: 0.7 }), M.frame, [0, 0.05, 0.2]);
+    [-1, 1].forEach(sd => add(head, 0, 'skull', sph(0.05, 10, 8), M.dark, [sd * 0.115, 0.1, 0.17]));
+    for (let i = 0; i < 6; i++) [-1, 1].forEach(sd => add(head, 3, 'teeth', cone(0.017, 0.06, 5), M.chrome, [sd * (0.125 - i * 0.008), -0.08, 0.13 + i * 0.065], [Math.PI, 0, 0], null, true));
+    const jaw = piv(head, [0, -0.08, 0.04]);
+    add(jaw, 1, 'jaw', cyl(0.04, 0.04, 0.36, 12), M.dark, [0, 0, 0], [0, 0, Math.PI / 2]);
+    add(jaw, 2, 'jaw', rbox(0.3, 0.09, 0.54, 0.035, { tx1: 0.72, ty1: 0.8 }), M.paint2, [0, -0.035, 0.22]);
+    add(jaw, 0, 'skull', rbox(0.24, 0.06, 0.5, 0.025, { tx1: 0.7 }), M.frame, [0, -0.03, 0.22]);
+    for (let i = 0; i < 6; i++) [-1, 1].forEach(sd => add(jaw, 3, 'teeth', cone(0.015, 0.05, 5), M.chrome, [sd * (0.11 - i * 0.008), 0.03, 0.1 + i * 0.065], null, null, true));
+    // tiny two-fingered arms (real T. rex)
+    [-1, 1].forEach(sd => arm(B, hips, [sd * 0.2, 0.0, 0.38], 1, 2, false));
+    const legs = [legBiped(B, hips, -0.21, 1), legBiped(B, hips, 0.21, 1)];
+    add(hips, 0, 'spine', rbox(0.36, 0.1, 0.22, 0.04), M.frame, [0, 0.02, 0]);   // pelvis
+    const tail = tailChain(B, hips, [0, 0.14, -0.3], 5, 0.36, 0.25, { bands: true });
+    return { root, size, rig: { hips, body, head, jaw, legs, tail: tail.segs, biped: true, hipY: 0.66 }, tail };
+  }
+  function raptor(B) {
+    const { M, add, piv, piston, cable, eye } = B;
+    const root = new THREE.Group();
+    const hips = piv(root, [0, 0.56, 0]);
+    const body = piv(hips, [0, 0.1, 0.08]); body.rotation.x = -0.15;
+    const size = [0.3, 0.32, 0.6];
+    add(body, 2, 'torso', rbox(0.3, 0.32, 0.6, 0.1, { tx0: 0.8, ty0: 0.8 }), M.paint);
+    add(body, 2, 'torso', rbox(0.2, 0.07, 0.4, 0.03), M.paint2, [0, -0.17, 0.04]);
+    [-1, 1].forEach(sd => B.bolts(body, [[sd * 0.155, 0.06, -0.05], [sd * 0.155, 0.06, 0.15]], 0.012, 'x'));
+    add(body, 1, 'heart', ico(0.055), M.heart, [0, -0.05, 0.3]); add(body, 2, 'torso', cyl(0.058, 0.058, 0.03, 18), M.glass, [0, -0.05, 0.270], [Math.PI / 2, 0, 0]);
+    add(body, 2, 'torso', ring(0.062, 0.017), M.dark, [0, -0.05, 0.302]);
+    B.vertebrae(body, [0, 0.08, -0.28], [0, 0.08, 0.28], 5, 0.05);
+    B.ribs(body, -0.15, 0.2, 4, 0.06, 0.13, 0.19);
+    [-0.18, -0.02, 0.14].forEach((z, i) => B.backs.push({ parent: body, pos: [0, 0.15, z], s: 0.75 }));
+    const n1 = B.between(hips, [0, 0.2, 0.32], [0, 0.48, 0.5]);
+    add(n1.g, 2, 'neck', capsule(0.08, 0.07, n1.L * 0.6, 12), M.paint, [0, n1.L * 0.45, 0]);
+    [0, 1, 2].forEach(i => add(n1.g, 2, 'feather', fin(0.12, 0.07, 0.014), M.paint2, [0, n1.L * (0.25 + i * 0.25), -0.07], [-Math.PI / 2, 0, 0], null, true));
+    piston(hips, [0, 0.14, 0.36], [0, 0.4, 0.54], 0.022);
+    cable(hips, [[0.07, 0.2, 0.2], [0.09, 0.4, 0.4], [0.06, 0.5, 0.5]], 0.012);
+    B.vertebrae(hips, [0, 0.24, 0.36], [0, 0.46, 0.5], 3, 0.04, 'neck');
+    const head = piv(hips, [0, 0.5, 0.52]);
+    add(head, 2, 'head', rbox(0.22, 0.18, 0.46, 0.06, { tx1: 0.6, ty1: 0.55, lift: -0.02 }), M.paint, [0, 0.02, 0.16]);
+    [0, 1, 2].forEach(i => add(head, 2, 'feather', fin(0.2 - i * 0.03, 0.12 - i * 0.02, 0.016), i === 1 ? M.chrome : M.paint2, [0, 0.09, -0.02 - i * 0.05], [0.2 + i * 0.15, 0, 0]));
+    eye(head, [-0.1, 0.06, 0.15], -1, 0.8); eye(head, [0.1, 0.06, 0.15], 1, 0.8);
+    add(head, 0, 'skull', rbox(0.17, 0.13, 0.42, 0.04, { tx1: 0.55, ty1: 0.55 }), M.frame, [0, 0.02, 0.16]);
+    [-1, 1].forEach(sd => add(head, 0, 'skull', sph(0.035, 8, 6), M.dark, [sd * 0.07, 0.05, 0.12]));
+    for (let i = 0; i < 5; i++) [-1, 1].forEach(sd => add(head, 3, 'teeth', cone(0.01, 0.035, 5), M.chrome, [sd * (0.07 - i * 0.006), -0.05, 0.1 + i * 0.055], [Math.PI, 0, 0], null, true));
+    const jaw = piv(head, [0, -0.06, 0.02]);
+    add(jaw, 1, 'jaw', cyl(0.025, 0.025, 0.22, 10), M.dark, [0, 0, 0], [0, 0, Math.PI / 2]);
+    add(jaw, 2, 'jaw', rbox(0.18, 0.06, 0.38, 0.022, { tx1: 0.6 }), M.paint2, [0, -0.02, 0.17]);
+    add(jaw, 0, 'skull', rbox(0.14, 0.04, 0.36, 0.015, { tx1: 0.6 }), M.frame, [0, -0.02, 0.17]);
+    // long feathered arms with three claws (real Velociraptor had feathers)
+    [-1, 1].forEach(sd => arm(B, hips, [sd * 0.13, 0.04, 0.3], 1.45, 3, true));
+    const legs = [legBiped(B, hips, -0.14, 0.85, { sickle: true }), legBiped(B, hips, 0.14, 0.85, { sickle: true })];
+    add(hips, 0, 'spine', rbox(0.24, 0.08, 0.16, 0.03), M.frame, [0, 0.02, 0]);
+    const tail = tailChain(B, hips, [0, 0.1, -0.24], 6, 0.24, 0.2, { noFins: true });
+    [-0.5, 0, 0.5].forEach(a => add(tail.tip, 2, 'feather', fin(0.22, 0.08, 0.014), M.paint2, [Math.sin(a) * 0.04, 0.02, -0.3], [-Math.PI / 2 + 0.2, a, 0], null, true));
+    return { root, size, rig: { hips, body, head, jaw, legs, tail: tail.segs, biped: true, hipY: 0.56 }, tail };
+  }
+  function trike(B) {
+    const { M, add, piv, piston, cable, eye, joint } = B;
+    const root = new THREE.Group();
+    const hips = piv(root, [0, 0, 0]);
+    const body = piv(hips, [0, 0.66, 0]);
+    const size = [0.8, 0.62, 1.15];
+    add(body, 2, 'torso', rbox(0.8, 0.62, 1.15, 0.24, { tx0: 0.86, ty0: 0.86, ty1: 0.95 }), M.paint);
+    add(body, 2, 'torso', rbox(0.6, 0.12, 0.8, 0.05), M.paint2, [0, -0.3, 0.02]);
+    [-0.34, 0, 0.34].forEach((z, i) => add(body, 2, 'torso', rbox(0.46, 0.07, 0.24, 0.03), M.paint2, [0, 0.305, z]));
+    [-1, 1].forEach(sd => B.bolts(body, [[sd * 0.41, 0.05, -0.3], [sd * 0.41, 0.05, 0], [sd * 0.41, 0.05, 0.3]], 0.018, 'x'));
+    add(body, 1, 'heart', ico(0.09), M.heart, [0, -0.06, 0.56]); add(body, 2, 'torso', cyl(0.095, 0.095, 0.03, 18), M.glass, [0, -0.06, 0.530], [Math.PI / 2, 0, 0]);
+    add(body, 2, 'torso', ring(0.1, 0.026), M.dark, [0, -0.06, 0.575]);
+    B.vertebrae(body, [0, 0.18, -0.5], [0, 0.18, 0.5], 7, 0.08);
+    B.ribs(body, -0.35, 0.35, 6, 0.14, 0.33, 0.36);
+    [-0.45, 0.45].forEach(z => B.backs.push({ parent: body, pos: [0, 0.3, z], s: 0.8 }));
+    // head with frill, three horns and beak
+    const head = piv(hips, [0, 0.62, 0.66]);
+    joint(head, [0, -0.02, -0.06], 0.14, 'joint');
+    piston(hips, [0.16, 0.5, 0.4], [0.16, 0.56, 0.7], 0.03); piston(hips, [-0.16, 0.5, 0.4], [-0.16, 0.56, 0.7], 0.03);
+    add(head, 2, 'head', rbox(0.46, 0.4, 0.46, 0.12, { tx1: 0.76, ty1: 0.8 }), M.paint, [0, 0, 0.16]);
+    add(head, 2, 'beak', rbox(0.2, 0.2, 0.24, 0.06, { tx1: 0.45, ty1: 0.5, lift: -0.05 }), M.dark, [0, -0.07, 0.45]);
+    add(head, 3, 'beak', cone(0.05, 0.1, 8), M.chrome, [0, -0.13, 0.58], [Math.PI * 0.75, 0, 0]);
+    add(head, 3, 'horn', cone(0.05, 0.2, 10), M.ivory, [0, 0.14, 0.4], [0.75, 0, 0]);
+    [-1, 1].forEach(sd => add(head, 3, 'horn', cone(0.055, 0.52, 10), M.ivory, [sd * 0.13, 0.32, 0.32], [1.0, 0, -sd * 0.12]));
+    const frill = piv(head, [0, 0.14, -0.04]); frill.rotation.x = -0.42;
+    add(frill, 3, 'frill', plate('frill', scallop(0.46, 7, 0.86), 0.05, 0.012), M.paint, [0, 0, 0], [0, Math.PI / 2, 0]);
+    if (!B.fossil) {
+      add(frill, 2, 'frill', ring(0.32, 0.018, Math.PI), M.eye, [0, 0, 0.05], null, null, true);
+      for (let i = 0; i < 7; i++) { const a = (i + 0.5) / 7 * Math.PI; add(frill, 2, 'frill', sph(0.035, 8, 6), M.chrome, [Math.cos(a) * 0.4, Math.sin(a) * 0.4, 0.04], null, null, true); }
+    }
+    eye(head, [-0.215, 0.07, 0.24], -1); eye(head, [0.215, 0.07, 0.24], 1);
+    add(head, 0, 'skull', rbox(0.36, 0.3, 0.42, 0.08, { tx1: 0.7 }), M.frame, [0, 0, 0.16]);
+    [-1, 1].forEach(sd => add(head, 0, 'skull', sph(0.06, 10, 8), M.dark, [sd * 0.15, 0.07, 0.22]));
+    const jaw = piv(head, [0, -0.17, 0.12]);
+    add(jaw, 1, 'jaw', cyl(0.035, 0.035, 0.34, 10), M.dark, [0, 0.02, -0.06], [0, 0, Math.PI / 2]);
+    add(jaw, 2, 'jaw', rbox(0.3, 0.08, 0.32, 0.03, { tx1: 0.5 }), M.paint2, [0, 0, 0.14]);
+    add(jaw, 0, 'skull', rbox(0.22, 0.05, 0.3, 0.02, { tx1: 0.5 }), M.frame, [0, 0, 0.14]);
+    cable(hips, [[0.25, 0.86, 0.45], [0.22, 0.78, 0.62], [0.16, 0.66, 0.66]], 0.018);
+    cable(hips, [[-0.25, 0.86, 0.45], [-0.22, 0.78, 0.62], [-0.16, 0.66, 0.66]], 0.018);
+    const legs = [legQuad(B, hips, -0.3, 0.5, 0.36, 1, 0.5, true), legQuad(B, hips, 0.3, 0.5, 0.36, 1, 0.5, true), legQuad(B, hips, -0.3, 0.5, -0.38, 1, 0.5), legQuad(B, hips, 0.3, 0.5, -0.38, 1, 0.5)];
+    const tail = tailChain(B, hips, [0, 0.62, -0.62], 3, 0.32, 0.25);
+    return { root, size, rig: { hips, body, head, jaw, legs, tail: tail.segs, biped: false, hipY: 0 }, tail };
+  }
+  function stego(B) {
+    const { M, add, piv, cable, eye } = B;
+    const root = new THREE.Group();
+    const hips = piv(root, [0, 0, 0]);
+    const body = piv(hips, [0, 0.72, -0.05]); body.rotation.x = 0.08;
+    const size = [0.7, 0.62, 1.15];
+    add(body, 2, 'torso', rbox(0.7, 0.62, 1.15, 0.24, { tx0: 0.8, tx1: 0.76, ty0: 0.86, ty1: 0.7 }), M.paint);
+    add(body, 2, 'torso', rbox(0.5, 0.12, 0.8, 0.05), M.paint2, [0, -0.28, 0.02]);
+    [-1, 1].forEach(sd => B.bolts(body, [[sd * 0.355, 0.0, -0.25], [sd * 0.36, 0.0, 0.05]], 0.016, 'x'));
+    add(body, 1, 'heart', ico(0.08), M.heart, [0, -0.08, 0.5]); add(body, 2, 'torso', cyl(0.084, 0.084, 0.03, 18), M.glass, [0, -0.08, 0.470], [Math.PI / 2, 0, 0]);
+    add(body, 2, 'torso', ring(0.09, 0.024), M.dark, [0, -0.08, 0.505]);
+    B.vertebrae(body, [0, 0.16, -0.5], [0, 0.16, 0.5], 7, 0.07);
+    B.ribs(body, -0.35, 0.3, 6, 0.1, 0.28, 0.33);
+    // 17 plates in two alternating rows (as in Stegosaurus stenops), tallest over the hips
+    const plates = piv(hips, [0, 0, 0]);
+    for (let i = 0; i < 17; i++) {
+      const t = i / 16, z = lerp(0.62, -1.15, t), hgt = 0.12 + Math.sin(Math.min(1, t * 1.25) * Math.PI) * 0.26, side = i % 2 ? 1 : -1;
+      const y = t < 0.62 ? 0.72 + 0.27 * (1 - Math.abs(t - 0.32) * 1.3) : 0.66 - (t - 0.62) * 0.55;
+      const pl = piv(plates, [side * 0.06, y, z]); pl.rotation.z = side * 0.14;
+      add(pl, 3, 'plates', plate('leaf' + r3(hgt), leafPts(hgt * 0.9, hgt), 0.04, 0.01), M.paint2);
+      if (!B.fossil && !B.low) [-1, 1].forEach(sd => add(pl, 2, 'plates', plate('leafi' + r3(hgt), leafPts(hgt * 0.45, hgt * 0.55).map(([u, v]) => [u, v + hgt * 0.18]), 0.006, 0.002), M.eye, [sd * 0.036, 0, 0]));
+    }
+    const n1 = B.between(hips, [0, 0.66, 0.55], [0, 0.46, 0.8]);
+    add(n1.g, 2, 'neck', capsule(0.13, 0.1, n1.L * 0.5, 12), M.paint, [0, n1.L * 0.45, 0]);
+    B.vertebrae(hips, [0, 0.66, 0.55], [0, 0.48, 0.78], 3, 0.05, 'neck');
+    cable(hips, [[0.12, 0.8, 0.45], [0.12, 0.6, 0.7], [0.08, 0.48, 0.8]], 0.015);
+    const head = piv(hips, [0, 0.44, 0.84]);
+    add(head, 2, 'head', rbox(0.22, 0.2, 0.34, 0.07, { tx1: 0.7, ty1: 0.7, lift: -0.03 }), M.paint, [0, 0, 0.1]);
+    add(head, 2, 'beak', rbox(0.12, 0.08, 0.1, 0.03, { tx1: 0.6 }), M.dark, [0, -0.05, 0.27]);
+    eye(head, [-0.105, 0.04, 0.12], -1, 0.75); eye(head, [0.105, 0.04, 0.12], 1, 0.75);
+    add(head, 0, 'skull', rbox(0.17, 0.15, 0.3, 0.05, { tx1: 0.65 }), M.frame, [0, 0, 0.1]);
+    [-1, 1].forEach(sd => add(head, 0, 'skull', sph(0.035, 8, 6), M.dark, [sd * 0.07, 0.04, 0.1]));
+    const jaw = piv(head, [0, -0.09, 0.04]);
+    add(jaw, 2, 'jaw', rbox(0.17, 0.05, 0.26, 0.02, { tx1: 0.6 }), M.paint2, [0, 0, 0.1]);
+    add(jaw, 0, 'skull', rbox(0.13, 0.035, 0.24, 0.012, { tx1: 0.6 }), M.frame, [0, 0, 0.1]);
+    // front legs shorter than back legs (real Stegosaurus)
+    const legs = [legQuad(B, hips, -0.26, 0.42, 0.4, 1, 0.42, true), legQuad(B, hips, 0.26, 0.42, 0.4, 1, 0.42, true), legQuad(B, hips, -0.28, 0.55, -0.42, 1.15, 0.55), legQuad(B, hips, 0.28, 0.55, -0.42, 1.15, 0.55)];
+    const tail = tailChain(B, hips, [0, 0.62, -0.72], 4, 0.3, 0.27, { noFins: true });
+    // four tail spikes
+    [[1, 0.4], [-1, 0.4], [1, -0.05], [-1, -0.05]].forEach(([sd, z]) => add(tail.tip, 3, 'spikes', cone(0.035, 0.34, 8), M.ivory, [sd * 0.1, 0.08, -0.12 - z * 0.3], [0, 0, -sd * (1.05 - z * 0.5)]));
+    return { root, size, rig: { hips, body, head, jaw, legs, tail: tail.segs, biped: false, hipY: 0 }, tail };
+  }
+  const BUILD = { trex, raptor, trike, stego };
+
+  /* build(sp, palette, cfg, { fossil, skel, lod }) → { root, rig, parts } */
+  function build(sp, p, cfg, opts) {
+    opts = opts || {}; cfg = cfg || {};
+    const B = ctx(p, cfg, opts); B.backs = [];
+    const res = (BUILD[sp] || trex)(B);
+    if (!B.fossil) {
+      backCrest(B, cfg.arm | 0);
+      addPattern(B, res.rig.body, p.pat, res.size);
+      armourStyle(B, res.rig, cfg.arm | 0, res.size);
+      if (cfg.tip) tailTip(B, res.tail.tip, res.tail.w, 0.25, cfg.tip | 0);
+    }
+    return { root: res.root, rig: res.rig, parts: B.parts };
+  }
+  return { build, rbox, capsule, plate };
 })();
 
 /* ---- games/dinobots/src/models.js ---- */
@@ -5055,47 +5654,6 @@ const M3 = (function () {
   }
   const pivot = (pos, kids) => group(kids, pos);
 
-  /* visor with glowing eyes, used by every Dinobot head */
-  function visor(w, h, d, y, z, eye) {
-    const v = mesh(G.box(w, h, d), toon(BLACK), [0, y, z]);
-    v.add(mesh(G.box(w * 0.82, h * 0.42, d * 0.3), glow(eye, 1.4), [0, 0, d * 0.42]));
-    [-1, 1].forEach(sd => v.add(mesh(G.box(0.02, h * 0.42, d * 0.62), glow(eye, 1.4), [sd * w * 0.5, 0, d * 0.08])));
-    v.children.forEach(c => { c.userData.noOutline = true; c.userData.eye = true; });
-    return v;
-  }
-  function legBiped(x, col, dark, s) {
-    const thigh = mesh(G.box(0.2 * s, 0.38 * s, 0.3 * s), toon(col), [0, -0.12 * s, 0]);
-    const shinP = pivot([0, -0.3 * s, -0.02 * s]);
-    shinP.add(mesh(G.box(0.14 * s, 0.3 * s, 0.14 * s), toon(METAL2), [0, -0.12 * s, -0.03 * s]));
-    shinP.add(mesh(G.box(0.24 * s, 0.08 * s, 0.32 * s), toon(dark), [0, -0.28 * s, 0.06 * s]));
-    const hip = pivot([x, 0, 0], [thigh, shinP]);
-    hip.userData.shin = shinP;
-    return hip;
-  }
-  function legQuad(x, z, col, s, h) {
-    const p = pivot([x, h, z]);
-    p.add(mesh(G.cyl(0.13 * s, 0.11 * s, h * 0.9), toon(col), [0, -h * 0.45, 0]));
-    p.add(mesh(G.cyl(0.15 * s, 0.16 * s, 0.08), toon(BLACK), [0, -h + 0.04, 0]));
-    return p;
-  }
-  function tailChain(n, w0, len, col, sec, pos) {
-    const root = pivot(pos); let cur = root; const segs = [];
-    for (let i = 0; i < n; i++) {
-      const k = 1 - i / n, w = w0 * (0.35 + 0.65 * k);
-      const seg = pivot([0, 0, i === 0 ? 0 : -len]);
-      seg.add(mesh(G.box(w, w * 0.9, len * 1.05), toon(i % 2 ? sec : col), [0, 0, -len / 2]));
-      cur.add(seg); cur = seg; segs.push(seg);
-    }
-    return { root, segs, tip: cur };
-  }
-  function addPattern(body, p, size) {
-    if (p.pat === 'none') return;
-    const [w, h, d] = size;
-    if (p.pat === 'stripes') for (let i = -1; i <= 1; i++) body.add(mesh(G.box(w * 1.02, h * 1.02, d * 0.1), toon(p.sec), [0, 0, i * d * 0.28]));
-    if (p.pat === 'spots') [[0.5, 0.3, 0.2], [-0.5, 0.2, -0.2], [0.5, -0.1, -0.3], [-0.5, 0.35, 0.3], [0, 0.5, 0]].forEach(([x, y, z]) => body.add(mesh(G.sph(Math.min(w, h) * 0.12, 8, 6), toon(p.sec), [x * w, y * h, z * d])));
-    if (p.pat === 'bolt') [-1, 1].forEach(s => body.add(mesh(G.box(0.02, h * 0.55, d * 0.18), glow('#ffd21f', 1.1), [s * w * 0.51, 0, 0], [0.5, 0, 0])));
-    if (p.pat === 'stars') [[1, 0.2, 0.2], [-1, 0.1, -0.15], [1, -0.1, -0.25]].forEach(([s, y, z]) => body.add(mesh(G.oct(Math.min(w, h) * 0.1), glow('#ffd21f', 1.2), [s * w * 0.5, y * h, z * d])));
-  }
   function addAccessory(rig, p) {
     const head = rig.head, body = rig.body;
     if (p.acc === 'antenna') { head.add(mesh(G.cyl(0.02, 0.02, 0.3), toon(METAL2), [0, 0.32, -0.05])); head.add(mesh(G.sph(0.06), glow('#ff3d9a', 1.2), [0, 0.48, -0.05])); }
@@ -5106,100 +5664,19 @@ const M3 = (function () {
   }
 
   /* ---------------- Dinobots ---------------- */
-  function trex(p) {
-    const s = 1, rig = {};
-    const root = new THREE.Group();
-    const hips = pivot([0, 0.62, 0]); root.add(hips);
-    const body = mesh(G.box(0.5, 0.48, 0.75), toon(p.col), [0, 0.12, 0.08], [-0.28, 0, 0]); hips.add(body);
-    body.add(mesh(G.box(0.4, 0.1, 0.55), toon(p.sec), [0, -0.24, 0.02]));
-    body.add(mesh(G.box(0.52, 0.06, 0.2), toon(METAL), [0, 0.2, 0.15]));
-    addPattern(body, p, [0.5, 0.48, 0.75]);
-    const neck = mesh(G.box(0.32, 0.34, 0.3), toon(p.col), [0, 0.38, 0.42], [-0.6, 0, 0]); hips.add(neck);
-    const head = pivot([0, 0.55, 0.55]); hips.add(head);
-    head.add(mesh(G.box(0.38, 0.3, 0.52), toon(p.col), [0, 0.04, 0.18]));
-    head.add(mesh(G.box(0.4, 0.05, 0.4), toon(METAL), [0, 0.2, 0.15]));
-    head.add(visor(0.4, 0.11, 0.18, 0.1, 0.3, p.eye));
-    const jaw = pivot([0, -0.1, 0.02]); head.add(jaw);
-    jaw.add(mesh(G.box(0.34, 0.1, 0.46), toon(p.sec), [0, -0.04, 0.2]));
-    for (let i = 0; i < 4; i++) [-1, 1].forEach(sd => { const t = mesh(G.cone(0.025, 0.07, 4), toon('#ffffff'), [sd * 0.14, 0.04, 0.08 + i * 0.1], [0, 0, 0]); t.userData.noOutline = true; jaw.add(t); });
-    [-1, 1].forEach(sd => hips.add(mesh(G.box(0.07, 0.07, 0.2), toon(p.col), [sd * 0.24, 0.05, 0.42], [0.6, 0, 0])));
-    const legs = [legBiped(-0.2, p.col, BLACK, s), legBiped(0.2, p.col, BLACK, s)]; legs.forEach(l => hips.add(l));
-    const tail = tailChain(4, 0.34, 0.3, p.col, p.sec, [0, 0.12, -0.3]); hips.add(tail.root);
-    Object.assign(rig, { hips, body, head, jaw, legs, tail: tail.segs, biped: true, hipY: 0.62 });
-    return { root, rig };
-  }
-  function raptor(p) {
-    const rig = {}, root = new THREE.Group();
-    const hips = pivot([0, 0.55, 0]); root.add(hips);
-    const body = mesh(G.box(0.34, 0.34, 0.6), toon(p.col), [0, 0.08, 0.08], [-0.2, 0, 0]); hips.add(body);
-    body.add(mesh(G.box(0.28, 0.08, 0.45), toon(p.sec), [0, -0.17, 0]));
-    addPattern(body, p, [0.34, 0.34, 0.6]);
-    hips.add(mesh(G.box(0.2, 0.2, 0.36), toon(p.col), [0, 0.3, 0.4], [-0.9, 0, 0]));
-    const head = pivot([0, 0.5, 0.52]); hips.add(head);
-    head.add(mesh(G.box(0.24, 0.2, 0.42), toon(p.col), [0, 0.02, 0.15]));
-    head.add(visor(0.26, 0.08, 0.14, 0.06, 0.2, p.eye));
-    [-0.07, 0.07].forEach((x, i) => head.add(mesh(G.cone(0.05, 0.22, 4), toon(p.sec), [x, 0.15, -0.04 - i * 0.04], [-0.9, 0, 0])));
-    const jaw = pivot([0, -0.07, 0.02]); head.add(jaw);
-    jaw.add(mesh(G.box(0.2, 0.06, 0.36), toon(p.sec), [0, -0.02, 0.16]));
-    const legs = [legBiped(-0.14, p.col, BLACK, 0.85), legBiped(0.14, p.col, BLACK, 0.85)];
-    legs.forEach(l => { hips.add(l); l.userData.shin.add(mesh(G.cone(0.03, 0.12, 4), toon('#ffffff'), [0, -0.2, 0.24], [1.6, 0, 0])); });
-    const tail = tailChain(5, 0.22, 0.28, p.col, p.sec, [0, 0.1, -0.24]); hips.add(tail.root);
-    tail.tip.add(mesh(G.cone(0.08, 0.2, 4), toon(p.sec), [0, 0, -0.32], [-Math.PI / 2, 0, 0]));
-    Object.assign(rig, { hips, body, head, jaw, legs, tail: tail.segs, biped: true, hipY: 0.55 });
-    return { root, rig };
-  }
-  function trike(p) {
-    const rig = {}, root = new THREE.Group();
-    const hips = pivot([0, 0, 0]); root.add(hips);
-    const body = mesh(G.sph(0.5, 18, 14), toon(p.col), [0, 0.62, 0], null, [1.15, 0.92, 1.6]); hips.add(body);
-    body.add(mesh(G.sph(0.42, 14, 10), toon(p.sec), [0, -0.18, 0], null, [0.95, 0.6, 0.9]));
-    addPattern(body, p, [0.9, 0.7, 0.9]);
-    const head = pivot([0, 0.62, 0.78]); hips.add(head);
-    head.add(mesh(G.box(0.42, 0.36, 0.42), toon(p.col), [0, 0, 0.12]));
-    head.add(mesh(G.cone(0.13, 0.22, 4), toon(METAL), [0, -0.06, 0.42], [Math.PI / 2, 0, 0]));
-    const frill = mesh(G.cyl(0.52, 0.52, 0.06, 18, 1), toon(p.sec), [0, 0.24, -0.08], [-1.15, 0, 0]); head.add(frill);
-    for (let i = 0; i < 7; i++) { const a = Math.PI + (i + 0.5) / 7 * Math.PI; frill.add(mesh(G.sph(0.05, 6, 5), toon(METAL), [Math.cos(a) * 0.5, 0.05, Math.sin(a) * 0.5])); }
-    [-0.13, 0.13].forEach(x => head.add(mesh(G.cone(0.05, 0.42, 6), toon(BONE), [x, 0.26, 0.3], [1.0, 0, 0])));
-    head.add(mesh(G.cone(0.045, 0.2, 6), toon(BONE), [0, 0.1, 0.36], [0.9, 0, 0]));
-    head.add(visor(0.44, 0.09, 0.14, 0.08, 0.3, p.eye));
-    const jaw = pivot([0, -0.16, 0.1]); head.add(jaw); jaw.add(mesh(G.box(0.3, 0.08, 0.3), toon(p.sec), [0, 0, 0.12]));
-    const legs = [legQuad(-0.3, 0.38, p.col, 1, 0.5), legQuad(0.3, 0.38, p.col, 1, 0.5), legQuad(-0.3, -0.38, p.col, 1, 0.5), legQuad(0.3, -0.38, p.col, 1, 0.5)];
-    legs.forEach(l => hips.add(l));
-    const tail = tailChain(3, 0.3, 0.26, p.col, p.sec, [0, 0.62, -0.72]); hips.add(tail.root);
-    Object.assign(rig, { hips, body, head, jaw, legs, tail: tail.segs, biped: false, hipY: 0 });
-    return { root, rig };
-  }
-  function stego(p) {
-    const rig = {}, root = new THREE.Group();
-    const hips = pivot([0, 0, 0]); root.add(hips);
-    const body = mesh(G.sph(0.5, 18, 14), toon(p.col), [0, 0.7, -0.05], null, [1.0, 0.95, 1.65]); hips.add(body);
-    body.add(mesh(G.sph(0.42, 14, 10), toon(p.sec), [0, -0.2, 0], null, [0.9, 0.55, 0.9]));
-    addPattern(body, p, [0.8, 0.8, 0.9]);
-    const plates = [[0.55, -0.55, 0.18], [0.72, -0.3, 0.26], [0.8, 0, 0.3], [0.76, 0.28, 0.26], [0.6, 0.5, 0.2]];
-    plates.forEach(([y, z, s], i) => { hips.add(mesh(G.box(0.05, s * 1.3, s * 1.1), toon(p.sec), [i % 2 ? 0.06 : -0.06, 0.7 + y * 0.62, z], [0, 0, i % 2 ? 0.12 : -0.12])); });
-    const head = pivot([0, 0.45, 0.85]); hips.add(head);
-    head.add(mesh(G.box(0.24, 0.22, 0.34), toon(p.col), [0, 0, 0.1]));
-    head.add(visor(0.26, 0.07, 0.12, 0.04, 0.18, p.eye));
-    hips.add(mesh(G.box(0.2, 0.2, 0.3), toon(p.col), [0, 0.52, 0.66], [0.4, 0, 0]));
-    const jaw = pivot([0, -0.1, 0.04]); head.add(jaw); jaw.add(mesh(G.box(0.18, 0.06, 0.26), toon(p.sec), [0, 0, 0.1]));
-    const legs = [legQuad(-0.26, 0.4, p.col, 1, 0.42), legQuad(0.26, 0.4, p.col, 1, 0.42), legQuad(-0.28, -0.42, p.col, 1.15, 0.55), legQuad(0.28, -0.42, p.col, 1.15, 0.55)];
-    legs.forEach(l => hips.add(l));
-    const tail = tailChain(4, 0.28, 0.28, p.col, p.sec, [0, 0.62, -0.78]); hips.add(tail.root);
-    [[0.12, 0.6], [-0.12, 0.6], [0.12, -0.6], [-0.12, -0.6]].forEach(([z, r], i) => tail.tip.add(mesh(G.cone(0.04, 0.3, 5), toon(BONE), [i < 2 ? 0.1 : -0.1, 0.08, -0.15 + z], [0, 0, r * (i < 2 ? -1 : 1) * 1.6])));
-    Object.assign(rig, { hips, body, head, jaw, legs, tail: tail.segs, biped: false, hipY: 0 });
-    return { root, rig };
-  }
-  const BUILD = { trex, raptor, trike, stego };
+  /* Built by DinoMech (detailed "machine" Dinobots, v0.3). opts: rusty, fossil (bones only), skel (keep the hidden
+   * skeleton for the museum), lod: 'low' (fewer small parts, for crowded scenes). */
   const SCALE = { trex: 1, raptor: 0.9, trike: 0.95, stego: 0.95 };
   function dino(sp, cfg, opts) {
+    opts = opts || {};
     const p = palette(cfg);
-    if (opts && opts.rusty) Object.assign(p, { col: '#96603a', sec: '#5b2d8a', eye: '#ff3d9a', pat: 'none', acc: 'none' });
-    const { root, rig } = BUILD[sp] ? BUILD[sp](p) : trex(p);
-    addAccessory(rig, p);
-    outline(root, 0.022);
+    if (opts.rusty) Object.assign(p, { col: '#96603a', sec: '#5b2d8a', eye: '#ff3d9a', pat: 'none', acc: 'none' });
+    const mcfg = opts.rusty ? { arm: 1 } : (cfg || {});
+    const { root, rig, parts } = DinoMech.build(SCALE[sp] ? sp : 'trex', p, mcfg, opts);
+    if (!opts.fossil) addAccessory(rig, p);
     D3.shadows(root, true, false);
     const g = new THREE.Group(); g.add(root); root.scale.setScalar(SCALE[sp] || 1);
-    g.userData.rig = rig; g.userData.sp = sp; g.userData.mode = 'idle'; g.userData.phase = Math.random() * 6;
+    g.userData.rig = rig; g.userData.sp = sp; g.userData.mode = 'idle'; g.userData.phase = Math.random() * 6; g.userData.parts = parts;
     return g;
   }
 
@@ -5581,7 +6058,7 @@ const Hub3D = (function () {
       D3.addLabel(sc, bl, basePos, 3.4);
       // companion
       if (sc.buddy) scene.remove(sc.buddy);
-      if (state.buddy) { sc.buddy = M3.dino(state.buddy.sp, state.buddy.cfg); scene.add(sc.buddy); const r = R[state.at] || R[0]; sc.buddy.position.set(r.x + 1, hf.h(r.x + 1, r.z), r.z); sc.buddyGoal = null; sc.buddyHome = r; }
+      if (state.buddy) { sc.buddy = M3.dino(state.buddy.sp, state.buddy.cfg, { lod: 'low' }); scene.add(sc.buddy); const r = R[state.at] || R[0]; sc.buddy.position.set(r.x + 1, hf.h(r.x + 1, r.z), r.z); sc.buddyGoal = null; sc.buddyHome = r; }
     };
     const orb = D3.orbit(camera, document.getElementById('gl'), { target: center, dist: opts.title ? 78 : 74, minDist: 18, maxDist: 110, phi: opts.title ? 1.05 : 0.9, theta: 0.35, minPhi: 0.3, maxPhi: 1.25, auto: opts.title ? 0.06 : 0 });
     sc.orbit = orb;
@@ -5679,23 +6156,38 @@ const Puzzle3D = (function () {
         }
       }
       robot = M3.dino(sp || 'trex', cfg || {});
-      robot.scale.setScalar(0.62);
+      robot.scale.setScalar(0.72);
       sc.board.add(robot);
       reset();
       fit();
     }
-    function fit() {
+    // the free part of the screen, measured from the layout: between the controls and the block editor
+    function freeRect() {
       const W = window.innerWidth, H = window.innerHeight, portrait = W < H;
-      // the part of the screen the board may use (the editor takes the rest)
-      const fx = portrait ? 1 : 0.56, fy = portrait ? 0.42 : 0.78;
-      const vf = camera.fov * Math.PI / 360, hf = Math.atan(Math.tan(vf) * W / H), phi = 0.82;
-      const halfW = map.w / 2 + 0.8, halfD = (map.h / 2 + 0.8) * Math.cos(phi) + 1.2;
-      const dist = Math.max(halfW / (Math.tan(hf) * fx), halfD / (Math.tan(vf) * fy)) * 1.05 + 2;
-      if (!sc.orbit) sc.orbit = D3.orbit(camera, document.getElementById('gl'), { target: new THREE.Vector3(), dist, minDist: 4, maxDist: 80, phi, theta: 0, minPhi: 0.2, maxPhi: 1.35, onTap: (x, y) => sc.onTap && sc.onTap(x, y) });
-      const shiftX = portrait ? 0 : (1 - fx) * dist * Math.tan(hf) * 0.82;
-      const shiftZ = portrait ? (1 - fy) * dist * Math.tan(vf) * 0.95 : -0.04 * dist * Math.tan(vf);
-      sc.orbit.st.target.set(shiftX, 0, shiftZ); sc.orbit.st.dist = dist; sc.orbit.st.theta = 0; sc.orbit.st.phi = phi; sc.orbit.apply();
+      const left = document.querySelector('.c3d-left'), ed = document.querySelector('.c3d-ed');
+      if (!left || !ed) return portrait ? { x0: 0, y0: H * 0.1, x1: W, y1: H * 0.52 } : { x0: 0, y0: H * 0.12, x1: W * 0.56, y1: H * 0.9 };
+      const er = ed.getBoundingClientRect();
+      if (portrait) {
+        // everything in the left column sits above the board
+        let y0 = 0; left.querySelectorAll(':scope > *').forEach(k => { const r = k.getBoundingClientRect(); if (r.height) y0 = Math.max(y0, r.bottom); });
+        return { x0: 0, y0: y0 + 6, x1: W, y1: er.top - 6 };
+      }
+      const talk = left.querySelector('.talk'), run = left.querySelector('.runbar');
+      return { x0: 0, y0: talk ? talk.getBoundingClientRect().bottom + 6 : H * 0.12, x1: er.left - 8, y1: run ? run.getBoundingClientRect().top - 6 : H * 0.9 };
     }
+    function fit() {
+      const W = window.innerWidth, H = window.innerHeight, R = freeRect();
+      const rw = Math.max(80, R.x1 - R.x0), rh = Math.max(80, R.y1 - R.y0);
+      const vf = camera.fov * Math.PI / 360, hf = Math.atan(Math.tan(vf) * W / H), phi = W < H ? 0.6 : 0.78;
+      // board footprint as seen by the camera (depth shortened by the viewing angle, plus the robot standing on it)
+      const halfW = map.w / 2 + 0.3, halfD = (map.h / 2 + 0.3) * Math.cos(phi) + 0.6;
+      const dist = Math.max(halfW / (Math.tan(hf) * rw / W), halfD / (Math.tan(vf) * rh / H)) + 0.6;
+      if (!sc.orbit) sc.orbit = D3.orbit(camera, document.getElementById('gl'), { target: new THREE.Vector3(), dist, minDist: 3, maxDist: 80, phi, theta: 0, minPhi: 0.2, maxPhi: 1.35, onTap: (x, y) => sc.onTap && sc.onTap(x, y) });
+      // the picture is centred on the free area by shifting the projection window, not the camera aim
+      camera.setViewOffset(W, H, W / 2 - (R.x0 + R.x1) / 2, H / 2 - (R.y0 + R.y1) / 2, W, H);
+      sc.orbit.st.target.set(0, 0.25, 0); sc.orbit.st.dist = dist; sc.orbit.st.theta = 0; sc.orbit.st.phi = phi; sc.orbit.apply();
+    }
+    sc.refit = () => { if (map) fit(); };
     function placeRobot(st) {
       const p = wpos(st.x, st.y); robot.position.set(p.x, TH(st.z), p.z); robot.rotation.y = ROT[st.dir];
     }
@@ -6114,7 +6606,7 @@ const BlockEditor = (function () {
     const title = (C.CODE[m.fam] || {}).title + (C.KIND_BADGE[m.kind] ? ' · ' + C.KIND_BADGE[m.kind] : '');
     $('#app').innerHTML = `<div class="screen s3d">${App.barHTML(title, true)}
       <div class="c3d"><div class="c3d-left">${App.talkHTML('', who)}
-        <div class="isles" id="isles">${it.maps.map((_, i) => `<button class="isle ${i === 0 ? 'on' : ''}" data-i="${i}">${it.maps.length > 1 ? 'Νησί ' + (i + 1) : 'Νησί'}<span class="st"></span></button>`).join('')}</div>
+        <div class="isles" id="isles" ${it.maps.length > 1 ? '' : 'hidden'}>${it.maps.map((_, i) => `<button class="isle ${i === 0 ? 'on' : ''}" data-i="${i}">${it.maps.length > 1 ? 'Νησί ' + (i + 1) : 'Νησί'}<span class="st"></span></button>`).join('')}</div>
         <div class="runbar"><button class="btn go" id="run">${I.play}<span>${it.variant === 'predict' ? 'Δες!' : 'ΠΑΜΕ'}</span></button><button class="btn sq" id="stop" aria-label="Σταμάτα">${I.stop}</button><button class="btn sq" id="spd" aria-label="Ταχύτητα">🐢</button></div>
         <div class="row helpbar"><button class="btn yl" id="hintb">${I.bulb}<span>Βοήθεια</span></button><button class="btn sm" id="skipb">Άλλο</button></div>
       </div><div class="c3d-ed panel" id="ed"></div></div></div>`;
@@ -6128,6 +6620,7 @@ const BlockEditor = (function () {
     const startProg = it.variant === 'predict' ? DC.clone(it.ref) : it.variant === 'debug' ? DC.clone(it.shown) : { main: [], fns: {} };
     const ed = BlockEditor.create($('#ed'), { program: startProg, palette: it.palette, limit: it.limit, readOnly: it.variant === 'predict', target: it.target, speak: t => App.speak(t), onLimit: () => App.bubble('Δεν χωράνε άλλα μπλοκ! Μήπως μια ΕΠΑΝΑΛΗΨΗ ή ένα δικό σου ΜΠΛΟΚ;'), onChange: () => { sc.showEnd(null); } });
     m.ed = ed; m.sc = sc;
+    sc.refit();
     const setIsle = i => { isle = i; $$('.isle').forEach(b => b.classList.toggle('on', +b.dataset.i === i)); sc.build(it.maps[i], sp, ST.dinos[sp]); if (m.pick != null) sc.showEnd(m.pick); };
     $$('.isle').forEach(b => b.onclick = () => { if (!m.running) setIsle(+b.dataset.i); });
     $('#spd').onclick = () => { speed = speed === 1 ? 2.2 : speed === 2.2 ? 0.6 : 1; $('#spd').textContent = speed === 1 ? '🐢' : speed > 1 ? '🐇' : '🐌'; };
@@ -6323,7 +6816,7 @@ const BlockEditor = (function () {
   function turntable(sp, cfg) {
     const scene = new THREE.Scene(); scene.background = D3.lin('#2d3a66');
     D3.lights(scene, { span: 4, sx: 3, sy: 6, sz: 4 });
-    const camera = new THREE.PerspectiveCamera(32, window.innerWidth / window.innerHeight, 0.1, 50);
+    const camera = new THREE.PerspectiveCamera(32, window.innerWidth / window.innerHeight, 0.4, 40);
     const ped = D3.mesh(D3.G.cyl(1.4, 1.6, 0.4, 32), D3.toon('#d5dbea'), [0, -0.2, 0]); ped.receiveShadow = true; scene.add(ped);
     const ring = D3.mesh(D3.G.tor(1.5, 0.04), D3.glow('#7fe9ff', 1.2), [0, 0.01, 0], [Math.PI / 2, 0, 0]); scene.add(ring);
     let dino = M3.dino(sp, cfg); scene.add(dino);
@@ -6361,6 +6854,8 @@ const BlockEditor = (function () {
         <div><div class="lbl">Δεύτερο χρώμα</div><div class="row">${sw('sec', 0, C.SEC_AT, 'auto')}${C.COLORS.map((c, i) => sw('sec', i + 1, C.SEC_AT, '', `background:${c.hex}`)).join('')}</div></div>
         <div><div class="lbl">Μάτια</div><div class="row">${C.GLOWS.map((g, i) => sw('eye', i, g.at, '', `background:#1d1530;box-shadow:inset 0 0 0 10px ${g.hex}`)).join('')}</div></div>
         <div><div class="lbl">Σχέδιο</div><div class="row">${C.PATTERNS.map((p, i) => `<button class="pill ${cfg.pat === i ? 'on' : ''}" data-c="pat" data-i="${i}" data-at="${p.at}" ${ST.stars < p.at ? 'style="opacity:.5"' : ''}>${App.esc(p.name)}${ST.stars < p.at ? ' ★' + p.at : ''}</button>`).join('')}</div></div>
+        <div><div class="lbl">Θωράκιση</div><div class="row">${C.ARMOURS.map((p, i) => `<button class="pill ${(cfg.arm | 0) === i ? 'on' : ''}" data-c="arm" data-i="${i}" data-at="${p.at}" ${ST.stars < p.at ? 'style="opacity:.5"' : ''}>${App.esc(p.name)}${ST.stars < p.at ? ' ★' + p.at : ''}</button>`).join('')}</div></div>
+        <div><div class="lbl">Ουρά</div><div class="row">${C.TIPS.map((p, i) => `<button class="pill ${(cfg.tip | 0) === i ? 'on' : ''}" data-c="tip" data-i="${i}" data-at="${p.at}" ${ST.stars < p.at ? 'style="opacity:.5"' : ''}>${App.esc(p.name)}${ST.stars < p.at ? ' ★' + p.at : ''}</button>`).join('')}</div></div>
         <div><div class="lbl">Αξεσουάρ</div><div class="row">${C.ACCS.map((p, i) => `<button class="pill ${cfg.acc === i ? 'on' : ''}" data-c="acc" data-i="${i}" data-at="${p.at}" ${ST.stars < p.at ? 'style="opacity:.5"' : ''}>${App.esc(p.name)}${ST.stars < p.at ? ' ★' + p.at : ''}</button>`).join('')}</div></div>
       </div></div>`;
     $('#back').onclick = () => { App.leaveLowLoad('decorate', App.S.wsT0); App.S.wsT0 = 0; App.go('base'); };
@@ -6372,6 +6867,110 @@ const BlockEditor = (function () {
     });
   };
 
+  /* ---------- museum: the real fossil next to its Dinobot ---------- */
+  const FOSSIL_GROUP = { teeth: 'teeth', jaw: 'skull', skull: 'skull', spine: 'body', ribs: 'body', neck: 'body', bone: 'body', foot: 'leg', claw: 'leg', joint: 'body' };
+  function partOf(o) { while (o && !(o.userData && o.userData.part)) o = o.parent; return o; }
+  function museumScene(sp, cfg, built) {
+    const scene = new THREE.Scene(); scene.background = D3.lin('#141a36'); scene.fog = new THREE.Fog(D3.lin('#141a36'), 9, 22);
+    const L = D3.lights(scene, { span: 4, sx: 2, sy: 7, sz: 5 }); L.hemi.intensity = 0.55;
+    const camera = new THREE.PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.3, 60);
+    const floor = D3.mesh(new THREE.CircleGeometry(9, 48), D3.metal('#2a3360', 0.3, 0.35), [0, 0, 0], [-Math.PI / 2, 0, 0]); floor.receiveShadow = true; scene.add(floor);
+    // fossil stand (left) and Dinobot podium (right)
+    const FX = built ? -1.05 : 0, RX = 1.05;
+    const stand = D3.group([D3.mesh(DinoMech.rbox(1.7, 0.22, 1.35, 0.05), D3.metal('#6b5440', 0.7, 0.05), [0, 0.11, 0]), D3.mesh(DinoMech.rbox(0.5, 0.05, 0.03, 0.01), D3.metal('#ffcf4a', 0.25, 1), [0, 0.13, 0.69], [-0.3, 0, 0])], [FX, 0, 0]);
+    D3.shadows(stand, true, true); scene.add(stand);
+    const fossil = M3.dino(sp, {}, { fossil: true }); fossil.position.set(FX, 0.22, 0); fossil.rotation.y = built ? 1.15 : 0.9; scene.add(fossil);
+    M3.animate(fossil, 0, 'idle');
+    let robot = null;
+    if (built) {
+      const pod = D3.group([D3.mesh(D3.G.cyl(0.82, 0.92, 0.2, 40), D3.metal('#d5dbea', 0.25, 0.8), [0, 0.1, 0]), D3.mesh(D3.G.tor(0.84, 0.025), D3.glow(M3.palette(cfg).eye, 1.3), [0, 0.2, 0], [Math.PI / 2, 0, 0])], [RX, 0, 0]);
+      D3.shadows(pod, false, true); scene.add(pod);
+      robot = M3.dino(sp, cfg, { skel: true }); robot.position.set(RX, 0.2, 0); robot.rotation.y = -0.6; scene.add(robot);
+      robot.userData.parts.forEach(m => { if (m.userData.layer === 0) m.visible = false; });
+    }
+    // soft light beams over both exhibits
+    [FX, built ? RX : null].forEach(x => { if (x == null) return; const beam = D3.mesh(new THREE.ConeGeometry(1.1, 5, 24, 1, true), new THREE.MeshBasicMaterial({ color: D3.lin('#bfe6ff'), transparent: true, opacity: 0.07, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }), [x, 2.6, 0]); scene.add(beam); });
+    const fx = D3.particles(scene);
+    const sc = { scene, camera, labels: [], fx, sp, robot, fossil, built };
+    const portrait = () => window.innerWidth < window.innerHeight;
+    function viewOffset() { const W = window.innerWidth, H = window.innerHeight; camera.setViewOffset(W, H, portrait() ? 0 : W * 0.15, portrait() ? H * 0.21 : 0, W, H); }
+    sc.orbit = D3.orbit(camera, document.getElementById('gl'), { target: new THREE.Vector3(0, 0.6, 0), dist: built ? 6 : 4.2, minDist: 2, maxDist: 10, theta: 0, phi: 1.2, minPhi: 0.5, maxPhi: 1.45, auto: 0.08, onTap: (x, y) => sc.tap(x, y) });
+    sc.onResize = () => { viewOffset(); const W = window.innerWidth, H = window.innerHeight; sc.orbit.st.dist = (built ? 6 : 4.2) * (portrait() ? Math.min(1.9, 1.05 / (W / H)) : 1); sc.orbit.apply(); };
+    sc.onResize();
+    /* assembly: skeleton → mechanics → armour, each part flying into place */
+    let asm = null;
+    sc.assemble = () => {
+      if (!robot) return;
+      const parts = robot.userData.parts.filter(m => m.isMesh || m.isSprite), order = [0, 1, 2, 3];
+      const start = { 0: 0, 1: 1.3, 2: 2.4, 3: 2.4 }, span = { 0: 1.1, 1: 1.0, 2: 1.4, 3: 1.4 };
+      asm = { t: 0, items: parts.map((m, i) => {
+        const rest = m.position.clone(), dir = rest.clone(); if (dir.lengthSq() < 1e-4) dir.set(0, 1, 0); dir.normalize(); dir.y += 0.6;
+        const lay = m.userData.layer;
+        return { m, rest, dir: dir.normalize(), lay, t0: start[lay] + (i % 17) / 17 * span[lay] * 0.6, d: 0.55 + (i % 5) * 0.12 };
+      }), sounded: {} };
+      asm.items.forEach(it => { it.m.visible = false; });
+      App.speak('Συναρμολόγηση! Πρώτα ο σκελετός, μετά τα μηχανήματα και στο τέλος η θωράκιση.');
+    };
+    const ease = k => 1 - Math.pow(1 - k, 3);
+    sc.xray = on => {
+      if (!robot) return;
+      sc.xr = on;
+      const glass = D3.metal('#7fd0ff', 0.1, 0.2, { opacity: 0.32 });
+      robot.userData.parts.forEach(m => {
+        if (!m.isMesh) return;
+        if (m.userData.layer === 0) m.visible = on;
+        if (m.userData.layer === 2) { if (!m.userData.mat0) m.userData.mat0 = m.material; m.material = on ? glass : m.userData.mat0; m.castShadow = !on; }
+      });
+    };
+    let hl = null;
+    sc.tap = (x, y) => {
+      const objs = [fossil].concat(robot ? [robot] : []);
+      const hit = D3.pick(camera, objs, x, y).find(h => h.object.visible && !(h.object.material && h.object.material.opacity < 0.5 && h.object.userData.layer === 2));
+      if (!hit) return;
+      const part = partOf(hit.object); if (!part) return;
+      const isFossil = (function () { let o = part; while (o) { if (o === fossil) return true; o = o.parent; } return false; })();
+      const key = part.userData.part;
+      let title, text;
+      if (isFossil) { const F = C.FOSSIL_FACTS[sp] || {}; title = 'Απολίθωμα'; text = F[key] || F[FOSSIL_GROUP[key]] || F[key === 'jaw' ? 'skull' : ''] || F.body; }
+      else { const P = C.PARTS[key] || C.PARTS.torso; title = P[0]; text = P[1]; }
+      App.sfx.tap(); App.speak(title + '. ' + text, true);
+      sc.onInfo && sc.onInfo(title, text);
+      // highlight: a glowing shell around the tapped part for a moment
+      if (hl) { hl.parent && hl.parent.remove(hl); hl = null; }
+      if (part.isMesh) {
+        hl = new THREE.Mesh(part.geometry, new THREE.MeshBasicMaterial({ color: D3.lin('#ffd21f'), transparent: true, opacity: 0.45, depthWrite: false, blending: THREE.AdditiveBlending }));
+        hl.scale.setScalar(1.12); hl.userData.until = performance.now() + 900; part.add(hl);
+      }
+      fx.burst(hit.point.clone(), ['#ffd21f', '#ffffff', '#7fe9ff'], 14, { up: 1.2, speed: 0.9, life: 0.6 });
+    };
+    sc.update = (dt, t) => {
+      sc.orbit.update(dt); fx.update(dt);
+      if (robot) M3.animate(robot, t, asm ? 'idle' : sc.mode || 'idle');
+      if (hl && performance.now() > hl.userData.until) { hl.parent && hl.parent.remove(hl); hl = null; }
+      if (asm) {
+        asm.t += dt; let left = 0;
+        asm.items.forEach(it => {
+          const k = Math.min(1, Math.max(0, (asm.t - it.t0) / it.d));
+          if (asm.t < it.t0) { left++; return; }
+          it.m.visible = it.lay === 0 ? (asm.t < 3.9 || sc.xr) : true;
+          const e = ease(k), off = (1 - e) * 1.6;
+          it.m.position.set(it.rest.x + it.dir.x * off, it.rest.y + it.dir.y * off, it.rest.z + it.dir.z * off);
+          if (k < 1) left++;
+          if (k >= 1 && !asm.sounded[it.lay]) { asm.sounded[it.lay] = 1; App.sfx.tap(); }
+        });
+        if (!left && asm.t > 4) {
+          asm.items.forEach(it => { it.m.position.copy(it.rest); if (it.lay === 0) it.m.visible = !!sc.xr; });
+          asm = null; sc.mode = 'happy'; setTimeout(() => { sc.mode = 'idle'; }, 1200);
+          fx.burst(new THREE.Vector3(RX, 1.2, 0), ['#ffd21f', '#ff3d9a', '#7fe9ff'], 50, { up: 3, speed: 2 });
+          App.speak('Έτοιμο! Πάτα πάνω του για να μάθεις τι κάνει κάθε κομμάτι.');
+        }
+      }
+    };
+    sc.busy = () => !!asm;
+    sc.dispose = () => { sc.orbit.dispose(); D3.disposeTree(scene); };
+    return sc;
+  }
+
   App.screens.museum = function () {
     if (!App.has3D) return App.renderMuseum2D();
     const ST = App.ST;
@@ -6379,16 +6978,27 @@ const BlockEditor = (function () {
     const found = C.FOSSIL_ORDER.filter(sp => ST.found[sp]);
     const cur = App.S.musSp && found.includes(App.S.musSp) ? App.S.musSp : found[0];
     gl(true);
-    let sc = D3.active && D3.active.isTurntable ? D3.active : null;
-    const cfg = cur && ST.dinos[cur] ? ST.dinos[cur] : { col: 0 };
-    if (cur) { if (!sc) { sc = turntable(cur, cfg); sc.isTurntable = true; D3.show(sc); } else sc.set(cur, cfg); }
+    const built = !!(cur && ST.dinos[cur]), cfg = built ? ST.dinos[cur] : { col: 0 };
+    const cfgKey = JSON.stringify(cfg);
+    let sc = D3.active && D3.active.isMuseum && D3.active.sp === cur && D3.active.cfgKey === cfgKey ? D3.active : null;
+    if (cur && !sc) { sc = museumScene(cur, cfg, built); sc.isMuseum = true; sc.cfgKey = cfgKey; D3.show(sc); }
     const s = cur ? C.SPECIES[cur] : null;
-    $('#app').innerHTML = `<div class="screen s3d ws3d">${App.barHTML('Μουσείο', true)}
+    $('#app').innerHTML = `<div class="screen s3d ws3d mus3d">${App.barHTML('Μουσείο', true)}
       <div class="row dinopick">${C.FOSSIL_ORDER.map(sp => ST.found[sp] ? `<button class="pill ${sp === cur ? 'on' : ''}" data-m="${sp}">${App.esc(C.SPECIES[sp].name)}</button>` : `<span class="pill" style="opacity:.5">;</span>`).join('')}</div>
-      <div class="opts panel">${s ? `<div class="row" style="justify-content:space-between"><h2>${App.esc(s.name)}</h2><button class="btn sq sm" id="msay" aria-label="Άκουσε">${I.speaker}</button></div><ul class="facts">${s.facts.map(f => `<li>${App.esc(f)}</li>`).join('')}</ul>${ST.dinos[cur] ? '' : '<p class="small">Ο σκελετός περιμένει στο εργαστήριο.</p>'}` : '<p>Δεν έχουμε βρει ακόμα απολιθώματα. Ψάξε στο νησί!</p>'}</div></div>`;
+      <div class="opts panel">${s ? `<div class="row" style="justify-content:space-between"><h2>${App.esc(s.name)}</h2><button class="btn sq sm" id="msay" aria-label="Άκουσε">${I.speaker}</button></div>
+        <div class="row mbtns">${built ? `<button class="btn yl sm" id="masm">⚙️ Συναρμολόγηση</button><button class="btn sm ${sc && sc.xr ? 'on' : ''}" id="mxr">🩻 Ακτίνες Χ</button><button class="btn sm" id="mws">🔧 Κομμάτια</button>` : ''}</div>
+        <div class="minfo" id="minfo"><b>Πάτα πάνω ${built ? 'στο Dinobot ή στον σκελετό' : 'στον σκελετό'}!</b><span>Μπορείς να το γυρίσεις και να κάνεις ζουμ με τα δάχτυλα.</span></div>
+        <ul class="facts">${s.facts.map(f => `<li>${App.esc(f)}</li>`).join('')}</ul>${built ? '' : '<p class="small">Ο σκελετός περιμένει στο εργαστήριο για να γίνει Dinobot.</p>'}` : '<p>Δεν έχουμε βρει ακόμα απολιθώματα. Ψάξε στο νησί!</p>'}</div></div>`;
     $('#back').onclick = () => { App.leaveLowLoad('museum', App.S.musT0); App.S.musT0 = 0; App.go('base'); };
     $$('[data-m]').forEach(b => b.onclick = () => { App.S.musSp = b.dataset.m; App.go('museum'); });
     const ms = $('#msay'); if (ms) ms.onclick = () => App.speak(s.name + '. ' + s.facts.join(' '), true);
+    if (!sc) return;
+    sc.onInfo = (t, x) => { const el = $('#minfo'); if (el) el.innerHTML = `<b>${App.esc(t)}</b><span>${App.esc(x)}</span>`; };
+    const asmB = $('#masm'); if (asmB) asmB.onclick = () => sc.assemble();
+    const xr = $('#mxr'); if (xr) xr.onclick = () => { sc.xray(!sc.xr); xr.classList.toggle('on', sc.xr); App.speak(sc.xr ? 'Ακτίνες Χ! Τώρα βλέπεις τον σκελετό και τα μηχανήματα μέσα από τη θωράκιση.' : 'Η θωράκιση γύρισε.'); };
+    const ws = $('#mws'); if (ws) ws.onclick = () => { App.S.wsDino = cur; App.go('workshop'); };
+    // the first visit to each Dinobot plays the assembly by itself
+    if (built && !ST.tips['asm_' + cur]) { ST.tips['asm_' + cur] = 1; App.save(); setTimeout(() => { if (D3.active === sc) sc.assemble(); }, 600); }
   };
 
   /* every other screen is flat (2D) over a calm background */
@@ -6454,8 +7064,8 @@ const BlockEditor = (function () {
     });
     const ball = M3.ball(); scene.add(ball);
     const players = [];
-    for (let i = 0; i < 3; i++) { const sp = team[i % team.length]; const d = M3.dino(sp.sp, sp.cfg); d.scale.setScalar(1.25); scene.add(d); players.push(d); }
-    for (let i = 0; i < 3; i++) { const d = foeSp === 'rusty' ? M3.rusty() : M3.dino(foeSp, {}, { rusty: true }); d.scale.setScalar(foeSp === 'rusty' ? 1.5 : 1.25); scene.add(d); players.push(d); }
+    for (let i = 0; i < 3; i++) { const sp = team[i % team.length]; const d = M3.dino(sp.sp, sp.cfg, { lod: 'low' }); d.scale.setScalar(1.25); scene.add(d); players.push(d); }
+    for (let i = 0; i < 3; i++) { const d = foeSp === 'rusty' ? M3.rusty() : M3.dino(foeSp, {}, { rusty: true, lod: 'low' }); d.scale.setScalar(foeSp === 'rusty' ? 1.5 : 1.25); scene.add(d); players.push(d); }
     const fx = D3.particles(scene);
     return { scene, camera, ball, players, crowd, fx, labels: [] };
   }

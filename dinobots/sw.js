@@ -1,5 +1,5 @@
 // DINOBOTS offline cache. A new release changes CACHE_NAME; older dinobots caches are removed.
-const CACHE_NAME = 'dinobots-pwa-v0.2-2ec2fc1ad0';
+const CACHE_NAME = 'dinobots-pwa-v0.3-8ec97a1e10';
 const CACHE_PREFIX = 'dinobots-pwa-';
 const APP_URL = new URL('./', self.location.href);
 const FILES = ['./', 'index.html', 'three.min.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png']
