@@ -812,12 +812,532 @@ button.pedestal{position:relative;display:block;margin:0 auto;padding:0;border:0
 }
 @media(prefers-reduced-motion:reduce){.flight-loop.open{box-shadow:0 0 0 3px #7fe9ff}}
 
+/* Same ink, flat colour, bevel and touch scale as the workshop. */
+.expansion{overflow-y:auto!important;min-height:0}.ex-workbench{position:relative;max-width:960px;width:100%;padding:12px 24px 30px;margin:auto;box-sizing:border-box;text-align:center}.ex-guide{position:absolute;left:12px;top:5px;width:65px;opacity:.9}.ex-guide .robot{width:100%;height:85px}.ex-game{max-width:700px;margin:auto}.ex-round{font-weight:900;white-space:nowrap}.ex-controls,.ex-choices,.ex-order{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;margin:12px auto}.ex-controls .btn,.ex-choices .btn,.ex-order .btn{min-height:48px;min-width:48px}.ex-status{min-height:1.5em;font-weight:800}.ex-number{display:flex;align-items:center;justify-content:center;gap:16px;margin:14px auto}.ex-number output{min-width:65px;font-size:2rem;font-weight:900;padding:12px;border:3px solid var(--ink);border-radius:12px;background:var(--yellow)}.ex-pad{display:grid;grid-template-columns:repeat(4,50px);gap:6px}.ex-pad .btn{min-width:46px;min-height:46px;padding:5px}.ex-equation{font-size:clamp(1.1rem,4vw,1.7rem);font-weight:900;margin:14px}.ex-batteries,.ex-robots,.ex-wallet,.ex-coins{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:12px auto;max-width:560px}.ex-batteries>svg{width:30px;height:42px}.ex-batteries .btn{width:48px;padding:3px;min-height:60px}.ex-batteries svg{width:36px;height:48px}.ex-coin{width:58px;height:58px;display:inline-flex;align-items:center;justify-content:center;gap:2px;border:3px solid #0e0c22;border-radius:50%;background:#ffd21f;box-shadow:inset 4px 4px #fff7e2;font-size:1.4rem;font-weight:900;color:#0e0c22}.ex-coin small{font-size:.7rem}.ex-price{display:flex;align-items:center;justify-content:center;gap:15px;font-size:1.5rem}.ex-price svg{width:70px}.ex-wallet .btn,.ex-coins .btn{padding:3px}.ex-sharing{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}.ex-counter{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;background:#fff7e2;border:3px solid #0e0c22;border-radius:12px;padding:10px}.ex-counter b{flex-basis:100%;color:#0e0c22}.ex-counter output{font-size:1.5rem;font-weight:900;min-width:35px;color:#0e0c22}.ex-counter .btn{min-width:46px;min-height:46px}.ex-clock{width:min(260px,70vw);display:block;margin:auto}.ex-ruler{width:min(560px,100%);display:block;margin:auto}.ex-partitions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:20px auto}.ex-partitions .btn{padding:4px;min-width:100px;max-width:160px;flex:1}.ex-partitions svg{display:block;width:100%}.ex-shade{display:grid;grid-template-columns:repeat(2,90px);justify-content:center;gap:0;margin:20px auto}.ex-shade .btn{height:70px;border-radius:0;background:#fff7e2}.ex-shade .btn.yl{background:#ffd21f}.ex-array{display:grid;grid-template-columns:repeat(var(--cols),minmax(32px,65px));justify-content:center;margin:20px auto;gap:6px}.ex-array svg{width:100%}.ex-pairs{display:grid;grid-template-columns:repeat(2,30px);justify-content:center;gap:3px;max-height:270px;overflow:auto;margin:auto}.ex-pairs svg{width:30px}.ex-chart{display:block;max-width:390px;width:100%;margin:auto;background:#fff7e2;border-radius:12px;color:#0e0c22}.ex-robots svg{width:42px;height:42px}.ex-build-row{display:flex;justify-content:center;flex-wrap:wrap;gap:0;margin:10px auto}.ex-build-row svg{width:32px}.ex-lengths{display:flex;flex-direction:column;align-items:flex-start;max-width:340px;margin:auto;gap:12px}.ex-lengths .btn{display:flex;min-height:48px}.ex-lengths span{max-width:230px;height:35px}.ex-lengths svg{width:100%;height:100%}.ex-event{display:block;font-size:2.5rem}.ex-order small{display:block}.ex-object{font-size:5rem}.ex-tally{font-size:1.4rem;align-self:center}
+@media(max-width:600px){.ex-workbench{padding:8px 10px 24px}.ex-guide{display:none}.ex-game{width:100%}.ex-number{gap:8px}.ex-pad{grid-template-columns:repeat(4,46px);gap:4px}.ex-sharing{gap:8px}.ex-counter{gap:4px;padding:6px}.ex-wallet{gap:4px}.ex-coin{width:46px;height:46px;font-size:1.1rem}.expansion .bar{gap:5px}.expansion .ttl{font-size:.9rem}.ex-counter .btn{padding:4px}.ex-order .btn{font-size:.9rem}.ex-partitions{gap:5px}}
+@media(prefers-reduced-motion:reduce){.expansion *{animation:none!important;transition:none!important}}
+.ex-garage{padding:20px;max-width:1000px;margin:auto;text-align:center}.garage-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.garage-slot{display:flex;flex-direction:column;align-items:center;gap:8px;border:3px solid var(--ink);border-radius:14px;padding:12px;background:#fff7e2;color:#0e0c22}.garage-slot>.robot{height:120px;max-width:100%}.garage-slot .btn{min-height:44px;max-width:100%}.garage-empty{height:120px;display:grid;place-items:center;font-size:3rem;opacity:.3}.world-lock{display:block;background:#fff7e2;color:#0e0c22;border-radius:4px;font-size:.65rem;position:absolute;bottom:0;left:0;right:0}.card .world-lock{position:static;font-size:.75rem}.ex-voice{font-size:.9rem;font-weight:900}.opt:has(.ex-voice){min-width:100px}.garage-slot b{font-weight:900}
+@media(max-width:600px){.garage-slots{grid-template-columns:repeat(2,minmax(0,1fr))}.ex-garage{padding:10px}.garage-slot{padding:8px;gap:6px}.garage-slot .btn{font-size:.8rem;padding:6px}.shop .cards{min-width:0}}
+.ex-grid-scroll{overflow:auto;max-width:100%;margin:12px auto;border:3px solid #0e0c22;border-radius:12px;background:#fff7e2;touch-action:pan-x pan-y}.ex-gear-grid{display:grid;grid-template-columns:repeat(var(--gridw),44px);grid-template-rows:repeat(var(--gridh),44px);width:max-content;padding:20px}.ex-gear-cell{position:relative;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border:1px dashed #7c86a8;background:transparent;display:grid;place-items:center;overflow:visible}.ex-gear-cell i{width:5px;height:5px;border-radius:50%;background:#7c86a8}.ex-gear-cell.driver{background:#d5efff}.ex-gear-cell.output{background:#dbf8db}.ex-gear-cell.blocked svg{width:34px;height:34px}.ex-gear{display:block;width:43px;height:43px;pointer-events:none;transform-origin:center}.ex-gear svg{width:100%;height:100%;fill:#ffd21f;stroke:#0e0c22;stroke-width:3}.ex-gear-cell.output .ex-gear svg{fill:#17b26a}.ex-gear.turning svg{animation:ex-gear-turn var(--speed) linear infinite;animation-direction:var(--direction)}@keyframes ex-gear-turn{to{transform:rotate(360deg)}}
+.ex-assembly{width:100%;max-width:240px;height:205px}.ex-book-spread{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;background:#fff7e2;color:#0e0c22;border:3px solid #0e0c22;border-radius:12px}.ex-book-spread figure{margin:0;min-width:0}.ex-book-spread figcaption{font-weight:900;padding-top:8px}.ex-block-palette{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:12px auto}.ex-block-card{width:110px;min-height:94px;padding:2px;display:flex;flex-direction:column;align-items:center}.ex-block-card .ex-assembly{height:65px;max-width:80px;margin-top:-2px}.ex-block-card small{font-size:.7rem}.ex-program{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin:10px}.ex-program .btn{display:flex;align-items:center;min-width:50px;padding:3px}.ex-program svg{width:38px;height:34px}.ex-position-grid{display:grid;grid-template-columns:repeat(3,60px);justify-content:center;gap:5px}.ex-position-grid .btn{min-height:44px}.ex-view-grid{display:grid;grid-template-columns:repeat(3,44px);justify-content:center;margin:auto}.ex-view-grid .btn{min-width:44px;min-height:44px;padding:0;border-radius:0}.ex-track{display:grid;grid-template-columns:repeat(var(--trackw),minmax(35px,55px));justify-content:center;margin:10px auto}.ex-track-cell{height:48px;background:var(--tile);border:2px solid #0e0c22;position:relative;display:grid;place-items:center;color:#0e0c22}.ex-track-cell:not(.road){opacity:.35}.sensor-robot{position:absolute;font-size:2rem;color:#ffd21f;-webkit-text-stroke:1.5px #0e0c22;z-index:2}.second-sensor{position:absolute;right:3px;bottom:3px;width:12px;height:12px;border:2px solid #0e0c22}.second-sensor.white{background:#fff7e2}.second-sensor.black{background:#0e0c22}.ex-rules{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}.ex-rule{display:flex;gap:6px;align-items:center;border:3px solid #0e0c22;border-radius:10px;padding:6px;background:#fff7e2;color:#0e0c22}.ex-rule b{display:flex;gap:4px;align-items:center}.sensor-color{display:inline-block;width:22px;height:22px;border:2px solid #0e0c22;border-radius:4px}.sensor-color.red{background:#e8292c}.sensor-color.blue{background:#1f5fe0}.sensor-color.green{background:#17b26a}.sensor-color.white{background:#fff7e2}.sensor-color.black{background:#0e0c22}.ex-rule .btn{min-height:44px;min-width:85px}
+.ex-robot-cards{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:12px auto}.ex-robot-card{width:190px;max-width:100%;border:4px solid #0e0c22;border-radius:14px;background:#fff7e2;color:#0e0c22;padding:10px;box-shadow:4px 5px #0e0c22}.ex-robot-card>.robot{height:135px;display:block;margin:4px auto;max-width:100%}.ex-stat{display:flex;justify-content:space-between;padding:6px 4px;border-bottom:2px solid #d5dbea;font-size:.95rem}.ex-stat.lit{background:#ffd21f;border-radius:5px}.ex-robot-card .btn{font-size:.8rem;min-height:44px;margin-top:8px;max-width:100%}.ex-robot-card.chosen{background:#c7f4df}.card-library{margin:16px auto;display:block}
+@media(max-width:600px){.ex-robot-cards{gap:8px}.ex-robot-card{width:calc(50% - 5px);padding:6px;border-width:3px;box-shadow:2px 3px #0e0c22}.ex-robot-card>.robot{height:112px}.ex-stat{font-size:.78rem;gap:4px}.ex-robot-card>b{font-size:.85rem}.ex-robot-card .btn{font-size:.7rem;padding:5px}.ex-book-spread .ex-assembly{height:175px}.ex-block-card{width:95px}.ex-track{grid-template-columns:repeat(var(--trackw),minmax(32px,48px))}.ex-guide{display:none}}
+.ex-gear-grid{padding:var(--gear-pad,44px)}.ex-position-dot{display:block;width:16px;height:16px;border-radius:3px;background:#7c86a8;border:2px solid #0e0c22;margin:auto}.yl .ex-position-dot{background:#17b26a}.ex-position-grid .btn{min-height:48px;padding:5px}
+.ex-output-arm{position:absolute;inset:-18px;pointer-events:none;transform-origin:center}.ex-output-arm svg{width:100%;height:100%}.ex-output-arm.turning{animation:ex-gear-turn var(--speed) linear infinite;animation-direction:var(--direction)}
+.ex-track{grid-template-columns:repeat(var(--trackw),minmax(0,1fr));width:min(100%,calc(var(--trackw)*48px))}.ex-track-cell{min-width:0}
+.sensor-robot{width:38px;height:40px;display:block;-webkit-text-stroke:0}.sensor-robot>.robot{width:32px;height:36px}.sensor-robot>i{position:absolute;right:-4px;top:-3px;font-size:.75rem;font-style:normal;color:#0e0c22}
+
 </style>
 </head>
 <body>
 <div id="app"></div>
 <script>
 (()=>{'use strict';
+const BipNewRobots=(()=>{// Append-only robot catalogue. Stats are playful deterministic part scores, not physics.
+const chassis=[
+ {id:7,name:'ΓΑΝΤΖΟΣ',personality:'Υπομονετικός. Σηκώνει τις δύσκολες δουλειές!',stars:210,world:19,sig:{head:10,legs:6,veh:7,body:4,color:8,ant:4}},
+ {id:8,name:'ΣΥΡΜΟΣ',personality:'Βάζει κάθε βήμα στη σωστή σειρά.',stars:250,world:20,sig:{head:11,legs:7,veh:8,body:5,color:9}},
+ {id:9,name:'ΒΥΘΟΣ',personality:'Ήσυχος εξερευνητής. Κοιτά κάτω από την επιφάνεια.',stars:290,world:16,sig:{head:12,legs:8,veh:9,body:6,color:10}},
+ {id:10,name:'ΔΡΑΚΟΣ',personality:'Πετά ιδέες και ψάχνει έξυπνους κανόνες.',stars:335,world:21,sig:{head:13,legs:9,veh:10,body:7,color:11,ant:5}},
+ {id:11,name:'ΑΡΑΧΝΟΣ',personality:'Βρίσκει στήριγμα με κάθε του πόδι.',stars:390,world:17,sig:{head:14,legs:10,veh:11,body:8}},
+ {id:12,name:'ΤΡΟΧΙΑ',personality:'Ενώνει την ομάδα σαν διαστημικός σταθμός.',stars:450,world:22,sig:{head:15,legs:11,veh:12,body:9,ant:6}}
+];
+const additions={color:4,sec:4,head:6,eyes:3,glow:3,body:6,legs:6,ant:3,veh:6,zap:3,emblem:6,back:4,voice:4,pattern:5};
+const original={ch:7,color:8,sec:9,head:10,eyes:4,glow:5,body:4,legs:6,ant:4,veh:7,zap:5,emblem:0,back:0,voice:0,pattern:0};
+const unlockTable=(()=>{
+ const rows=[];for(const [k,n] of Object.entries(additions))for(let j=0;j<n;j++){const i=(original[k]||0)+j;if(i===0)continue;rows.push({k,i});}
+ return rows.map((r,j)=>{const signature=chassis.find(c=>c.sig[r.k]===r.i);return {...r,n:signature?.stars||Math.round((190+290*j/(rows.length-1))/5)*5,...(signature?{world:signature.world}:{})};});
+})();
+function install(parts,models,unlocks){
+ if(models.length!==7)throw Error('Expected original seven chassis before append');
+ models.push(...chassis.map(c=>({...c,sig:{...c.sig}})));parts.ch=models.length;
+ for(const [k,n] of Object.entries(additions))parts[k]=(original[k]||0)+n;
+ unlocks.push(...unlockTable.map(r=>[r.k,r.i,r.n]));
+}
+function requiredStars(k,i,legacy){if(k==='ch'&&i>=7)return chassis.find(c=>c.id===i)?.stars??Infinity;const r=unlockTable.find(r=>r.k===k&&r.i===i);return r?r.n:legacy(k,i);}
+function worldComplete(core,w){return Array.from({length:8},(_,i)=>(core?.stars?.[w+'-'+(i+1)]||0)>0).every(Boolean);}
+function requiredWorld(k,i){return k==='ch'?chassis.find(c=>c.id===i)?.world:unlockTable.find(r=>r.k===k&&r.i===i)?.world;}
+function isOwned(k,i,stars,core,legacy){if(core.all)return true;const w=requiredWorld(k,i);return stars>=requiredStars(k,i,legacy)&&(!w||worldComplete(core,w));}
+function robotStats(c={}){const keys=['ch','head','eyes','body','legs','ant','color','veh','sec','glow','zap','emblem','back','pattern','voice'];const sum=(offset)=>keys.reduce((n,k,i)=>n+(Number.isInteger(c[k])?c[k]:0)*(i+offset),0);return {speed:10+sum(3)%80,strength:10+sum(7)%80,energy:10+sum(11)%80};}
+function saveDesign(core,slot){if(!Number.isInteger(slot)||slot<0||slot>=6)throw new RangeError('Garage slot must be 0–5');const old=core.garage?.schema_version===1&&Array.isArray(core.garage.slots)?core.garage.slots.slice(0,6):Array(6).fill(null);while(old.length<6)old.push(null);old[slot]=JSON.parse(JSON.stringify(core.robot));core.garage={schema_version:1,slots:old};return core.garage;}
+function loadDesign(core,slot,owns){const c=core.garage?.schema_version===1?core.garage.slots?.[slot]:null;if(!c||!Number.isInteger(c.ch)||!Object.entries(c).every(([k,i])=>!Object.hasOwn(original,k)||owns(k,i)))return false;core.bots[core.robot.ch||0]={...core.robot};core.robot=JSON.parse(JSON.stringify(c));return true;}
+const K='#0e0c22',G='#d5dbea',W='#aeeeff';
+const O=`stroke="${K}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"`,O2=`stroke="${K}" stroke-width="2" stroke-linejoin="round"`;
+const both=s=>s+`<g transform="matrix(-1 0 0 1 100 0)">${s}</g>`;
+const highlight=d=>`<path d="${d}" fill="#fff" opacity=".32"/>`;
+function chassisSVG(c,p){const {col,sec,acc}=p,id=c.ch-7;
+ const frames=[
+  {back:`<path d="M30 59V18h18l30 21v17" fill="none" stroke="${K}" stroke-width="9"/><path d="M30 59V18h18l30 21v17" fill="none" stroke="${acc}" stroke-width="5"/><path d="M78 56v7q0 8-8 7" fill="none" ${O}/>`,chest:`<path d="M28 49h44v25H28z" fill="${col}" ${O}/><path d="M30 50h40v6H30z" fill="${acc}"/>`},
+  {back:`<path d="M24 54V28h8v26M21 28h14" fill="none" ${O}/><circle cx="28" cy="21" r="5" fill="${sec}" ${O2}/>`,chest:`<path d="M29 49h42l4 21H25z" fill="${col}" ${O}/><path d="M31 52h38v9H31z" fill="${W}" ${O2}/>`},
+  {back:both(`<path d="M31 50L12 61l6 9 18-7" fill="${sec}" ${O}/><circle cx="24" cy="60" r="4" fill="${G}" ${O2}/>`),chest:`<rect x="27" y="48" width="46" height="28" rx="12" fill="${col}" ${O}/><circle cx="50" cy="61" r="12" fill="${sec}" ${O2}/>`},
+  {back:both(`<path d="M35 52L8 23l4 26-5 17 29-5z" fill="${sec}" ${O}/><path d="M11 29l17 26M12 49l16 6" fill="none" ${O2}/>`),chest:`<path d="M30 48h40l-6 28H36z" fill="${col}" ${O}/><path d="M50 49l-7 24h14z" fill="${acc}" ${O2}/>`},
+  {back:both(`<path d="M32 55L16 46 8 61M30 64L14 69 7 84" fill="none" stroke="${K}" stroke-width="7"/><path d="M32 55L16 46 8 61M30 64L14 69 7 84" fill="none" stroke="${sec}" stroke-width="3"/>`),chest:`<path d="M50 46l24 13-7 17H33l-7-17z" fill="${col}" ${O}/>`},
+  {back:both(`<rect x="6" y="35" width="19" height="34" rx="2" fill="#1f5fe0" ${O}/><path d="M6 46h19M6 57h19M15 35v34" stroke="${W}" stroke-width="1.5"/>`),chest:`<path d="M29 48h42v26H29z" fill="${col}" ${O}/><path d="M29 52h42v6H29z" fill="${sec}"/>`}
+ ][id]||{back:'',chest:''};
+ return {...frames,arms:both(`<circle cx="26" cy="57" r="8" fill="${sec}" ${O}/><path d="M21 64h11v16H20z" fill="${col}" ${O}/><rect x="20" y="80" width="11" height="6" rx="2" fill="${K}"/>`),waist:`<rect x="44" y="42" width="12" height="10" fill="${G}" ${O}/><rect x="35" y="72" width="30" height="10" rx="3" fill="${sec}" ${O}/>`,chest:frames.chest+highlight('M32 51h5v19h-5z'),e:[.82,0]};
+}
+function partSVG(cat,i,c,p){const {col,sec,eye,acc}=p;let n=i-(original[cat]||0);if(n<0)return '';n=n%6;
+ if(cat==='head')return [
+ `<path d="M30 45V28h40v17l-8 6H38z" fill="${col}" ${O}/><path d="M28 27h44v7H28z" fill="${acc}" ${O2}/>`,
+ `<path d="M33 48V26h34v22z" fill="${col}" ${O}/><rect x="40" y="18" width="20" height="9" rx="3" fill="${sec}" ${O}/><circle cx="50" cy="22" r="3" fill="${W}"/>`,
+ `<ellipse cx="50" cy="36" rx="23" ry="18" fill="${col}" ${O}/><path d="M30 26h40" ${O}/><circle cx="72" cy="35" r="4" fill="${sec}" ${O2}/>`,
+ `<path d="M31 45V29l9-8 10 6 10-6 9 8v16l-9 6H40z" fill="${col}" ${O}/><path d="M34 28l-8-12 14 7M66 28l8-12-14 7" fill="${acc}" ${O2}/>`,
+ `<path d="M28 38l10-17h24l10 17-10 13H38z" fill="${col}" ${O}/><circle cx="32" cy="37" r="4" fill="${sec}" ${O2}/><circle cx="68" cy="37" r="4" fill="${sec}" ${O2}/>`,
+ `<rect x="28" y="24" width="44" height="27" rx="8" fill="${col}" ${O}/><path d="M50 24V11m-8 1h16" fill="none" ${O}/><circle cx="50" cy="9" r="4" fill="${acc}" ${O2}/>`][n]+highlight('M35 27h5v17h-5z');
+ if(cat==='eyes')return [
+ `<path d="M43 33l5 4m0-4-5 4M52 33l5 4m0-4-5 4" stroke="${eye}" stroke-width="2"/>`,
+ `<rect x="42" y="32" width="6" height="6" rx="1" fill="${eye}"/><rect x="52" y="32" width="6" height="6" rx="1" fill="${eye}"/>`,
+ `<path d="M42 36l4-3 4 3 4-3 4 3" fill="none" stroke="${eye}" stroke-width="2.5"/>`][n%3];
+ if(cat==='body')return [
+ `<circle cx="50" cy="61" r="9" fill="${acc}" ${O2}/><path d="M50 54v14M43 61h14" ${O2}/>`,
+ `<path d="M40 54h20v14H40z" fill="${sec}" ${O2}/><path d="M44 58h12M44 63h12" stroke="${W}" stroke-width="2"/>`,
+ `<circle cx="50" cy="61" r="9" fill="${W}" ${O2}/><circle cx="50" cy="61" r="4" fill="${col}" ${O2}/>`,
+ `<path d="M50 51l9 9-9 10-9-10z" fill="${acc}" ${O2}/><path d="M50 55v11" stroke="white" stroke-width="2"/>`,
+ `<path d="M41 55h18v13H41z" fill="${G}" ${O2}/><circle cx="45" cy="59" r="2" fill="${eye}"/><circle cx="55" cy="64" r="2" fill="${acc}"/>`,
+ `<circle cx="50" cy="61" r="9" fill="${sec}" ${O2}/><ellipse cx="50" cy="61" rx="13" ry="4" fill="none" ${O2}/>`][n];
+ if(cat==='legs')return both([
+ `<path d="M35 80h14v22H27v-7h8z" fill="${sec}" ${O}/><path d="M38 82v15" stroke="white" stroke-width="3" opacity=".4"/>`,
+ `<path d="M36 80h13v17H30z" fill="${sec}" ${O}/><circle cx="36" cy="99" r="8" fill="${K}"/><circle cx="36" cy="99" r="3" fill="${G}"/>`,
+ `<path d="M38 80h11v19l-18 6-5-8 12-4z" fill="${sec}" ${O}/><path d="M31 99l14-3" stroke="${W}" stroke-width="2"/>`,
+ `<path d="M37 80h12v19H34z" fill="${sec}" ${O}/><path d="M34 99l-7 7h22v-7z" fill="${acc}" ${O2}/>`,
+ `<path d="M43 80L28 89l-5 14M45 85L35 96l2 9" fill="none" stroke="${K}" stroke-width="7"/><path d="M43 80L28 89l-5 14M45 85L35 96l2 9" fill="none" stroke="${sec}" stroke-width="3"/>`,
+ `<path d="M36 80h13v17H35z" fill="${sec}" ${O}/><path d="M32 98h17v7H25z" fill="${G}" ${O}/><circle cx="41" cy="88" r="3" fill="${W}" ${O2}/>`][n]);
+ if(cat==='ant')return [
+ `<path d="M50 25V9l-9 6m9-6 9 6" fill="none" ${O}/><circle cx="50" cy="7" r="4" fill="${acc}" ${O2}/>`,
+ both(`<path d="M36 27L27 8l13 8" fill="${sec}" ${O}/><circle cx="29" cy="8" r="3" fill="${acc}" ${O2}/>`),
+ `<path d="M50 25V12" ${O}/><ellipse cx="50" cy="12" rx="15" ry="6" fill="${G}" ${O}/><circle cx="50" cy="11" r="4" fill="${acc}" ${O2}/>`][n%3];
+ if(cat==='veh'){
+ const wheel=(x)=>`<circle cx="${x}" cy="50" r="8" fill="${K}"/><circle cx="${x}" cy="50" r="3" fill="${G}"/>`;
+ const body=`<path d="M8 43V29h59l23 14v6H8z" fill="${col}" ${O}/><path d="M12 32h50v6H12z" fill="white" opacity=".32"/>`;
+ return [
+ body+`<path d="M36 29V7h15l29 17v15" fill="none" stroke="${K}" stroke-width="7"/><path d="M36 29V7h15l29 17v15" fill="none" stroke="${acc}" stroke-width="3"/>`+wheel(25)+wheel(69),
+ body+`<rect x="19" y="12" width="30" height="19" fill="${sec}" ${O}/><rect x="25" y="16" width="16" height="10" fill="${W}" ${O2}/><path d="M61 29V12h8v17" fill="${sec}" ${O}/>`+wheel(20)+wheel(45)+wheel(72),
+ `<ellipse cx="51" cy="37" rx="41" ry="21" fill="${col}" ${O}/><path d="M44 17V5h17v9" fill="none" ${O}/><circle cx="47" cy="37" r="11" fill="${W}" ${O}/><path d="M10 31L2 20v32l9-9" fill="${sec}" ${O}/>`+highlight('M22 26q30-16 55 4'),
+ `<path d="M13 45l36-30 40 30-38 10z" fill="${col}" ${O}/><path d="M48 23L10 7l7 25M54 23L92 7l-7 25" fill="${sec}" ${O}/><path d="M39 44l12-15 12 15" fill="${W}" ${O2}/>`,
+ body+both(`<path d="M30 41L15 53 7 57M36 45L28 57" fill="none" stroke="${K}" stroke-width="5"/>`),
+ `<path d="M36 13h28v41H36z" fill="${col}" ${O}/><rect x="2" y="20" width="28" height="27" fill="#1f5fe0" ${O}/><rect x="70" y="20" width="28" height="27" fill="#1f5fe0" ${O}/><path d="M30 33h6m28 0h6M16 20v27m68-27v27" stroke="${W}" stroke-width="2"/>`][n];
+ }
+ return '';
+}
+function emblemSVG(c,p){if(!c.emblem)return '';const symbols=['','⚡','★','⚙','♥','✓'];return `<g><circle cx="50" cy="61" r="8" fill="${p.acc}" ${O2}/><text x="50" y="65" font-size="11" font-weight="900" text-anchor="middle" fill="${K}">${symbols[c.emblem]||'★'}</text></g>`;}
+function accessorySVG(c,p){if(!c.back)return '';return [
+ '',both(`<rect x="12" y="47" width="13" height="33" rx="5" fill="${p.sec}" ${O}/><path d="M15 81l4 10 4-10" fill="${p.acc}" ${O2}/>`),
+ `<path d="M24 68L9 49V32l10-6 8 6" fill="none" stroke="${K}" stroke-width="7"/><path d="M24 68L9 49V32l10-6 8 6" fill="none" stroke="${G}" stroke-width="3"/>`,
+ `<path d="M72 50l19 5v20l-9 10-10-8z" fill="${p.sec}" ${O}/><path d="M78 56l7 3v12l-4 5" fill="none" stroke="#fff" stroke-width="3" opacity=".4"/>`][c.back]||'';}
+function patternSVG(c,p){if(!c.pattern)return '';const pattern=[
+ '',`<path d="M34 51l5 20M45 51l5 20M56 51l5 20" stroke="${p.sec}" stroke-width="4"/>`,
+ `<path d="M33 52l9 2-3 8-6-2M55 53l11 5-6 5-7-3M44 65l8-3 6 8-10 1" fill="${p.sec}"/>`,
+ `<path d="M34 51h9l-5 19h-4zM49 51h5l-4 19h-6zM61 51h5l-4 19h-5z" fill="white" opacity=".55"/>`,
+ `<path d="M50 51h16l-3 20H50z" fill="${p.sec}"/>`][c.pattern]||'';return pattern;}
+
+return {chassis,additions,unlockTable,install,requiredStars,requiredWorld,worldComplete,isOwned,robotStats,saveDesign,loadDesign,chassisSVG,partSVG,emblemSVG,accessorySVG,patternSVG};})();
+const BipRobotics=(()=>{const {robotStats}=BipNewRobots;
+const roboticsFamilies=['gears','booklet','sensors','robot-cards'];
+const roboticsCatalog=[
+ {family:'gears',title:'Το εργαστήρι με τα γρανάζια',primary_skill:'spatial_reasoning',secondary_skills:['multiplication','problem_decomposition'],prerequisites:['multiplication','spatial_reasoning'],mode:'spatial'},
+ {family:'booklet',title:'Το βιβλίο οδηγιών',primary_skill:'spatial_reasoning',secondary_skills:['geometry','problem_decomposition','error_detection'],prerequisites:['spatial_reasoning'],mode:'spatial'},
+ {family:'sensors',title:'Το ρομπότ με τους αισθητήρες',primary_skill:'deductive_logic',secondary_skills:['constraint_reasoning','problem_decomposition','error_detection'],prerequisites:['deductive_logic','problem_decomposition'],mode:'debug'},
+ {family:'robot-cards',title:'Οι κάρτες των ρομπότ',primary_skill:'number_sense',secondary_skills:['subtraction','data'],prerequisites:['number_sense','subtraction'],mode:'boss'}
+].map(c=>({...c,item_id:'a:'+c.family,kind:'expansion',nominal_difficulty:1,cognitive_demand:'apply',representation:'mixed',novelty_level:1,difficulty_dimensions:['structure','constraints','representation'],error_tags:[c.family+'_construction']}));
+const same=(a,b)=>Array.isArray(a)&&a.length===b.length&&a.every((x,i)=>x===b[i]);
+const key=g=>g.x+','+g.y;
+function seedNumber(seed){let n=0;for(const c of String(seed))n=(Math.imul(n,31)+c.charCodeAt(0))>>>0;return n;}
+function shuffled(a,n){a=a.slice();for(let i=a.length-1;i>0;i--){n=(Math.imul(n,1664525)+1013904223)>>>0;const j=n%(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
+function generateRobotics(family,seed=1,tier=0,modeKey=null){
+ const meta=roboticsCatalog.find(c=>c.family===family);if(!meta)throw new RangeError('Unknown robotics family');const n=seedNumber(seed),band=Math.max(0,Math.min(2,Math.floor(Number(tier)||0)));
+ const modes={gears:band===2?['ratio']:band===1?['detour','parity']:['chain'],booklet:band===2?['order','debug']:band===1?['views','faces']:['follow'],sensors:band===2?['until','debug']:band===1?['two']:['rules'],'robot-cards':band===2?['difference','order']:band===1?['sum','difference']:['duel','compare']};
+ const mode=modeKey||modes[family][n%modes[family].length],t={...meta,seed,tier:band,modeKey:mode,generator_version:'bip-robotics-1',validator_version:'bip-robotics-1',content_version:'1.4',par:3,nominal_difficulty:band+1};
+ if(family==='gears'){
+  const ratio=mode==='ratio',row=ratio?2:((n>>>1)%2?1:3);t.driver={x:0,y:row,r:ratio?2:1};t.output={x:ratio?(n%2?7:9):n%2?6:8,y:ratio?(n%3)*2:row,r:ratio?2:1};t.width=t.output.x+1;t.height=5;t.ratio=ratio?2:1;const edges=ratio?(t.output.x-1)/2+Math.abs(t.output.y-row)/2:t.output.x/2;t.direction=edges%2?-1:1;
+  t.blocked=mode==='detour'?['2,'+row]:[];t.maxGears=12;t.prompt=ratio?'Ένωσε τα γρανάζια. Μεγάλο μία στροφή, μικρό δύο!':`Ένωσε τα γρανάζια. Το τελευταίο να γυρίζει ${t.direction===1?'δεξιά ↻':'αριστερά ↺'}.`;
+ }else if(family==='booklet'){
+  const count=band===0?3:band===1?4:4+n%2;t.target=Array.from({length:count},(_,i)=>({id:i,x:band===0&&i===1?1:0,y:0,z:band===0?i===2?1:0:i,shape:i===count-1?'cone':i===1?['cube','prism','cylinder'][n%3]:'cube',color:(i+n)%3}));
+  if(band===2&&mode!=='views'&&mode!=='faces'){t.target=[{id:0,x:0,y:0,z:0,shape:'cube',color:n%3},{id:1,x:1,y:0,z:0,shape:'cube',color:(n+1)%3},{id:2,x:0,y:0,z:1,shape:'prism',color:(n+2)%3},{id:3,x:0,y:0,z:2,shape:'cube',color:n%3},...(count===5?[{id:4,x:1,y:0,z:1,shape:'cylinder',color:(n+1)%3}]:[])];}
+  if(mode==='views'){t.target=[{id:0,x:0,y:0,z:0,shape:'cube',color:n%3},{id:1,x:1,y:0,z:0,shape:'prism',color:(n+1)%3},{id:2,x:0,y:1,z:0,shape:'cylinder',color:(n+2)%3},{id:3,x:n%2,y:0,z:1,shape:'cone',color:n%3}];}
+  t.order=shuffled(t.target.map((_,i)=>i),n);t.broken=[...t.target.slice(1),t.target[0]];t.view=['top','front','side'][n%3];t.property=['circle','faces','edges'][n%3];
+  t.prompt=mode==='views'?`Δες την κατασκευή ${t.view==='top'?'από πάνω':t.view==='front'?'από μπροστά':'από το πλάι'}. Φτιάξε την όψη.`:mode==='faces'?t.property==='circle'?'Τι σχήμα έχει η επίπεδη πλευρά του κυλίνδρου;':`Πόσες ${t.property==='faces'?'έδρες':'ακμές'} έχει ο κύβος;`:mode==='order'?'Γράψε τα βήματα με εικόνες. Πρώτα ό,τι στηρίζει τα άλλα!':mode==='debug'?'Μπερδεμένα βήματα! Δες το λάθος και φτιάξε τη σειρά.':'Δες το βιβλίο. Διάλεξε κομμάτι και θέση σε κάθε βήμα.';
+ }else if(family==='sensors'){
+  t.two=mode==='two'||mode==='until'||mode==='debug';t.until=mode==='until'||mode==='debug';const turnX=2+n%3,turnY=2+(n>>>1)%2,last=1+(n>>>2)%2;t.width=turnX+(t.two?last:0)+2;t.height=5;t.start={x:0,y:1,dir:0};
+  const path=[];for(let x=0;x<=turnX;x++)path.push([x,1]);for(let y=2;y<=turnY;y++)path.push([turnX,y]);if(t.two)for(let x=turnX+1;x<=turnX+last;x++)path.push([x,turnY]);t.goal={x:path.at(-1)[0],y:path.at(-1)[1]};t.tiles=Object.fromEntries(path.map(([x,y])=>[x+','+y,{color:'white',second:'white'}]));
+  t.tiles[turnX+',1']={color:'red',second:'white'};if(t.two)t.tiles[turnX+','+turnY]={color:'red',second:'black'};
+  t.tiles[key(t.goal)]={color:t.until?'green':'blue',second:'white'};t.conditions=t.two?['red|white','red|black',...(!t.until?['blue|white']:[])]:['red','blue'];
+  t.prompt=t.until?'ΞΑΝΑ με ΑΝ, ώσπου να δεις πράσινο.':t.two?'Κοίτα και τους δύο αισθητήρες. Φτιάξε τους κανόνες!':'ΑΝ κόκκινο: δεξιά. ΑΝ μπλε: σταμάτα. Φτιάξε το σχέδιο!';
+ }else{
+  t.stat=['speed','strength','energy'][n%3];t.statsPair=shuffled(['speed','strength','energy'],n).slice(0,2);t.cards=Array.from({length:mode==='order'?3:2},(_,i)=>({id:i===0?'mine':i===1?'foe':'friend',name:i===0?'Το ρομπότ μου':i===1?'Σκουριάς':'Βίδα',cfg:{ch:(n+i*3)%7,head:(n+i)%10,eyes:(n+i)%4,body:(n+i)%4,legs:(n+i)%6,ant:(n+i)%4,color:(n+i)%8,veh:(n+i)%7}}));
+  t.prompt=mode==='sum'?'Πρόσθεσε τα δύο φωτισμένα στοιχεία στην κάρτα σου.':mode==='difference'?'Πόσο μεγαλύτερος είναι ο μεγάλος αριθμός;':mode==='order'?'Πάτα τις κάρτες από τη μικρή στη μεγάλη τιμή.':mode==='duel'?'Διάλεξε στοιχείο. Ποια κάρτα κερδίζει;':'Ποια κάρτα έχει μεγαλύτερη τιμή;';
+ }
+ if(mode==='debug'){t.cognitive_demand='debug';t.mode='debug';}
+ if(family==='gears'&&mode!=='ratio')t.secondary_skills=['problem_decomposition'];
+ if(family==='booklet')t.secondary_skills=['geometry','problem_decomposition',...(mode==='debug'?['error_detection']:[])];
+ if(family==='sensors'&&mode!=='debug')t.secondary_skills=['constraint_reasoning','problem_decomposition'];
+ if(family==='robot-cards')t.secondary_skills=['data',...(mode==='difference'?['subtraction']:[])];
+ t.hints=['Κοίτα τον στόχο και το πρώτο κομμάτι.',family==='gears'?'Τα γρανάζια πρέπει να ακουμπούν. Κάθε άγγιγμα αλλάζει τη φορά.':family==='booklet'?'Πρώτα η βάση. Μετά τα κομμάτια που πατούν πάνω της.':family==='sensors'?'Ο αισθητήρας κοιτά το πλακάκι όπου βρίσκεται τώρα.':'Σύγκρινε το ίδιο στοιχείο στις δύο κάρτες.','Δοκίμασε ένα μικρό κομμάτι και έλεγξέ το.',family==='gears'?'Ένα ζευγάρι αλλάζει τη φορά δύο φορές. Μεγάλο και μικρό αλλάζουν και τις στροφές.':family==='booklet'?'Κοίτα τη θέση και το ύψος κάθε κομματιού.':family==='sensors'?'Στο πρώτο κόκκινο στρίψε δεξιά. Στο επόμενο έλεγξε και τον άλλο αισθητήρα.':'Κοίτα πρώτα τις δεκάδες. Μετά τις μονάδες.','Δες ένα σωστό σχέδιο με το κουμπί βοήθειας.'];
+ t.item_id='a:'+family+':'+seed;t.surface_id=family+':'+JSON.stringify(Object.fromEntries(Object.entries(t).filter(([k])=>!['seed','item_id','hints','surface_id'].includes(k))));return t;
+}
+function gearMotion(t,answer){try{
+ if(!answer||!Array.isArray(answer.gears)||answer.gears.length>12||![1,2].includes(answer.outputRadius))return {ok:false,why:'layout',motion:[]};
+ const nodes=[{...t.driver},...answer.gears.map(g=>({...g})),{...t.output,r:answer.outputRadius}];
+ if(nodes.some(g=>!Number.isInteger(g.x)||!Number.isInteger(g.y)||g.x<0||g.y<0||g.x>=t.width||g.y>=t.height||![1,2].includes(g.r)||(t.blocked||[]).includes(key(g))))return {ok:false,why:'grid',motion:[]};
+ const edges=nodes.map(()=>[]);
+ for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){
+  const a=nodes[i],b=nodes[j],d=(a.x-b.x)**2+(a.y-b.y)**2,s=(a.r+b.r)**2;
+  if(d<s)return {ok:false,why:'overlap',motion:[]};if(d===s){edges[i].push(j);edges[j].push(i);}
+ }
+ const speed=Array(nodes.length).fill(null);speed[0]=1;const queue=[0];let jam=false;
+ for(let i=0;i<queue.length;i++)for(const j of edges[queue[i]]){const prev=queue[i],v=-speed[prev]*nodes[prev].r/nodes[j].r;if(speed[j]===null){speed[j]=v;queue.push(j);}else if(Math.abs(speed[j]-v)>1e-6)jam=true;}
+ const output=speed.at(-1),motion=nodes.map((g,i)=>({...g,speed:speed[i]||0}));
+ return {ok:!jam&&output!==null&&Math.sign(output)===t.direction&&Math.abs(Math.abs(output)-t.ratio)<1e-6,why:jam?'jam':output===null?'gap':'motion',motion,output};
+ }catch{return {ok:false,why:'layout',motion:[]};}}
+function solveGears(t){
+ const outR=t.driver.r/t.ratio;if(![1,2].includes(outR))return null;
+ // Search physical contact paths, then independently validate every construction.
+ const goal={...t.output,r:outR},q=[[{...t.driver}]],limit=50000;
+ for(let qi=0;qi<q.length&&qi<limit;qi++){
+  const path=q[qi],last=path.at(-1),d=(last.x-goal.x)**2+(last.y-goal.y)**2;
+  if(d===(last.r+goal.r)**2){const answer={gears:path.slice(1),outputRadius:outR};if(gearMotion(t,answer).ok)return answer;}
+  if(path.length>=9)continue;
+  const distance=last.r+1,offsets=[[distance,0],[0,distance],[0,-distance],[-distance,0]];
+  for(const [dx,dy] of offsets){const g={x:last.x+dx,y:last.y+dy,r:1};if(g.x<0||g.x>=t.width||g.y<0||g.y>=t.height||(t.blocked||[]).includes(key(g))||key(g)===key(goal))continue;
+   if([...path,goal].some(a=>(a.x-g.x)**2+(a.y-g.y)**2<(a.r+g.r)**2))continue;
+   q.push([...path,g]);
+  }
+ }
+ return null;
+}
+function project(blocks,view){return [...new Set(blocks.map(b=>view==='top'?b.x+','+b.y:view==='front'?b.x+','+b.z:b.y+','+b.z))].sort();}
+function runBooklet(t,steps){try{
+ if(!Array.isArray(steps)||steps.length>10)return {ok:false,built:[],why:'steps'};const built=[];
+ for(const s of steps){if(!s||!['cube','prism','cylinder','cone'].includes(s.shape)||![s.x,s.y,s.z,s.color].every(Number.isInteger)||s.x<0||s.x>2||s.y<0||s.y>2||s.z<0||s.z>5||s.color<0||s.color>3)return {ok:false,built,why:'block'};
+  if(built.some(b=>b.x===s.x&&b.y===s.y&&b.z===s.z))return {ok:false,built,why:'occupied'};
+  if(s.z>0&&!built.some(b=>b.x===s.x&&b.y===s.y&&b.z===s.z-1&&b.shape!=='cone'))return {ok:false,built:[...built,{...s,floating:true}],why:'support'};
+  built.push({...s});
+ }
+ const signature=b=>[b.x,b.y,b.z,b.shape,b.color].join(':'),a=built.map(signature).sort(),b=t.target.map(signature).sort();return {ok:same(a,b),built,why:'target'};
+ }catch{return {ok:false,built:[],why:'steps'};}}
+function runSensors(t,a){try{
+ if(!a||!a.rules||typeof a.rules!=='object'||(t.until&&(!a.loop||a.until!=='green')))return {ok:false,trail:[],why:'loop'};
+ let {x,y,dir}=t.start;const trail=[{x,y,dir}],seen=new Set(),delta=[[1,0],[0,1],[-1,0],[0,-1]];
+ for(let i=0;i<64;i++){
+  const tile=t.tiles[x+','+y];if(!tile)return {ok:false,trail,why:'off-track'};
+  if(t.until&&tile.color===a.until)return {ok:x===t.goal.x&&y===t.goal.y,trail,why:'stop'};
+  const k=t.two?tile.color+'|'+tile.second:tile.color,op=a.rules[k]||'F',mark=x+','+y+','+dir;
+  if(seen.has(mark))return {ok:false,trail,why:'cycle'};seen.add(mark);
+  if(!['F','R','L','S'].includes(op))return {ok:false,trail,why:'rule'};
+  if(op==='S')return {ok:x===t.goal.x&&y===t.goal.y&&tile.color==='blue',trail,why:'stop'};
+  if(op==='R')dir=(dir+1)%4;else if(op==='L')dir=(dir+3)%4;
+  x+=delta[dir][0];y+=delta[dir][1];trail.push({x,y,dir});
+ }
+ return {ok:false,trail,why:'cycle'};
+ }catch{return {ok:false,trail:[],why:'rules'};}}
+function withCards(t,cards){return {...t,cards:cards.map(c=>({id:c.id,name:c.name||c.id,cfg:{...c.cfg},...(c.pal?{pal:{...c.pal}}:{})})),surface_id:t.family+':'+t.modeKey+':'+t.stat+':'+JSON.stringify(cards.map(c=>c.cfg))};}
+function solveRobotics(t){
+ const m=t.modeKey;
+ if(t.family==='gears')return solveGears(t);
+ if(t.family==='booklet')return m==='views'?project(t.target,t.view):m==='faces'?t.property==='circle'?'κύκλος':t.property==='faces'?6:12:t.target.map(b=>({...b}));
+ if(t.family==='sensors')return {rules:t.two?{'red|white':'R','red|black':'L',...(!t.until?{'blue|white':'S'}:{})}:{red:'R',blue:'S'},loop:!!t.until,until:t.until?'green':'blue'};
+ if(t.family==='robot-cards'){
+  const values=t.cards.map(c=>robotStats(c.cfg)),stat=t.stat;
+  if(m==='sum')return t.statsPair.reduce((sum,k)=>sum+values[0][k],0);
+  if(m==='difference')return Math.abs(values[0][stat]-values[1][stat]);
+  if(m==='order')return t.cards.map(c=>c.id).sort((a,b)=>values[t.cards.findIndex(c=>c.id===a)][stat]-values[t.cards.findIndex(c=>c.id===b)][stat]);
+  const winner=values[0][stat]===values[1][stat]?'tie':values[0][stat]>values[1][stat]?t.cards[0].id:t.cards[1].id;
+  return m==='duel'?{stat,winner}:winner;
+ }
+ return null;
+}
+function checkRobotics(t,a){try{
+ if(a===null||a===undefined)return false;
+ if(t.family==='gears')return gearMotion(t,a).ok;
+ if(t.family==='booklet'){
+  if(t.modeKey==='views')return Array.isArray(a)&&new Set(a).size===a.length&&same(a.slice().sort(),project(t.target,t.view));
+  if(t.modeKey==='faces')return a===solveRobotics(t);return runBooklet(t,a).ok;
+ }
+ if(t.family==='sensors')return runSensors(t,a).ok;
+ if(t.family==='robot-cards'){
+  const m=t.modeKey;
+  if(m==='duel'){if(!a||!['speed','strength','energy'].includes(a.stat))return false;return a.winner===solveRobotics({...t,stat:a.stat}).winner;}
+  if(m==='order')return Array.isArray(a)&&a.length===t.cards.length&&new Set(a).size===a.length&&a.every(id=>t.cards.some(c=>c.id===id))&&a.every((id,i)=>i===0||robotStats(t.cards.find(c=>c.id===a[i-1]).cfg)[t.stat]<=robotStats(t.cards.find(c=>c.id===id).cfg)[t.stat]);
+  return a===solveRobotics(t);
+ }
+ return false;
+ }catch{return false;}}
+function validateRobotics(t){try{
+ if(!roboticsFamilies.includes(t?.family)||!Number.isInteger(t.tier)||t.tier<0||t.tier>2||t.hints?.length!==5||!t.surface_id)return false;
+ const modes={gears:['chain','detour','parity','ratio'],booklet:['follow','views','faces','order','debug'],sensors:['rules','two','until','debug'],'robot-cards':['duel','compare','sum','difference','order']};if(!modes[t.family].includes(t.modeKey))return false;
+ if(t.family==='gears'&&(![1,-1].includes(t.direction)||![1,2].includes(t.ratio)||t.width>10||t.height>6))return false;
+ if(t.family==='booklet'&&(!Array.isArray(t.target)||t.target.length<3||t.target.length>5))return false;
+ if(t.family==='sensors'&&(t.width>8||t.height>6||!t.tiles||!t.goal))return false;
+ if(t.family==='robot-cards'&&(!Array.isArray(t.cards)||t.cards.length<2||t.cards.length>8||new Set(t.cards.map(c=>c.id)).size!==t.cards.length||!t.cards.every(c=>c.cfg)))return false;
+ const a=solveRobotics(t);return a!==null&&checkRobotics(t,a);
+ }catch{return false;}}
+
+return {roboticsFamilies,roboticsCatalog,generateRobotics,checkRobotics,solveRobotics,validateRobotics,gearMotion,runBooklet,runSensors,project,withCards};})();
+const BipRoboticsContent=(()=>{const L=(family,modeKey,tier,grade,topics,evidence,say)=>({t:family,family,modeKey,tier,grade,topics,evidence:[evidence],say,hint:'Δες πρώτα τον στόχο. Δοκίμασε ένα μικρό βήμα.',par:3});
+const route=d=>({...d,t:'code',checkpoint:true,loop:1,g:['R...G','.....'],max:6,par:2});
+const W=(id,title,family,caps,says,levels)=>({id,title,family,comic:caps.map((cap,i)=>({art:`new:${family}:${i}`,cap,say:says[i]})),levels});
+const roboticsWorlds=[
+ W(19,'Το εργαστήρι με τα γρανάζια','gears',
+ ['Ο Γάντζος θέλει να σηκώσει τον βραχίονά του.','Ο ΜΠΙΠ δοκιμάζει γρανάζια που ακουμπούν.','Ο Σκουριάς γυρίζει ανάποδα το τελευταίο!'],
+ ['Το ένα γυρίζει έτσι. Το δίπλα του αλλιώς!','Έλεγξε την τελευταία κίνηση.','Μεγάλο μια φορά. Μικρό δύο φορές!'],[
+ L('gears','chain',0,'Α΄',['mt_0u4KLbvBa1'],'Determine alternating direction along a meshed chain; connect parity to equal pairs.','Ένωσε τα γρανάζια. Δες πώς θέλω να γυρίσει.'),
+ L('gears','chain',0,'Α΄',['mt_0u4KLbvBa1'],'Predict the final direction by pairing alternating turns.','Το διπλανό γρανάζι γυρίζει ανάποδα. Και το επόμενο;'),
+ route(L('gears','chain',0,'Α΄',['mt_0u4KLbvBa1'],'Construct a meshed chain with the requested final direction.','Ένωσε τη μετάδοση. Μετά φέρε το εργαλείο!')),
+ L('gears','detour',1,'Β΄',['mt_0u4KLbvBa1','mt_20WfHhnL39'],'Plan a connected spatial construction around an obstacle; test final direction.','Έχει εμπόδιο. Βρες δικό σου δρόμο για τα γρανάζια.'),
+ L('gears','parity',1,'Α΄',['mt_0u4KLbvBa1'],'Use an odd/even count of meshing contacts to determine direction.','Μονά και ζυγά αγγίγματα. Πώς γυρίζει το τελευταίο;'),
+ route(L('gears','detour',1,'Β΄',['mt_20WfHhnL39'],'Construct and test a spatial route that satisfies a mechanical constraint.','Δοκίμασε τη μετάδοση. Μετά άνοιξε την πόρτα!')),
+ L('gears','ratio',2,'Β΄',['mt_PZ909yPrEC'],'Apply the explicit 1:2 turn relationship as repeated equal turns.','Το μεγάλο γυρίζει μία φορά. Θέλω το μικρό δύο.'),
+ L('gears','ratio',2,'Β΄',['mt_PZ909yPrEC','mt_0u4KLbvBa1'],'Combine a 1:2 turn count with alternating direction.','Φτιάξε τη σωστή φορά και τις δύο στροφές.')]),
+ W(20,'Το βιβλίο οδηγιών','booklet',
+ ['Ο Σύρμος φέρνει ένα βιβλίο με εικόνες.','Η Βίδα χτίζει από πάνω, μπροστά και πλάι.','Ο αρχιμηχανικός γράφει οδηγίες για τον ΜΠΙΠ.'],
+ ['Κοιτάζω ένα βήμα κάθε φορά.','Η ίδια κατασκευή φαίνεται αλλιώς από κάθε πλευρά!','Αν λείπει βήμα, το σχέδιο αλλάζει.'],[
+ L('booklet','follow',0,'Α΄',['mt_QNxFnxikCN'],'Stack cubes and prisms into the depicted composite structure.','Δες το επόμενο σχέδιο. Βάλε το σωστό κομμάτι.'),
+ L('booklet','follow',0,'Α΄',['mt_QNxFnxikCN'],'Combine solid shapes to match a target assembly.','Διάλεξε κομμάτι και θέση. Χτίσε το ρομπότ!'),
+ route(L('booklet','follow',0,'Α΄',['mt_QNxFnxikCN'],'Construct a target from solid components with supporting blocks.','Χτίσε το σχέδιο. Μετά φέρε το επόμενο φύλλο!')),
+ L('booklet','views',1,'Β΄',['mt_QNxFnxikCN','mt_qeZYF6HZ4o'],'Identify occupied positions in top, front or side views of a solid assembly.','Κοίτα από πάνω, μπροστά ή πλάι. Φτιάξε την όψη.'),
+ L('booklet','faces',1,'Β΄',['mt_UooUHC_V7U','mt_Mnodea7mG_'],'Identify a circular cylinder face or count cube faces/edges.','Πρόσωπα και ακμές. Τι βλέπεις στο στερεό;'),
+ route(L('booklet','views',1,'Β΄',['mt_QNxFnxikCN'],'Translate the same solid construction to a different viewpoint.','Βρες την όψη. Μετά φέρε τον κύβο!')),
+ L('booklet','order',2,'Β΄',['mt__p5n8z5soJ'],'Write step-by-step instructions in a valid supporting order.','Γράψε τις εικόνες στη σειρά για να χτίσει ο ΜΠΙΠ.'),
+ L('booklet','debug',2,'Β΄',['mt__p5n8z5soJ'],'Predict and repair a visibly wrong assembly caused by misordered steps.','Οι οδηγίες μπερδεύτηκαν. Διόρθωσε τη σειρά.')]),
+ W(21,'Το ρομπότ με τους αισθητήρες','sensors',
+ ['Ο Κεραυνός έβαλε χρωματιστά πλακάκια.','Ο Δράκος κοιτά με έναν και μετά με δύο αισθητήρες.','Ο ΜΠΙΠ συνδέει ΑΝ και ΞΑΝΑ.'],
+ ['ΑΝ δω κόκκινο, στρίβω δεξιά!','Δύο αισθητήρες. Δύο ενδείξεις μαζί.','ΞΑΝΑ ώσπου να δω πράσινο!'],[
+ L('sensors','rules',0,'Α΄',['mt__p5n8z5soJ','mt_WRRv1ABECC'],'Construct instructions that respond to colour input and stop at the goal.','Φτιάξε ΑΝ κόκκινο: δεξιά. ΑΝ μπλε: σταμάτα.'),
+ L('sensors','rules',0,'Α΄',['mt__p5n8z5soJ'],'Predict and correct the outcome of a colour-conditioned instruction sequence.','Ο αισθητήρας βλέπει το πλακάκι. Ποια εντολή χρειάζεται;'),
+ route(L('sensors','rules',0,'Α΄',['mt__p5n8z5soJ'],'Test input-dependent rules before running a robot route.','Δοκίμασε τους κανόνες. Μετά φέρε τον αισθητήρα!')),
+ L('sensors','two',1,'Β΄',['mt__p5n8z5soJ','mt_WRRv1ABECC'],'Use two input readings to choose distinct actions at a turn.','Το ίδιο κόκκινο έχει δίπλα άσπρο ή μαύρο. Δες και τα δύο.'),
+ L('sensors','two',1,'Β΄',['mt__p5n8z5soJ'],'Repair conditional instructions using two sensor readings.','Ένας κανόνας δεν φτάνει. Φτιάξε τους δύο αισθητήρες.'),
+ route(L('sensors','two',1,'Β΄',['mt__p5n8z5soJ'],'Execute and test a two-input conditional algorithm.','Έλεγξε τις δύο ενδείξεις. Μετά φέρε την μπαταρία!')),
+ L('sensors','until',2,'Β΄',['mt__p5n8z5soJ'],'Write an ordered program with repeated conditional instructions and a stop condition.','Βάλε ΞΑΝΑ. Συνέχισε ώσπου να δεις πράσινο.'),
+ L('sensors','debug',2,'Β΄',['mt__p5n8z5soJ'],'Debug and execute a loop combined with conditional input rules.','Δοκίμασε ΑΝ μέσα στο ΞΑΝΑ. Βρες το λάθος!')]),
+ W(22,'Οι κάρτες των ρομπότ','robot-cards',
+ ['Κάθε ρομπότ παίρνει τη δική του κάρτα.','Σκουριάς, Βίδα, Κεραυνός και Τιτάνας περιμένουν.','Τα εξαρτήματα αλλάζουν τους αριθμούς της κάρτας.'],
+ ['Ταχύτητα, δύναμη, ενέργεια!','Διάλεξε αριθμό. Ο μεγαλύτερος κερδίζει τον γύρο.','Άλλαξε σχέδιο και δοκίμασε ξανά!'],[
+ L('robot-cards','duel',0,'Α΄',['mt_U0waNfD8PB'],'Compare two card values and identify the greater, or equality.','Διάλεξε δύναμη. Ποια κάρτα κερδίζει;'),
+ L('robot-cards','compare',0,'Α΄',['mt_U0waNfD8PB'],'Compare two two-digit numbers using their value.','Ποιος αριθμός είναι πιο μεγάλος;'),
+ route(L('robot-cards','duel',0,'Α΄',['mt_U0waNfD8PB'],'Choose a statistic and correctly compare both cards.','Παίξε έναν γύρο. Μετά φέρε την κάρτα!')),
+ L('robot-cards','sum',1,'Β΄',['mt_UQnAFPs83F'],'Add two two-digit card statistics.','Πρόσθεσε δύο δυνάμεις στην κάρτα σου.'),
+ L('robot-cards','difference',1,'Β΄',['mt_zuKAX6lcYR'],'Find the difference between two displayed card values.','Πόσο μεγαλύτερος είναι ο μεγάλος αριθμός;'),
+ route(L('robot-cards','compare',1,'Α΄',['mt_U0waNfD8PB'],'Compare displayed two-digit card values.','Δες τις κάρτες. Μετά φέρε το μετάλλιο!')),
+ L('robot-cards','order',2,'Β΄',['mt_ylXdiVRAYv','mt_U0waNfD8PB'],'Order a hand by a named numerical attribute, allowing ties.','Βάλε τις κάρτες από τη μικρή δύναμη στη μεγάλη.'),
+ L('robot-cards','difference',2,'Β΄',['mt_zuKAX6lcYR','mt_VhBH8wrFC6'],'Read two data values and calculate their difference.','Ο Τιτάνας θέλει δίκαιη σύγκριση. Βρες τη διαφορά.')])
+];
+
+return {roboticsWorlds};})();
+const BipNewContent=(()=>{// Curated design metadata; Marble's database is deliberately not bundled.
+const credit='Περιεχόμενο εμπνευσμένο από το Marble Skill Taxonomy (v1) · © Generative Spark, Inc. (Marble) · https://withmarble.com · ODbL 1.0 (database) και CC BY-SA 4.0 (content).';
+const skillNames={subtraction:'Αφαίρεση',time:'Ώρα και ημερολόγιο',length:'Μήκος και μέτρηση',money:'Ευρώ και λεπτά',fractions:'Μισά και τέταρτα',multiplication:'Ίσες ομάδες',data:'Ταξινόμηση και διαγράμματα'};
+const topic={take:'mt_zuKAX6lcYR',equal:'mt_oIzycTBeE4',missing:'mt_ezc2m_0dzN',unknown:'mt_3JgrHY221M',inverse:'mt_ehGS_uVSJv',length:'mt_KaF0SQvaiu',units:'mt_cqSf213hSa',orderLength:'mt_skYly2Qm01',ruler:'mt_e4x3l2JeLI',estimate:'mt_OzRZ89GrQW',half:'mt_-hTTat0mBR',share:'mt_LpSuPgL31x',quarters:'mt_xACS3rWWDp',fraction:'mt_cFltwUQi-d',clock:'mt_0XxyaQLRhn',events:'mt_-vvVxpOHG2',days:'mt_bj1YCgNWUx',coins:'mt_cPZwlUk8Nd',pay:'mt_AF2BeFQwfX',money:'mt_6J1wmCWf41',groups:'mt_PZ909yPrEC',array:'mt_GRWwTDZ3wD',repeated:'mt_B1zj1RwQ3a',parity:'mt_0u4KLbvBa1',sort:'mt_ylXdiVRAYv',tally:'mt_c29FaCTNsx',chart:'mt_VhBH8wrFC6'};
+const L=(family,modeKey,tier,grade,topics,evidence,say,extra={})=>({t:family,family,modeKey,tier,grade,topics:topics.map(k=>topic[k]||k),evidence:[evidence],say,hint:'Κοίτα το σχέδιο. Δοκίμασε ένα μικρό βήμα.',par:3,...extra});
+const route=(d,kind='code',extra={})=>({...d,t:kind,checkpoint:true,secondary_skills:['spatial_reasoning'],...(kind==='draw'?{loop:1,cols:6,rows:4,start:[1,1],path:'RRRR',max:6,par:2}:{loop:1,g:['R...G','.....'],max:6,par:2}),...extra});
+const W=(id,title,family,caps,says,levels)=>({id,title,family,comic:caps.map((cap,i)=>({art:`new:${family}:${i}`,cap,say:says[i]})),levels});
+const worlds=[
+ W(12,'Αφαίρεση και αριθμοί που λείπουν','subtraction',
+ ['Οι πόρτες του κόσμου 4 άνοιξαν ξανά.','Ο Σκουριάς πήρε λίγη ενέργεια!','Η Βίδα φέρνει τουβλάκια με μείον.'],
+ ['Αρχιμηχανικέ, πόσα έμειναν;','Το ίσον θέλει δύο ίσα μέρη.','Βρίσκουμε και ό,τι λείπει!'],[
+ L('subtraction','take',0,'Α΄',['take'],'Model taking away with objects and say how many remain.','Βγάλε τις μπαταρίες. Πόσες έμειναν;'),
+ L('subtraction','balance',0,'Α΄',['equal'],'Determine whether both sides of an equation have the same value.','Φτιάξε ίση ενέργεια στις δύο μεριές.'),
+ route(L('subtraction','take',0,'Α΄',['take'],'Act out a take-from situation and find how many are left.','Πέρασε από το συν και το μείον. Άνοιξε την πόρτα!'), 'code',{g:['R8.2G','.....'],need:6,signed:[{x:3,y:0,v:-2}],max:6,par:4}),
+ L('subtraction','missing',1,'Α΄',['missing'],'Find the unknown addend by finding the missing part.','Πόσες μπαταρίες λείπουν από την πόρτα;'),
+ L('subtraction','start',1,'Β΄',['unknown'],'Solve an unknown minuend, such as 5 = □ − 3.','Πόσες είχα πριν δώσω μερικές;'),
+ route(L('subtraction','inverse',1,'Β΄',['inverse'],'Check an addition using the inverse subtraction.','Έλεγξε το συν με μείον. Μετά φέρε το γρανάζι!')),
+ L('subtraction','balance',2,'Β΄',['equal','unknown'],'Balance equations with operations on both sides.','Το ίσον δεν είναι βελάκι. Ζύγισε τις δύο μεριές!'),
+ L('subtraction','inverse',2,'Β΄',['inverse'],'Use subtraction to check the result of an addition.','Η Βίδα ελέγχει την επισκευή με το αντίστροφο.')]),
+ W(13,'Μετράμε με τουβλάκια','length',
+ ['Ο Τιτάνας χρειάζεται μια νέα γέφυρα.','Ο ΜΠΙΠ βάζει ίδια τουβλάκια στη σειρά.','Η Βίδα φέρνει χάρακα με εκατοστά.'],
+ ['Χωρίς κενά, χωρίς να πατά το ένα στο άλλο!','Από το μηδέν αρχίζουμε.','Πρώτα μαντεύω. Μετά μετρώ!'],[
+ L('length','bricks',0,'Α΄',['length','units'],'Measure an object using equal cubes placed end to end.','Μέτρα τη γέφυρα με ίδια τουβλάκια.'),
+ L('length','compare',0,'Α΄',['orderLength'],'Put three lengths in order from shortest to longest.','Βάλε τις δοκούς από τη μικρή στη μεγάλη.'),
+ route(L('length','bricks',0,'Α΄',['units'],'Span an object with equal units without gaps or overlaps.','Μέτρα και ζωγράφισε τη δοκό.'),'draw'),
+ L('length','ruler',1,'Α΄',['length','ruler'],'Align the zero mark of a ruler and read the measurement in centimetres.','Βάλε τον χάρακα στο μηδέν. Πόσα εκατοστά;'),
+ L('length','unit',1,'Β΄',['ruler'],'Choose centimetres or metres for an object.','Για μια βίδα ή μια αίθουσα; Διάλεξε μονάδα.'),
+ route(L('length','compare',1,'Α΄',['orderLength'],'Order three measured lengths.','Ταξινόμησε τις δοκούς. Μετά φέρε τον χάρακα!')),
+ L('length','estimate',2,'Β΄',['estimate'],'Estimate using a known reference, then measure and compare.','Μάντεψε με οδηγό το ένα εκατοστό. Μετά μέτρα.'),
+ L('length','ruler',2,'Β΄',['ruler'],'Read centimetres from an aligned zero mark.','Μέτρα την τελευταία δοκό για τον Τιτάνα.')]),
+ W(14,'Δίκαιο μοίρασμα','fractions',
+ ['Ο Κεραυνός φέρνει ενέργεια για όλους.','Ο Σκουριάς κόβει ένα μικρό και ένα μεγάλο κομμάτι.','Η Βίδα ζητά ίσα κομμάτια για κάθε φίλο.'],
+ ['Μοιράζουμε δίκαια!','Δύο κομμάτια δεν είναι πάντα μισά.','Δύο μισά, ένα ολόκληρο!'],[
+ L('fractions','share',0,'Α΄',['share','half'],'Share a set into two equal groups and find half.','Δώσε ίσες μπαταρίες στα δύο ρομπότ.'),
+ L('fractions','half',0,'Α΄',['half'],'Identify equal halves rather than unequal pieces.','Διάλεξε το δίκαιο κόψιμο στη μέση.'),
+ route(L('fractions','half',0,'Α΄',['half'],'Identify two equal parts of a rectangle.','Κόψε την πλάκα σε δύο ίδια μισά.'),'draw',{cols:5,rows:5,start:[2,0],path:'DDDD',max:4,par:2}),
+ L('fractions','quarter',1,'Β΄',['quarters'],'Divide a rectangle into four equal quarters.','Διάλεξε τέσσερα ίσα κομμάτια.'),
+ L('fractions','share',1,'Β΄',['share','quarters'],'Share an amount into four equal groups.','Μοίρασε δίκαια σε τέσσερις φίλους.'),
+ route(L('fractions','quarter',1,'Β΄',['quarters'],'Identify a rectangle partitioned into four equal quarters.','Δες τα τέταρτα. Μετά φέρε την πλάκα!')),
+ L('fractions','shade',2,'Β΄',['fraction'],'Shade three quarters of a rectangle divided into four equal parts.','Χρωμάτισε τρία από τα τέσσερα ίσα κομμάτια.'),
+ L('fractions','whole',2,'Β΄',['quarters'],'Describe the whole as two halves or four quarters.','Πόσα τέταρτα φτιάχνουν μια ολόκληρη μπαταρία;')]),
+ W(15,'Το μεγάλο ρολόι','time',
+ ['Το ρολόι του πρώτου εργαστηρίου ξαναχτυπά.','Ο Κεραυνός μπέρδεψε τις δουλειές της ημέρας.','Ο αρχιμηχανικός βάζει χέρια, ώρες και μέρες στη σειρά.'],
+ ['Πρώτα ξυπνάμε. Μετά χτίζουμε!','Ο μικρός δείκτης λέει την ώρα.','Στη μισή ώρα είναι ανάμεσα σε δύο αριθμούς.'],[
+ L('time','events',0,'Α΄',['events'],'Order three daily events using first, next, last.','Πρώτα, μετά, τέλος. Βάλε τις εικόνες στη σειρά.'),
+ L('time','read',0,'Α΄',['clock'],'Read an analogue clock showing an exact hour.','Τι ώρα δείχνει το ρολόι;'),
+ route(L('time','days',0,'Α΄',['days'],'Name the seven days of the week in order.','Βάλε τις μέρες στη σειρά. Μετά φέρε το γρανάζι!')),
+ L('time','set',1,'Β΄',['clock'],'Draw hour and minute hands to show an exact hour.','Φτιάξε την ώρα με τους δύο δείκτες.'),
+ L('time','half',1,'Β΄',['clock'],'Read half past; hour hand lies halfway between numerals.','Ο μεγάλος στο έξι. Ποια ώρα και μισή;'),
+ route(L('time','events',1,'Α΄',['events'],'Order three daily events by their position in the day.','Οργάνωσε τη μέρα. Μετά επισκεύασε το ρολόι!')),
+ L('time','set-half',2,'Β΄',['clock'],'Draw both hands to show a given half-past time.','Βάλε και τους δύο δείκτες στη μισή ώρα.'),
+ L('time','days',2,'Β΄',['days'],'Order the seven days in a repeating week.','Μια εβδομάδα, επτά μέρες. Βρες τη σειρά.')]),
+ W(16,'Το μαγαζί με τα ανταλλακτικά','money',
+ ['Η Βίδα ανοίγει μαγαζί με ανταλλακτικά.','Ο Σκουριάς μπερδεύει τα ευρώ με τα λεπτά.','Ο ΜΠΙΠ μετρά την πληρωμή και τα ρέστα.'],
+ ['Εδώ έχουμε ευρώ και λεπτά!','Ίδια αξία, άλλα κέρματα.','Μετρώ ως όσα έδωσα. Αυτά είναι τα ρέστα!'],[
+ L('money','coin',0,'Α΄',['coins'],'Identify coin values, adapted explicitly to euro coins.','Πόσο αξίζει το κέρμα;'),
+ L('money','pay',0,'Α΄',['pay'],'Make a given total using valid coins.','Πλήρωσε ακριβώς το ανταλλακτικό.'),
+ route(L('money','pay',0,'Α΄',['pay'],'Combine euro coins to make the required price.','Πλήρωσε. Μετά πάρε το ανταλλακτικό!')),
+ L('money','total',1,'Β΄',['money'],'Calculate the total cost of two items in the same unit.','Πόσο κάνουν και τα δύο μαζί;'),
+ L('money','change',1,'Β΄',['money'],'Find change by subtracting price from amount paid.','Πόσα ρέστα θα δώσει η Βίδα;'),
+ route(L('money','missing',1,'Β΄',['money'],'Solve how much more money is needed.','Πόσα λείπουν; Βρες τα και φέρε το γρανάζι!')),
+ L('money','pay',2,'Β΄',['pay'],'Construct an alternative coin combination with equal value.','Πλήρωσε με κέρματα των λεπτών.'),
+ L('money','change',2,'Β΄',['money'],'Calculate change within fifty cents.','Έλεγξε τα ρέστα του Σκουριά.')]),
+ W(17,'Τα κουτιά του Σκουριά','multiplication',
+ ['Ο Σκουριάς γέμισε το πάτωμα ανταλλακτικά.','Ο ΜΠΙΠ βάζει ίδιο πλήθος σε κάθε κουτί.','Το ΞΑΝΑ κάνει πολλές ίδιες ομάδες.'],
+ ['Κάθε κουτί, ίδια κομμάτια!','ΞΑΝΑ τέσσερις φορές: πάρε τρία.','Τέσσερα επί τρία. Δώδεκα!'],[
+ L('multiplication','groups',0,'Α΄',['groups'],'Use objects to make equal groups and count the total.','Ίσα κουτιά. Πόσα κομμάτια έχουν όλα μαζί;'),
+ L('multiplication','array',0,'Β΄',['array'],'Read an array and state the total.','Κάθε σειρά έχει ίσα κομμάτια. Πόσα είναι όλα;'),
+ route(L('multiplication','repeat',0,'Β΄',['groups'],'Connect a groups of b to repeated addition.','ΞΑΝΑ 4 φορές: πάρε 3. Πόσα πήρες;'),'code',{g:['R***.','####.','####G'],loop:1,max:5,par:4}),
+ L('multiplication','build',1,'Β΄',['array'],'Build a rectangular array for a stated number of rows and columns.','Φτιάξε σειρές με ίσα κομμάτια.'),
+ L('multiplication','even',1,'Α΄',['parity'],'Identify whether a number can be split into two equal groups.','Κάνε ζευγάρια. Μένει ένα μόνο του;'),
+ route(L('multiplication','repeat',1,'Β΄',['repeated'],'Match repeated addition to a rectangular array.','Δες τις ίσες ομάδες. Μετά φέρε τα κουτιά!')),
+ L('multiplication','build',2,'Β΄',['array','repeated'],'Construct a rectangular array matching a repeated-addition equation.','Χτίσε το σχέδιο του Σκουριά σε ίσες σειρές.'),
+ L('multiplication','repeat',2,'Β΄',['groups'],'Connect the ΞΑΝΑ loop to equal groups and their total.','Διάβασε το ΞΑΝΑ. Βρες όλη την ενέργεια.')]),
+ W(18,'Η απογραφή των ρομπότ','data',
+ ['Ο Τιτάνας θέλει να μετρήσει όλους τους φίλους.','Η Βίδα φτιάχνει ομάδες, πίνακες και γραμμές.','Ο Κεραυνός φέρνει εικόνες και μπάρες.'],
+ ['Ένα ρομπότ, μία εικόνα!','Κάθε μπάρα ξεκινά από το μηδέν.','Ποια ομάδα έχει πιο πολλά; Πόσα παραπάνω;'],[
+ L('data','sort',0,'Α΄',['sort'],'Sort a set into given categories and count each group.','Μέτρα τα κόκκινα, τα μπλε και τα πράσινα.'),
+ L('data','read',0,'Α΄',['tally'],'Read a pictogram where each symbol represents one item.','Μία εικόνα, ένα ρομπότ. Πόσα βλέπεις;'),
+ route(L('data','sort',0,'Α΄',['sort'],'Create a category table with counts.','Μέτρα την ομάδα. Μετά φέρε τον πίνακα!')),
+ L('data','tally',1,'Β΄',['tally'],'Construct a tally chart from collected data.','Φτιάξε τις γραμμές για κάθε ομάδα.'),
+ L('data','build',1,'Β΄',['chart'],'Draw a bar graph with labelled axes and a single-unit scale.','Χτίσε μία μπάρα για κάθε ομάδα.'),
+ route(L('data','build',1,'Β΄',['chart'],'Construct a one-unit picture graph from counts.','Φτιάξε το διάγραμμα. Μετά φέρε την απογραφή!')),
+ L('data','difference',2,'Β΄',['chart'],'Use a bar graph to answer how many more comparison questions.','Πόσα περισσότερα έχει η μεγαλύτερη ομάδα;'),
+ L('data','order',2,'Β΄',['sort'],'Order categories from fewest to most.','Βάλε τις ομάδες από τη μικρή στη μεγάλη.')])
+];
+
+return {worlds,credit,skillNames,topic};})();
+const BipNewTasks=(()=>{const Robotics=BipRobotics;
+const mathsFamilies=['subtraction','time','length','money','fractions','multiplication','data'];
+const families=[...mathsFamilies,...Robotics.roboticsFamilies];
+const titles={subtraction:'Οι πόρτες με το μείον',time:'Το μεγάλο ρολόι',length:'Η γέφυρα με τα τουβλάκια',money:'Το μαγαζί της Βίδας',fractions:'Δίκαιο μοίρασμα',multiplication:'Τα ίσα κουτιά',data:'Η απογραφή των ρομπότ'};
+const modes={subtraction:['take','balance','missing','start','inverse'],time:['events','read','days','set','half','set-half'],length:['bricks','compare','ruler','unit','estimate'],money:['coin','pay','total','change','missing'],fractions:['share','half','quarter','shade','whole'],multiplication:['groups','array','repeat','build','even'],data:['sort','read','tally','build','difference','order']};
+const prerequisites={subtraction:['number_sense','arithmetic_strategy'],time:['number_sense','fractions'],length:['number_sense','spatial_reasoning'],money:['subtraction','number_sense'],fractions:['number_sense'],multiplication:['arithmetic_strategy','fractions'],data:['number_sense','subtraction']};
+const secondary={subtraction:['constraint_reasoning'],time:[],length:['spatial_reasoning'],money:['subtraction'],fractions:['geometry'],multiplication:['number_sense'],data:['number_sense']};
+function rng(seed){let n=2166136261;for(const c of String(seed))n=Math.imul(n^c.charCodeAt(0),16777619);return max=>{n=(Math.imul(n,1664525)+1013904223)>>>0;return n%max;};}
+const numeric=x=>typeof x==='number'&&Number.isFinite(x);
+const same=(a,b)=>Array.isArray(a)&&a.length===b.length&&a.every((v,i)=>v===b[i]);
+const total=a=>a.reduce((s,v)=>s+v,0);
+function generate(family,seed=1,tier=0,modeKey=null){
+ if(Robotics.roboticsFamilies.includes(family))return Robotics.generateRobotics(family,seed,tier,modeKey);
+ if(!mathsFamilies.includes(family))throw new RangeError('Unknown expansion family: '+family);
+ const pick=rng(seed),band=Math.max(0,Math.min(2,Math.floor(Number(tier)||0))),mode=modeKey||modes[family][pick(modes[family].length)];
+ if(!modes[family].includes(mode))throw new RangeError('Unknown mode '+mode);
+ const t={family,kind:'expansion',seed,tier:band,modeKey:mode,title:titles[family],primary_skill:family,secondary_skills:secondary[family],prerequisites:prerequisites[family],nominal_difficulty:band+1,mode:family==='length'||family==='fractions'?'spatial':'reasoning',cognitive_demand:'apply',representation:'mixed',generator_version:'bip-expansion-1',validator_version:'bip-expansion-1',content_version:'1.4',par:3};
+ if(family==='subtraction'){
+  t.a=3+pick(6+band*6);t.b=1+pick(t.a-1);t.c=1+pick(t.a+t.b-1);
+  if(mode==='missing')t.b=t.a+1+pick(6+band*4);
+  t.prompt=mode==='take'?`Έχω ${t.a} μπαταρίες. Δίνω ${t.b}. Πόσες μένουν;`:mode==='missing'?`Η πόρτα θέλει ${t.b}. Έχει ${t.a}. Πόσες λείπουν;`:mode==='start'?`${t.a} = □ − ${t.b}. Πόσες είχα στην αρχή;`:mode==='balance'?`${t.a} + ${t.b} = ${t.c} + □. Φτιάξε ίσες μεριές!`:`${t.a} + ${t.b} = ${t.a+t.b}. Έλεγξε: ${t.a+t.b} − ${t.b} = □.`;
+ }else if(family==='time'){
+  t.hour=1+pick(12);t.minute=['half','set-half'].includes(mode)?30:0;
+  t.events=['Ξυπνώ','Χτίζω','Κοιμάμαι'];t.shuffled=[];
+  t.shuffled=shuffle([0,1,2],pick);t.day=pick(7);
+  t.prompt=mode==='events'?'Πρώτα, μετά, τέλος. Βάλε τις εικόνες στη σειρά.':mode==='days'?'Ξεκίνα από τη Δευτέρα. Βάλε τις μέρες στη σειρά.':mode==='set'||mode==='set-half'?`Φτιάξε ${t.hour}${t.minute?' και μισή':' ακριβώς'}.`:'Τι ώρα δείχνουν οι δύο δείκτες;';
+ }else if(family==='length'){
+  t.length=2+pick(5+band*3);t.lengths=shuffle([t.length,t.length+2,t.length+4],pick);t.unit=mode==='bricks'?'τουβλάκια':'εκ.';t.object=pick(2)?'βίδα':'αίθουσα';
+  t.prompt=mode==='compare'?'Πάτα τις δοκούς από τη μικρή στη μεγάλη.':mode==='unit'?`Μετρώ ${t.object==='βίδα'?'μια βίδα':'μια αίθουσα'}. Εκατοστά ή μέτρα;`:mode==='estimate'?'Πρώτα μάντεψε. Μετά άνοιξε τον χάρακα και μέτρα.':mode==='bricks'?'Κάλυψε όλη τη δοκό με ίδια τουβλάκια.':`Διάβασε τον χάρακα. Πόσα εκατοστά είναι η δοκός;`;
+ }else if(family==='money'){
+  t.unit=band===0?'euro':'cent';t.coin=band===0?[1,2][pick(2)]:[1,2,5,10,20,50][pick(6)];
+  t.price=band===0?2+pick(5):(2+pick(8))*5;t.price2=band===0?1+pick(3):(1+pick(4))*5;t.paid=band===0?t.price+1+pick(4):50;t.have=Math.max(0,t.price-(band===0?1+pick(2):5+pick(3)*5));
+  const u=t.unit==='euro'?'ευρώ':'λεπτά';
+  t.prompt=mode==='coin'?'Πόσο αξίζει αυτό το κέρμα;':mode==='pay'?`Το ανταλλακτικό κάνει ${t.price} ${u}. Πλήρωσε ακριβώς!`:mode==='total'?`Ένα κάνει ${t.price} και ένα ${t.price2} ${u}. Πόσο μαζί;`:mode==='change'?`Κάνει ${t.price} ${u}. Έδωσα ${t.paid}. Πόσα ρέστα;`:`Θέλω ${t.price} ${u}. Έχω ${t.have}. Πόσα λείπουν;`;
+ }else if(family==='fractions'){
+  t.groups=band===0?2:4;t.each=1+pick(4+band);t.total=t.groups*t.each;t.shapes=shuffle(['equal','unequal','slanted'],pick);
+  t.prompt=mode==='share'?`Μοίρασε ${t.total} μπαταρίες σε ${t.groups} φίλους. Ίσα για όλους!`:mode==='half'?'Ποιο κόψιμο δίνει δύο ίσα μισά;':mode==='quarter'?'Ποιο κόψιμο δίνει τέσσερα ίσα τέταρτα;':mode==='shade'?'Χρωμάτισε τρία από τα τέσσερα ίσα κομμάτια.':'Πόσα τέταρτα κάνουν ένα ολόκληρο;';
+ }else if(family==='multiplication'){
+  t.rows=2+pick(band+2);t.cols=2+pick(band+2);t.n=4+pick(16+band*5);
+  t.prompt=mode==='even'?`${t.n} μπαταρίες. Ζυγός ή μονός;`:mode==='build'?`Χτίσε ${t.rows} σειρές. Κάθε σειρά έχει ${t.cols}.`:mode==='repeat'?`ΞΑΝΑ ${t.rows} φορές: πάρε ${t.cols}. Πόσα πήρες;`:`${t.rows} κουτιά. ${t.cols} κομμάτια σε κάθε κουτί. Πόσα όλα μαζί;`;
+ }else if(family==='data'){
+  const low=1+pick(3);t.counts=shuffle([low,low+1+pick(2),low+4],pick);t.category=pick(3);t.labels=['Κόκκινα','Μπλε','Πράσινα'];
+  t.robots=shuffle(t.counts.flatMap((n,c)=>Array(n).fill(c)),pick);
+  t.prompt=mode==='order'?'Πάτα τις ομάδες από τα λίγα στα πολλά.':mode==='difference'?'Πόσα παραπάνω έχει η μεγαλύτερη από τη μικρότερη ομάδα;':mode==='read'?`Πόσα είναι τα ${t.labels[t.category].toLowerCase()}; Μία εικόνα, ένα ρομπότ.`:mode==='sort'?'Μέτρα και βάλε το πλήθος σε κάθε ομάδα.':mode==='tally'?'Φτιάξε γραμμές για κάθε ομάδα.':'Χτίσε τις μπάρες. Ένα κουτάκι, ένα ρομπότ.';
+ }
+ const instruction={subtraction:'Δες τι μένει και τι λείπει.',time:'Ο μικρός δείκτης λέει ώρα. Ο μεγάλος λέει λεπτά.',length:'Μέτρα ίδιες μονάδες από το μηδέν, χωρίς κενά.',money:'Κράτησε ίδια μονάδα: ευρώ ή λεπτά.',fractions:'Δίκαιο σημαίνει ίδιο μέγεθος για όλους.',multiplication:'Κάθε ομάδα έχει το ίδιο πλήθος.',data:'Ένα σημάδι σημαίνει ένα ρομπότ.'}[family];
+ t.hints=['Κοίτα το σχέδιο και τον στόχο.',instruction,'Χώρισε τη δουλειά σε μικρά βήματα.',example(t,false),example(t,true)];
+ t.item_id=`a:${family}:${seed}`;t.surface_id=family+':'+JSON.stringify(Object.fromEntries(Object.entries(t).filter(([k])=>!['seed','item_id','hints','surface_id','shuffled','shapes','robots'].includes(k))));
+ return t;
+}
+function shuffle(a,pick){for(let i=a.length-1;i>0;i--){const j=pick(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
+function solve(t){
+ if(Robotics.roboticsFamilies.includes(t.family))return Robotics.solveRobotics(t);
+ const m=t.modeKey;
+ if(t.family==='subtraction')return m==='take'?t.a-t.b:m==='missing'?t.b-t.a:m==='start'?t.a+t.b:m==='balance'?t.a+t.b-t.c:t.a;
+ if(t.family==='time')return m==='events'?[0,1,2]:m==='days'?[0,1,2,3,4,5,6]:m==='set'||m==='set-half'?{hour:t.hour%12*2+(t.minute===30?1:0),minute:t.minute}:`${t.hour}:${t.minute===30?'30':'00'}`;
+ if(t.family==='length')return m==='compare'?t.lengths.map((n,i)=>i).sort((a,b)=>t.lengths[a]-t.lengths[b]):m==='unit'?(t.object==='βίδα'?'εκ.':'μ.'):m==='estimate'?{estimate:t.length,measurement:t.length}:t.length;
+ if(t.family==='money'){
+  if(m==='pay'){let n=t.price;const coins=[];for(const v of (t.unit==='euro'?[2,1]:[50,20,10,5,2,1]))while(n>=v){coins.push(v);n-=v;}return coins;}
+  return m==='coin'?t.coin:m==='total'?t.price+t.price2:m==='change'?t.paid-t.price:t.price-t.have;
+ }
+ if(t.family==='fractions')return m==='share'?Array(t.groups).fill(t.total/t.groups):m==='half'||m==='quarter'?'equal':m==='shade'?[0,1,2]:4;
+ if(t.family==='multiplication')return m==='even'?(t.n%2?'μονός':'ζυγός'):m==='build'?[t.rows,t.cols]:t.rows*t.cols;
+ if(t.family==='data')return ['sort','tally','build'].includes(m)?t.counts.slice():m==='read'?t.counts[t.category]:m==='difference'?Math.max(...t.counts)-Math.min(...t.counts):[0,1,2].sort((a,b)=>t.counts[a]-t.counts[b]);
+ return null;
+}
+function check(t,a){try{
+ if(Robotics.roboticsFamilies.includes(t?.family))return Robotics.checkRobotics(t,a);
+ if(!t||!families.includes(t.family)||!modes[t.family].includes(t.modeKey)||a===null||a===undefined)return false;
+ if(t.family==='money'&&t.modeKey==='pay')return Array.isArray(a)&&a.length>0&&a.length<=50&&a.every(v=>(t.unit==='euro'?[1,2]:[1,2,5,10,20,50]).includes(v))&&total(a)===t.price;
+ if(t.family==='fractions'&&t.modeKey==='share')return Array.isArray(a)&&a.length===t.groups&&a.every(n=>Number.isInteger(n)&&n>=0&&n*t.groups===t.total);
+ if(t.family==='fractions'&&t.modeKey==='shade')return Array.isArray(a)&&a.length===3&&new Set(a).size===3&&a.every(n=>[0,1,2,3].includes(n));
+ if(t.family==='length'&&t.modeKey==='estimate')return a&&numeric(a.estimate)&&Number.isInteger(a.estimate)&&a.estimate>0&&Math.abs(a.estimate-t.length)<=Math.max(1,t.length*.25)&&a.measurement===t.length;
+ const s=solve(t);
+ if(Array.isArray(s))return same(a,s);
+ if(s&&typeof s==='object')return a&&a.hour===s.hour&&a.minute===s.minute;
+ return a===s;
+ }catch{return false;}}
+function validate(t){try{
+ if(Robotics.roboticsFamilies.includes(t?.family))return Robotics.validateRobotics(t);
+ if(!t||!families.includes(t.family)||!modes[t.family].includes(t.modeKey)||!Number.isInteger(t.tier)||t.tier<0||t.tier>2||t.hints?.length!==5||!t.hints.every(h=>typeof h==='string'&&h.length)||!t.surface_id)return false;
+ const positive=(...ns)=>ns.every(n=>Number.isInteger(n)&&n>0&&n<=100);
+ if(t.family==='subtraction'&&(!positive(t.a,t.b,t.c)||(t.modeKey==='take'&&t.b>t.a)))return false;
+ if(t.family==='time'&&(!positive(t.hour)||t.hour>12||![0,30].includes(t.minute)))return false;
+ if(t.family==='length'&&(!positive(t.length)||t.length>20||!Array.isArray(t.lengths)||t.lengths.length!==3||new Set(t.lengths).size!==3))return false;
+ if(t.family==='money'&&(!positive(t.price,t.paid,t.coin,t.price2)||!['cent','euro'].includes(t.unit)||t.paid<t.price))return false;
+ if(t.family==='fractions'&&(![2,4].includes(t.groups)||!positive(t.total)||t.total%t.groups!==0))return false;
+ if(t.family==='multiplication'&&(!positive(t.rows,t.cols,t.n)||t.rows>5||t.cols>5))return false;
+ if(t.family==='data'&&(!Array.isArray(t.counts)||t.counts.length!==3||!positive(...t.counts)||new Set(t.counts).size!==3))return false;
+ return check(t,solve(t));
+ }catch{return false;}}
+function example(t,worked){if(worked&&t.family==='fractions'&&t.modeKey==='shade')return 'Χρωμάτισε τρία ίσα κομμάτια. Άφησε ένα χωρίς χρώμα.';if(worked&&t.family==='data'&&t.modeKey==='order')return 'Σειρά: '+solve(t).map(i=>t.labels[i]).join(', ')+'.';if(worked&&t.family==='length'&&t.modeKey==='compare')return 'Από το μικρό στο μεγάλο: '+t.lengths.slice().sort((a,b)=>a-b).join(', ')+'.';if(worked&&t.family==='time'&&['read','half'].includes(t.modeKey))return t.hour+(t.minute?' και μισή.':' ακριβώς.');if(worked&&t.family==='fractions'&&['half','quarter'].includes(t.modeKey))return 'Διάλεξε το κόψιμο που δίνει ίδια κομμάτια.';if(worked&&t.family==='fractions'&&t.modeKey==='share')return 'Κάθε ρομπότ παίρνει '+t.total/t.groups+' μπαταρίες.';if(worked&&t.family==='time'&&t.modeKey==='events')return 'Ξυπνώ, χτίζω, κοιμάμαι.';if(worked&&t.family==='time'&&t.modeKey==='days')return 'Δευτέρα, Τρίτη, Τετάρτη, Πέμπτη, Παρασκευή, Σάββατο, Κυριακή.';const s=solve(t);const label=Array.isArray(s)?s.join(', '):s&&typeof s==='object'?t.family==='time'?`${t.hour} και ${t.minute?'μισή':'ακριβώς'}`:`${t.length} εκατοστά`:String(s);return worked?`Ένα σωστό σχέδιο: ${label}. Δοκίμασέ το στην εικόνα.`:t.family==='multiplication'?`${t.rows} ομάδες από ${t.cols}: ${Array(t.rows).fill(t.cols).join(' + ')}.`:t.family==='subtraction'?`${t.modeKey==='take'?t.a+' − '+t.b:t.modeKey==='missing'?t.b+' − '+t.a:t.a+' + '+t.b}. Μέτρα ένα βήμα τη φορά.`:'Ταίριαξε ένα κομμάτι ή ένα σημάδι κάθε φορά.';}
+function extendTasks(base){
+ const added=[...mathsFamilies.map(f=>({item_id:'a:'+f,family:f,kind:'expansion',title:titles[f],primary_skill:f,secondary_skills:secondary[f],prerequisites:prerequisites[f],nominal_difficulty:1,mode:['length','fractions'].includes(f)?'spatial':'reasoning',representation:'mixed',cognitive_demand:'apply',novelty_level:1,difficulty_dimensions:['representation','quantity','construction'],error_tags:[f+'_construction']})),...Robotics.roboticsCatalog];
+ return {...base,SKILLS:[...base.SKILLS,...mathsFamilies],catalog:[...base.catalog,...added],registry:[...base.registry,...added.map(c=>({id:c.family,renderer:'expansion',skills:[c.primary_skill,...c.secondary_skills],prerequisites:c.prerequisites,generator:(s,d)=>generate(c.family,s,Math.max(0,d-1)),validator:validate,solver:solve}))],generateTask:(f,s,d)=>families.includes(f)?generate(f,s,Math.max(0,d-1)):base.generateTask(f,s,d),checkTask:(t,a)=>families.includes(t?.family)?check(t,a):base.checkTask(t,a),validateTask:t=>families.includes(t?.family)?validate(t):base.validateTask(t),solveTask:t=>families.includes(t?.family)?solve(t):base.solveTask(t)};
+}
+
+return {families,prerequisites,generate,check,solve,validate,extendTasks};})();
+const BipNewVisuals=(()=>{const K='#0e0c22';
+const outline=`stroke="${K}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"`;
+const colors=['#e8292c','#1f5fe0','#17b26a','#ffd21f'];
+function battery(n=1,off=false){return `<svg viewBox="0 0 44 56" aria-hidden="true"><rect x="15" y="2" width="14" height="6" rx="2" fill="#d5dbea" ${outline}/><rect x="5" y="8" width="34" height="43" rx="6" fill="${off?'#d5dbea':'#ffd21f'}" ${outline}/><path d="M10 13h6v32h-6z" fill="#fff" opacity=".4"/><path d="M25 17l-10 15h8l-4 12 12-17h-8z" fill="${off?'#7c86a8':K}"/>${n!==1?`<text x="22" y="35" text-anchor="middle" fill="white" font-size="17" font-weight="900" stroke="${K}" stroke-width="1" paint-order="stroke">${n}</text>`:''}</svg>`;}
+function block(color='#1f5fe0',label=''){return `<svg viewBox="0 0 62 54" aria-hidden="true"><rect x="11" y="2" width="14" height="9" rx="2" fill="${color}" ${outline}/><rect x="37" y="2" width="14" height="9" rx="2" fill="${color}" ${outline}/><rect x="3" y="10" width="56" height="38" rx="5" fill="${color}" ${outline}/><path d="M7 14h48v7H7z" fill="#fff" opacity=".32"/><text x="31" y="38" fill="white" text-anchor="middle" font-size="22" font-weight="900">${label}</text></svg>`;}
+function clock(hour,minute,hourHalf=null){
+ const angle=hourHalf===null?(hour%12)*30+minute*.5:hourHalf*15,rad=a=>(a-90)*Math.PI/180,line=(a,r,col,w)=>`<path d="M100 100L${100+Math.cos(rad(a))*r} ${100+Math.sin(rad(a))*r}" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>`;
+ return `<svg class="ex-clock" viewBox="0 0 200 200" role="img" aria-label="Ρολόι με δύο δείκτες"><circle cx="100" cy="100" r="94" fill="#ffd21f" ${outline}/><circle cx="100" cy="100" r="83" fill="#fff7e2" ${outline}/>${Array.from({length:12},(_,i)=>{const a=rad((i+1)*30);return `<text x="${100+Math.cos(a)*68}" y="${106+Math.sin(a)*68}" text-anchor="middle" fill="${K}" font-size="16" font-weight="900">${i+1}</text>`;}).join('')}${line(minute*6,58,'#1f5fe0',6)}${line(angle,37,'#e8292c',9)}<circle cx="100" cy="100" r="6" fill="${K}"/></svg>`;
+}
+function ruler(length,show=true,bricks=false){const max=Math.max(12,length+1),u=300/max;return `<svg class="ex-ruler" viewBox="0 0 330 110" role="img" aria-label="Δοκός και ${show?'χάρακας με αρχή το μηδέν':'οδηγός ενός εκατοστού'}"><rect x="12" y="8" width="${length*u}" height="30" rx="4" fill="#1f5fe0" ${outline}/><path d="M17 13h${length*u-10}" stroke="#fff" stroke-width="5" opacity=".4"/>${show?`<rect x="12" y="49" width="300" height="46" rx="3" fill="#ffd21f" ${outline}/>${Array.from({length:max+1},(_,i)=>`<path d="M${12+i*u} 49v${i%5===0?20:12}" stroke="${K}" stroke-width="2"/><text x="${12+i*u}" y="88" font-size="11" text-anchor="middle" fill="${K}">${i}</text>`).join('')}`:`<path d="M12 70h${u}m${-u} -7v14m${u} -14v14" stroke="${K}" stroke-width="3"/><text x="12" y="99" font-size="13">1 εκ.</text>`}${bricks?Array.from({length},(_,i)=>`<rect x="${12+i*u}" y="40" width="${u}" height="25" fill="#ff8a1f" stroke="${K}" stroke-width="2"/>`).join(''):''}</svg>`;}
+function partition(style,quarter=false,selected=[]){const p=quarter?4:2;
+ return `<svg viewBox="0 0 120 90" aria-hidden="true"><rect x="4" y="4" width="112" height="80" rx="5" fill="#ffd21f" ${outline}/>${style==='equal'?(quarter?'<path d="M60 4v80M4 44h112"':'<path d="M60 4v80"'):`<path d="M${style==='unequal'?30:20} 4L${style==='unequal'?30:70} 84${quarter?'M4 24h112M4 64h112':''}"`} fill="none" ${outline}/><path d="M10 10h100" stroke="white" stroke-width="5" opacity=".4"/></svg>`;
+}
+function chart(counts,labels,style='bar'){
+ const max=Math.max(8,...counts),u=18;return `<svg class="ex-chart" viewBox="0 0 330 ${max*u+70}" role="img" aria-label="Απογραφή ρομπότ. Κάθε βήμα σημαίνει ένα ρομπότ."><text x="170" y="16" text-anchor="middle" font-size="14" font-weight="900">Ρομπότ ανά χρώμα</text><text x="9" y="32" font-size="11">Πλήθος</text>${Array.from({length:max+1},(_,n)=>`<text x="24" y="${max*u+38-n*u}" text-anchor="end" font-size="11">${n}</text><path d="M30 ${max*u+34-n*u}h285" stroke="#d5dbea" stroke-width="1"/>`).join('')}${counts.map((n,i)=>`${style==='bar'?`<rect x="${50+i*90}" y="${max*u+34-n*u}" width="45" height="${n*u}" fill="${colors[i]}" ${outline}/>`:Array.from({length:n},(_,j)=>`<rect x="${50+i*90}" y="${max*u+34-(j+1)*u}" width="26" height="16" rx="3" fill="${colors[i]}" stroke="${K}" stroke-width="2"/>`).join('')}<text x="${72+i*90}" y="${max*u+54}" text-anchor="middle" font-size="12">${labels[i]}</text>`).join('')}<path d="M30 29v${max*u+5}h285" fill="none" ${outline}/></svg>`;
+}
+function comic(family,panel,robot,foe){
+ const x=72+panel*7;let scene='';
+ if(family==='subtraction')scene=`<g transform="translate(98 20) scale(.65)">${battery(3)}</g><text x="142" y="55" font-size="28" font-weight="900">${panel===0?'−':panel===1?'=':'?'}</text>`;
+ if(family==='length')scene=`<path d="M90 88h100" stroke="#ffd21f" stroke-width="20"/>${[0,1,2,3,4,5].map(i=>`<path d="M${92+i*18} 78v20" stroke="${K}" stroke-width="2"/>`).join('')}<path d="M92 63h${70+panel*9}" stroke="#1f5fe0" stroke-width="18"/>`;
+ if(family==='fractions')scene=`<g transform="translate(94 30) scale(.7)">${partition(panel===1?'unequal':'equal',panel===2)}</g>`;
+ if(family==='time')scene=`<svg x="105" y="12" width="82" height="82" viewBox="0 0 200 200">${clock(3+panel,panel===2?30:0).replace(/^<svg[^>]*>|<\/svg>$/g,'')}</svg>`;
+ if(family==='money')scene=[0,1,2].map(i=>`<circle cx="${105+i*30}" cy="${74-i*9}" r="18" fill="#ffd21f" ${outline}/><text x="${105+i*30}" y="${80-i*9}" text-anchor="middle" font-size="18" font-weight="900">${i===2?'€':i+1}</text>`).join('');
+ if(family==='multiplication')scene=Array.from({length:6},(_,i)=>`<g transform="translate(${95+i%3*30} ${30+Math.floor(i/3)*35}) scale(.45)">${block(colors[panel%3])}</g>`).join('');
+ if(family==='data')scene=[2,4,3].map((n,i)=>`<rect x="${100+i*28}" y="${100-n*15}" width="22" height="${n*15}" fill="${colors[(i+panel)%3]}" ${outline}/>`).join('');
+ return `<svg class="art" viewBox="0 0 200 124" role="img" aria-label="Νέα περιπέτεια στο εργαστήρι"><path d="M0 121h200" fill="none" ${outline}/><svg x="8" y="22" width="74" height="100" viewBox="0 0 100 108">${panel===1&&foe?foe:robot}</svg>${scene}<path d="M${x} 15l8 8-8 8" fill="none" stroke="#e8292c" stroke-width="4"/></svg>`;
+}
+
+return {battery,block,clock,ruler,partition,chart,comic,colors};})();
 const BipProfiles=(()=>{const PARENT_PREFIX='agis-parent-test:bip:';
 const DELETED='\u0000parent-profile-deleted';
 
@@ -1538,7 +2058,7 @@ function nextChallenge(state,family,difficulty,{generate,validate,seed=1,replay=
 }
 
 return {LAB_KEY,createLabState,sanitizeLabState,loadLabState,saveLabState,storyComplete,nextChallenge};})();
-const BipTasks=(()=>{const {createRegistry}=BipRegistry;
+const BipBaseTasks=(()=>{const {createRegistry}=BipRegistry;
 // Reproducible workshop challenges. Validators check the child's construction,
 // not a prescribed strategy; explanation/reflection evidence is collected separately.
 const SKILLS = ['number_sense','arithmetic_strategy','place_value','patterns_early_algebra','geometry','spatial_reasoning','deductive_logic','constraint_reasoning','combinatorics','probability_intuition','problem_decomposition','transfer','error_detection','mathematical_explanation','metacognition'];
@@ -1932,6 +2452,7 @@ const END2_COMIC=[
   {art:'read',cap:'Σειρά, επανάληψη, κόλπα, ΑΝ και διόρθωση λαθών.',say:'Τα ξέρεις όλα!'},
   {art:'party',cap:'Ο αρχιμηχανικός πήρε το δίπλωμά του.',say:'Και τώρα… έχω ένα μυστικό να σου δείξω!'}];
 
+WORLDS.push(...BipNewContent.worlds,...BipRoboticsContent.roboticsWorlds);
 const LEVELS=[];
 WORLDS.forEach(w=>w.levels.forEach((d,i)=>LEVELS.push({w:w.id,n:i+1,id:w.id+'-'+(i+1),def:d,world:w})));
 
@@ -1949,6 +2470,7 @@ const CHASSIS=[
   {id:4,name:'ΦΑΡΟΣ',stars:105,sig:{head:7,legs:0,veh:5,color:0}},
   {id:5,name:'ΑΕΤΟΣ',stars:140,sig:{head:8,legs:3,veh:2,color:6}},
   {id:6,name:'ΚΟΜΗΤΗΣ',stars:180,sig:{head:9,legs:1,veh:6,color:5}}];
+BipNewRobots.install(PARTS,CHASSIS,UNLOCKS);
 const GATES={sec:30,glow:60,zap:90};            // whole extra categories that open later
 function needStars(cat,i){
   if(cat==='ch')return CHASSIS[i]?CHASSIS[i].stars:Infinity;
@@ -1961,7 +2483,7 @@ function needStars(cat,i){
 const REWARDS=[...UNLOCKS.map(([k,i,n])=>({k,i,n})),...CHASSIS.filter(c=>c.stars).map(c=>({k:'ch',i:c.id,n:c.stars})),...Object.keys(GATES).map(k=>({k,i:1,n:GATES[k]}))].sort((a,b)=>a.n-b.n);
 const rkey=r=>r.k+r.i;
 const nextReward=stars=>REWARDS.find(r=>r.n>stars)||null;
-const newRewards=(stars,got)=>REWARDS.filter(r=>r.n<=stars&&!got[rkey(r)]);
+const newRewards=(stars,got)=>REWARDS.filter(r=>r.n<=stars&&!got[rkey(r)]&&owned(r.k,r.i));
 function botFor(ch,from){                       // a model's starting look: its own parts, the player's other choices kept
   const base={head:0,eyes:0,body:0,legs:0,ant:0,color:0,veh:0,sec:0,glow:0,zap:0};
   return Object.assign(base,from,CHASSIS[ch].sig,{ch});
@@ -2463,6 +2985,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 /* ---------- save: this device first, account copy when available ---------- */
+const BipTasks=BipNewTasks.extendTasks(BipBaseTasks);
 const KEY='bip-save-v12';
 const fresh=()=>({v:SAVE_V,epoch:0,t:0,stars:{},skill:{studs:0,tower:0,pattern:0,trace:0,logic:0,turbo:0},robot:{ch:0,head:0,eyes:0,body:0,legs:0,ant:0,color:0,veh:0,sec:0,glow:0,zap:0},bots:{},seen:{},tut:{},tutAt:{},got:{},sound:true,voice:true,all:false});
 function shape(s){const f=fresh();if(!s||typeof s!=='object')return f;
@@ -2649,10 +3172,10 @@ function robotInner(c,pal){
     `<rect x="41" y="78" width="18" height="11" fill="${G}" ${o}/><path d="M27 88h46l5 8-5 9H27l-5-9z" fill="${D}" ${o}/><circle cx="34" cy="96.5" r="4.6" fill="${K}"/><circle cx="50" cy="96.5" r="4.6" fill="${K}"/><circle cx="66" cy="96.5" r="4.6" fill="${K}"/>`,
     thighs+`<path d="M37 99h9l-4.5 9z" fill="#ff8a1f" ${o2}/><path d="M54 99h9l-4.5 9z" fill="#ff8a1f" ${o2}/><path d="M35 86h13l-1 13h-10z" fill="${sec}" ${o}/><path d="M52 86h13l-2 13h-10z" fill="${sec}" ${o}/>`,
     thighs+both(`<path d="M30 85h19v15H30z" fill="${sec}" ${o}/><rect x="33" y="83" width="13" height="5.5" rx="1" fill="${G}" ${o2}/><path d="M34 92h11M34 95.5h11" stroke="${K}" stroke-width="1.8"/><rect x="26" y="98" width="24" height="8" rx="1.5" fill="${K}"/>`),
-    thighs+both(`<path d="M37 86h11l-1 14h-8z" fill="${sec}" ${o}/>${sh('M39 88h3.5l-.5 10h-2.5z')}<circle cx="33" cy="92" r="5.6" fill="${K}"/><circle cx="33" cy="92" r="2" fill="${G}"/><path d="M34 99h15v6H28z" fill="${K}"/>`)][c.legs]||'';
+    thighs+both(`<path d="M37 86h11l-1 14h-8z" fill="${sec}" ${o}/>${sh('M39 88h3.5l-.5 10h-2.5z')}<circle cx="33" cy="92" r="5.6" fill="${K}"/><circle cx="33" cy="92" r="2" fill="${G}"/><path d="M34 99h15v6H28z" fill="${K}"/>`)][c.legs]||BipNewRobots.partSVG('legs',c.legs,c,{col,sec,eye,acc});
   const neck=`<rect x="45" y="43" width="10" height="9" fill="${D}" ${o}/>`,buckle=`<rect x="46" y="72.5" width="8" height="5" fill="${acc}" ${o2}/>`;
   const joint=`<rect x="20" y="62" width="9" height="9" fill="${G}" ${o}/>`,hand=`<rect x="20.5" y="81" width="8" height="6" rx="1.5" fill="${K}"/>`,fore=`<rect x="18" y="70" width="13" height="12" rx="1.5" fill="${col}" ${o}/>`;
-  const T=[                                     // each model: {back, arms, waist, chest, e:[scale, shift] for the chest emblem}
+  const T=([                                     // each model: {back, arms, waist, chest, e:[scale, shift] for the chest emblem}
     ()=>({back:'',arms:both(joint+`<rect x="17" y="50" width="14" height="13" rx="2" fill="${sec}" ${o}/>${sh('M18.5 51.5h5v10h-5z')}`+fore+hand),
       waist:neck+`<rect x="39" y="70" width="22" height="10" fill="${G}" ${o}/>`+buckle,chest:`<path d="M30 50h40l-4 22H34z" fill="${col}" ${o}/>${sh('M32 52h6l1 18h-4z')}`}),
     ()=>({back:both(`<rect x="23" y="27" width="6" height="25" fill="${G}" ${o}/><rect x="21.5" y="23" width="9" height="6" rx="1" fill="${K}"/>`),          // ΤΑΥΡΟΣ: road truck
@@ -2678,18 +3201,18 @@ function robotInner(c,pal){
       arms:both(`<rect x="21.5" y="59" width="5.5" height="11" fill="${G}" ${o}/><circle cx="24.5" cy="55" r="6.5" fill="${sec}" ${o}/><rect x="19" y="69" width="11" height="11" rx="2" fill="${col}" ${o}/><path d="M20.5 80v6.5M28.5 80v6.5M20.5 83h8" fill="none" stroke="${K}" stroke-width="3" stroke-linecap="round"/>`),
       waist:neck+`<rect x="42" y="72" width="16" height="8" rx="2" fill="${G}" ${o}/>`+buckle,
       chest:`<path d="M36 49h28l8 12-8 13H36l-8-13z" fill="${col}" ${o}/>${sh('M37 51h5l-6 10 4 8-5-8z')}<path d="M62 66l5-5M59 70l9-9" stroke="${K}" stroke-width="1.8"/>`,e:[.9,0]})
-  ][c.ch||0]();
+  ][c.ch||0]||(()=>BipNewRobots.chassisSVG(c,{col,sec,eye,acc})))();
   const es=T.e||[1,0];
   const body=`<g transform="translate(50 ${60.5+es[1]}) scale(${es[0]}) translate(-50 -60.5)">`+([
     `<circle cx="50" cy="60.5" r="8" fill="${G}" ${o2}/><circle cx="50" cy="60.5" r="4.6" fill="${W}" ${o2}/><path d="M47.5 60a3 3 0 0 1 2.5-2.4" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>`,
     `<rect x="40" y="54" width="20" height="13" fill="${D}" ${o2}/><path d="M40 58.3h20M40 62.6h20" stroke="${K}" stroke-width="1.8"/>`,
     `<path d="M41 53h18l4 7-4 8H41l-4-8z" fill="${W}" ${o2}/><path d="M43 62l6-7" stroke="#fff" stroke-width="1.8"/>`,
-    `<path d="M50 53l7 4v8l-7 4-7-4v-8z" fill="${acc}" ${o2}/><circle cx="50" cy="61" r="2.6" fill="${K}"/>`][c.body]||'')+'</g>';
+    `<path d="M50 53l7 4v8l-7 4-7-4v-8z" fill="${acc}" ${o2}/><circle cx="50" cy="61" r="2.6" fill="${K}"/>`][c.body]||BipNewRobots.partSVG('body',c.body,c,{col,sec,eye,acc}))+'</g>';
   const crest=[
     `<path d="M46 26l4-15 4 15z" fill="${acc}" ${o}/>`,
     `<path d="M39 27l-6-14 11 10zM61 27l6-14-11 10z" fill="${acc}" ${o}/>`,
     `<circle cx="31" cy="24" r="6.5" fill="${acc}" ${o}/><circle cx="69" cy="24" r="6.5" fill="${acc}" ${o}/><circle cx="31" cy="24" r="2.2" fill="${K}"/><circle cx="69" cy="24" r="2.2" fill="${K}"/>`,
-    `<path d="M50 24V13" fill="none" ${o}/><path d="M39 13a11 7 0 0 0 22 0z" fill="${G}" ${o}/><circle cx="50" cy="9" r="2.6" fill="${acc}" ${o2}/>`][c.ant]||'';
+    `<path d="M50 24V13" fill="none" ${o}/><path d="M39 13a11 7 0 0 0 22 0z" fill="${G}" ${o}/><circle cx="50" cy="9" r="2.6" fill="${acc}" ${o2}/>`][c.ant]||BipNewRobots.partSVG('ant',c.ant,c,{col,sec,eye,acc});
   const head=[
     `<path d="M36 23h28l4 8v13l-6 6H38l-6-6V31z" fill="${col}" ${o}/>`,
     `<path d="M33 45V33a17 13 0 0 1 34 0v12l-6 5H39z" fill="${col}" ${o}/>`,
@@ -2700,16 +3223,16 @@ function robotInner(c,pal){
     `<path d="M32 36a18 15 0 0 1 36 0v1h4v5h-4v3l-6 5H38l-6-5v-3h-4v-5h4z" fill="${col}" ${o}/><path d="M36 28a16 12 0 0 1 28 0z" fill="#fff" fill-opacity=".3"/>`,
     `<rect x="41" y="15" width="18" height="7" rx="2.5" fill="#3fa9ff" ${o}/><path d="M34 46V33a16 12 0 0 1 32 0v13l-5 4H39z" fill="${col}" ${o}/>`,
     `<path d="M50 14l5 9 9 4 3 17-7 6H40l-7-6 3-17 9-4z" fill="${col}" ${o}/>`,
-    `<path d="M31 39a19 18 0 0 1 38 0v5l-6 6H37l-6-6z" fill="${col}" ${o}/><path d="M36 30a15 13 0 0 1 12-8" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".6"/>`][c.head]||'';
+    `<path d="M31 39a19 18 0 0 1 38 0v5l-6 6H37l-6-6z" fill="${col}" ${o}/><path d="M36 30a15 13 0 0 1 12-8" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".6"/>`][c.head]||BipNewRobots.partSVG('head',c.head,c,{col,sec,eye,acc});
   const face=`<path d="M39 29h22v15l-4 4H43l-4-4z" fill="${G}" ${o2}/><path d="M45 42.5q5 3.6 10 0" fill="none" stroke="${K}" stroke-width="2" stroke-linecap="round"/><rect x="40.5" y="31" width="19" height="7.5" rx="3.5" fill="${K}"/>`;
   const eyes=[
     `<circle cx="45.5" cy="34.7" r="2.7" fill="${eye}"/><circle cx="54.5" cy="34.7" r="2.7" fill="${eye}"/>`,
     `<rect x="42.5" y="33" width="15" height="3.6" rx="1.8" fill="${eye}"/>`,
     `<circle cx="50" cy="34.7" r="3.2" fill="${eye}"/>`,
-    `<path d="M42.5 36.5q3-4.6 6 0M51.5 36.5q3-4.6 6 0" fill="none" stroke="${eye}" stroke-width="2.2" stroke-linecap="round"/>`][c.eyes]||'';
-  return T.back+legs+T.arms+T.waist+T.chest+body+crest+head+face+eyes;
+    `<path d="M42.5 36.5q3-4.6 6 0M51.5 36.5q3-4.6 6 0" fill="none" stroke="${eye}" stroke-width="2.2" stroke-linecap="round"/>`][c.eyes]||BipNewRobots.partSVG('eyes',c.eyes,c,{col,sec,eye,acc});
+  return T.back+BipNewRobots.accessorySVG(c,{col,sec,eye,acc})+legs+T.arms+T.waist+T.chest+BipNewRobots.patternSVG(c,{col,sec,eye,acc})+body+BipNewRobots.emblemSVG(c,{col,sec,eye,acc})+crest+head+face+eyes;
 }
-const robotSVG=c=>`<svg class="robot" viewBox="10 0 80 108" aria-hidden="true">${robotInner(c)}</svg>`;
+const robotSVG=c=>`<svg class="robot" viewBox="${(c.ch||0)>=7||c.back?'0 0 100 108':'10 0 80 108'}" aria-hidden="true">${robotInner(c)}</svg>`;
 const rustySVG=()=>`<svg class="robot" viewBox="10 0 80 108" aria-hidden="true">${robotInner(RUSTY.cfg,RUSTY.pal)}</svg>`;
 function vehInner(c,pal){
   const {col,sec}=paint(c,pal),K='#0e0c22',G='#d5dbea',W='#aeeeff',Y='#ffd21f';
@@ -2722,7 +3245,7 @@ function vehInner(c,pal){
     `<path d="M4 31V22h13v4H9v5z" fill="${sec}" ${o2}/><path d="M3 47v-9l21-6 14-11h19l17 12 23 5v9z" fill="${col}" ${o}/><path d="M5 42h92" stroke="${sec}" stroke-width="4"/><path d="M5 38l20-5 5-4h7l-7 8z" fill="#fff" fill-opacity=".3"/><path d="M41 24h15l12 9H31z" fill="${W}" ${o2}/><path d="M90 39l6 1.5v3l-6 .5z" fill="${Y}" ${o2}/>${wheel(26,49,9.5)}${wheel(76,49,9.5)}`,
     `<path d="M60 36h19" stroke="${K}" stroke-width="7"/><path d="M79 20h7l9 38H83z" fill="${G}" ${o}/><rect x="49" y="10" width="5.5" height="17" fill="${G}" ${o2}/><path d="M16 27V9h27v18z" fill="${sec}" ${o}/><rect x="21" y="13" width="17" height="10" fill="${W}" ${o2}/><path d="M11 43V26h50v17z" fill="${col}" ${o}/><path d="M13 28h46v5H13z" fill="#fff" fill-opacity=".3"/><path d="M44 36l-4 7M52 36l-4 7M60 36l-4 7" stroke="${K}" stroke-width="2.6"/><rect x="6" y="41" width="68" height="19" rx="9.5" fill="${K}"/>`+[17,32,47,62].map(x=>`<circle cx="${x}" cy="50.5" r="5" fill="${G}"/><circle cx="${x}" cy="50.5" r="1.7" fill="${K}"/>`).join(''),
     `<rect x="24" y="8" width="22" height="7" rx="2.5" fill="#3fa9ff" ${o2}/><path d="M5 48V15h58l15 13 16 5v15z" fill="${col}" ${o}/><path d="M6.5 30h86v7h-86z" fill="#fff" fill-opacity=".92"/><path d="M7 17h54v6H7z" fill="#fff" fill-opacity=".25"/><path d="M57 19h5l12 10H57z" fill="${W}" ${o2}/><rect x="13" y="19" width="14" height="9" rx="1" fill="${W}" ${o2}/><rect x="89" y="38" width="5" height="5" fill="${Y}" ${o2}/>${wheel(24,50,9)}${wheel(74,50,9)}`,
-    `<path d="M22 33V14" fill="none" ${o}/><path d="M11 14a11 7 0 0 0 22 0z" fill="${G}" ${o}/><circle cx="22" cy="10" r="2.4" fill="${sec}" ${o2}/><path d="M46 33a15 14 0 0 1 30 0z" fill="${W}" ${o}/><path d="M6 44V32h74l12 12z" fill="${col}" ${o}/><path d="M8 34h70l3 3H8z" fill="#fff" fill-opacity=".3"/><rect x="30" y="24" width="13" height="8" fill="#1f5fe0" ${o2}/>${wheel(17,51,8.5)}${wheel(45,51,8.5)}${wheel(73,51,8.5)}`][c.veh||0]||'';
+    `<path d="M22 33V14" fill="none" ${o}/><path d="M11 14a11 7 0 0 0 22 0z" fill="${G}" ${o}/><circle cx="22" cy="10" r="2.4" fill="${sec}" ${o2}/><path d="M46 33a15 14 0 0 1 30 0z" fill="${W}" ${o}/><path d="M6 44V32h74l12 12z" fill="${col}" ${o}/><path d="M8 34h70l3 3H8z" fill="#fff" fill-opacity=".3"/><rect x="30" y="24" width="13" height="8" fill="#1f5fe0" ${o2}/>${wheel(17,51,8.5)}${wheel(45,51,8.5)}${wheel(73,51,8.5)}`][c.veh||0]||BipNewRobots.partSVG('veh',c.veh||0,c,{col,sec,eye:'#7fe9ff',acc:'#ffd21f'});
 }
 const vehSVG=c=>`<svg class="vehsvg" viewBox="0 0 100 64" aria-hidden="true">${vehInner(c)}</svg>`;
 function tankInner(c,pal){                      // a bulldozer-tank: tracks, cab and a pusher blade (no gun)
@@ -2767,7 +3290,7 @@ function logoSVG(){
 /* ---------- comic panel drawings ---------- */
 function art(kind){
   const K='#17142a',o=`stroke="${K}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"`;
-  const rb=(x,y,w)=>`<svg x="${x}" y="${y}" width="${w}" height="${w*1.35}" viewBox="10 0 80 108">${robotInner(ST.robot)}</svg>`;
+  const rb=(x,y,w)=>`<svg x="${x}" y="${y}" width="${w}" height="${w*1.35}" viewBox="${(ST.robot.ch||0)>=7||ST.robot.back?'0 0 100 108':'10 0 80 108'}">${robotInner(ST.robot)}</svg>`;
   const gear=(x,y,r,rot,fill)=>`<g transform="translate(${x} ${y}) rotate(${rot||0})"><path d="${gearPath(0,0,r,r*.72,8)}" fill="${fill||'#ffc928'}" ${o}/><circle r="${r*.3}" fill="#fff7e2" ${o}/></g>`;
   const floor=`<path d="M0 121h200" fill="none" ${o}/>`;
   const tx=(x,y,t,s,rot,fill)=>`<text x="${x}" y="${y}" font-size="${s||16}" font-weight="900" fill="${fill||'#e63329'}" stroke="${K}" stroke-width="3" stroke-linejoin="round" paint-order="stroke" transform="rotate(${rot||0} ${x} ${y})">${t}</text>`;
@@ -3503,7 +4026,7 @@ function finish(stars){
 /* ---------- workshop: the robot collection, parts, and what unlocks next ---------- */
 const CATS=[['color','Χρώμα'],['sec','Δεύτερο χρώμα'],['head','Κεφάλι'],['eyes','Μάτια'],['glow','Λάμψη ματιών'],['body','Σώμα'],['legs','Πόδια'],['ant','Λοφίο'],['veh','Όχημα'],['zap','Εφέ']];
 const RNAME={ch:['ΝΕΟ ΡΟΜΠΟΤ!','νέο ρομπότ'],head:['ΝΕΟ ΚΕΦΑΛΙ!','νέο κεφάλι'],eyes:['ΝΕΑ ΜΑΤΙΑ!','νέα μάτια'],body:['ΝΕΟ ΣΩΜΑ!','νέο σώμα'],legs:['ΝΕΑ ΠΟΔΙΑ!','νέα πόδια'],ant:['ΝΕΟ ΛΟΦΙΟ!','νέο λοφίο'],color:['ΝΕΟ ΧΡΩΜΑ!','νέο χρώμα'],sec:['ΔΕΥΤΕΡΟ ΧΡΩΜΑ!','δεύτερο χρώμα'],glow:['ΛΑΜΨΗ ΜΑΤΙΩΝ!','λάμψη ματιών'],zap:['ΝΕΑ ΕΦΕ!','νέα εφέ']};
-const owned=(k,i)=>ST.all||totalStars()>=needStars(k,i);
+const owned=(k,i)=>Number.isInteger(i)&&i>=0&&i<(PARTS[k]||0)&&BipNewRobots.isOwned(k,i,totalStars(),ST,needStars);
 const botLook=i=>(ST.robot.ch||0)===i?ST.robot:(ST.bots[i]||botFor(i,{eyes:ST.robot.eyes,body:ST.robot.body,ant:ST.robot.ant}));
 function pickChassis(i){                         // every model keeps its own look
   if(!owned('ch',i)||(ST.robot.ch||0)===i)return false;
@@ -3735,7 +4258,7 @@ window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{fit();
 /* ΜΠΙΠ adapter: engine contains no robot/grid/domain assumptions. */
 let AD=MIG.adaptive;
 let LAB=BipLab.loadLabState(bipStorage);
-const endlessUnlocked=()=>BipLab.storyComplete(ST,LEVELS.map(l=>l.id));
+const endlessUnlocked=()=>BipLab.storyComplete(ST,LEVELS.filter(l=>l.w<=11).map(l=>l.id));
 let AS=AgisEngine.continueSession(AD.sessions,Date.now(),'bip-'+Date.now().toString(36));
 let pendingLegacyHelp=null;
 let TR=null,mission=null,missionReturn=null,lastPacing='',lastAdaptiveOffer=0,replayIntent=null;
@@ -3938,7 +4461,7 @@ function persistFlight(){
  try{profileStorage.setItem(FLIGHT_KEY,JSON.stringify(flightJournal));return true;}catch{MIG.warnings=['Η αποστολή δεν αποθηκεύτηκε. Κρατήστε εξαγωγή JSON πριν κλείσετε.'];return false;}
 }
 const flightEntries=BipExpeditions.flightCatalog.map(meta=>({...meta,item_id:'a:'+meta.family,kind:'flight',content_version:'1.3',representation:'spatial',nominal_difficulty:meta.nominal_difficulty||1}));
-BipTasks.catalog.push(...flightEntries);
+BipTasks.catalog.splice(BipBaseTasks.catalog.length,0,...flightEntries);
 const priorStartMission=startMission;startMission=function(c){if(c.kind==='flight'||c.family?.startsWith('flight-'))return startFlight(c);return priorStartMission(c);};
 const previousTimeCategory=BipMetadata.timeCategory;BipMetadata.timeCategory=(screen,meta,flags)=>screen==='flight'?(meta.cognitive_demand==='debug'?'logic_debugging':'adaptive_missions'):previousTimeCategory(screen,meta,flags);
 /* Mastery evidence: only a program the child built and ran without first
@@ -4212,7 +4735,7 @@ const startBeforeFlight=startPlay;startPlay=function(lv,def){flightGeneration++;
 const sideBeforeFlight=renderSide;renderSide=function(){sideBeforeFlight();if(!S.lesson&&!S.studio&&!S.D&&S.def?.forms?.includes('jet')){const panel=document.createElement('div');panel.className='flight-story-form';panel.innerHTML=`<button class="btn flight-transform" data-act="story-form" ${S.running?'disabled':''}>${I.morph}ROBOT ↔ JET</button><small>Πρόσθεσε μεταμόρφωση στο σχέδιό σου. Το τζετ πετά δύο τετράγωνα.</small>`;$('.side')?.prepend(panel);}};
 ACT['story-form']=()=>{if(S.running||S.lesson||!S.def?.forms?.includes('jet'))return;let form='bot';for(const block of S.prog)if(block.t==='tf'&&block.to)form=block.to;const target=form==='jet'?'bot':'jet';const before=JSON.stringify(S.prog);addCmd({t:'tf',to:target});if(JSON.stringify(S.prog)!==before){const r=$('#rob');if(r){setForm(r,target);r.classList.remove('morph');void r.offsetWidth;r.classList.add('morph');}sfx.morph();}};
 const parentBeforeFlight=parents;parents=function(){parentBeforeFlight();const section=document.createElement('section');section.innerHTML=`<h3>Parent Test Mode</h3><p>Η δοκιμή χρησιμοποιεί ξεχωριστό προφίλ. Δεν αλλάζει πρόοδο, αστέρια ή στοιχεία μάθησης του παιδιού.</p><button class="btn yl" data-act="${BIP_PARENT_TEST?'parent-test-exit':'parent-test-enter'}">${BIP_PARENT_TEST?'Έξοδος στη συνεδρία παιδιού':'Έναρξη απομονωμένης δοκιμής'}</button><p class="fine">${Object.keys(flightJournal.completed).length} ολοκληρωμένες νέες περιπέτειες. Πρόοδος προφίλ: ${BIP_PARENT_TEST?'δοκιμή γονέα':'παιδί'}.</p>`;$('.dlg.par')?.prepend(section);};
-const exportBeforeFlight=exportData;exportData=function(kind){persistFlight();const previous=exportBeforeFlight(kind);if(kind==='legacy-csv'&&!BIP_PARENT_TEST)return previous;if(kind==='json'){const value=JSON.parse(previous);value.version='1.3.2';value.profile=BIP_PARENT_TEST?'parent_test':'child';value.flight=flightJournal;value.schema_versions.flight=1;value.storage[FLIGHT_KEY]=profileStorage.getItem(FLIGHT_KEY);return JSON.stringify(value,null,2);}return 'profile,content_version,'+previous.split('\n').map((line,i)=>i===0?line:`${BIP_PARENT_TEST?'parent_test':'child'},1.3,${line}`).join('\n');};
+const exportBeforeFlight=exportData;exportData=function(kind){persistFlight();const previous=exportBeforeFlight(kind);if(kind==='legacy-csv'&&!BIP_PARENT_TEST)return previous;if(kind==='json'){const value=JSON.parse(previous);value.version='1.4';value.profile=BIP_PARENT_TEST?'parent_test':'child';value.flight=flightJournal;value.schema_versions.flight=1;value.storage[FLIGHT_KEY]=profileStorage.getItem(FLIGHT_KEY);return JSON.stringify(value,null,2);}return 'profile,content_version,'+previous.split('\n').map((line,i)=>i===0?line:`${BIP_PARENT_TEST?'parent_test':'child'},1.3,${line}`).join('\n');};
 ACT['ad-restore']=()=>{try{
  if(!pendingRestore)return;const parsed=JSON.parse(pendingRestore),journal=parsed.flight;
  if(journal){if(journal.schema_version!==1||!journal.completed||typeof journal.completed!=='object'||Array.isArray(journal.completed)||Object.values(journal.completed).some(v=>!Number.isInteger(v)||v<1||v>3)||!Array.isArray(journal.recent_signatures)||journal.recent_signatures.length>120||journal.recent_signatures.some(v=>typeof v!=='string')||!Number.isInteger(journal.generated_count)||journal.generated_count<0)throw Error('Μη έγκυρο αντίγραφο πτήσης.');const c=journal.current;if(c&&(!BipExpeditions.validateExpedition(c.task).valid||!BipFlightCheckpoint.validFlightSession(c.task,c)))throw Error('Μη έγκυρη θέση αποστολής.');}
@@ -4222,10 +4745,263 @@ ACT['ad-restore']=()=>{try{
  ST=p.progress;LOG=p.log;AD=p.adaptive;LAB=BipLab.loadLabState(profileStorage);AS=AgisEngine.continueSession(AD.sessions,Date.now(),'bip-'+Date.now().toString(36));MIG.adaptiveWritable=true;pendingRestore=null;TR=null;mission=null;flightGeneration++;flight=null;if(journal)flightJournal=journal;parents();
  }catch(e){if($('#expbox'))$('#expbox').textContent='Δεν ολοκληρώθηκε η επαναφορά: '+e.message;}};
 
-const profileBanner=document.createElement('div');profileBanner.className='profile-banner '+(BIP_PARENT_TEST?'test':'private');profileBanner.innerHTML=BIP_PARENT_TEST?'<strong>ΔΟΚΙΜΗ ΓΟΝΕΑ · ξεχωριστή πρόοδος</strong><button data-act="parent-test-exit">Έξοδος</button>':'<span>ΜΠΙΠ v1.3.2</span>';document.body.prepend(profileBanner);
+const profileBanner=document.createElement('div');profileBanner.className='profile-banner '+(BIP_PARENT_TEST?'test':'private');profileBanner.innerHTML=BIP_PARENT_TEST?'<strong>ΔΟΚΙΜΗ ΓΟΝΕΑ · ξεχωριστή πρόοδος</strong><button data-act="parent-test-exit">Έξοδος</button>':'<span>ΜΠΙΠ v1.4</span>';document.body.prepend(profileBanner);
 if(BIP_PARENT_TEST){profileBanner.querySelector('button').onclick=ACT['parent-test-exit'];document.body.classList.add('parent-test-profile');}
 window.addEventListener('pagehide',()=>persistFlight());
 const stateBeforeFlight=window.__bipQA.state;window.__bipQA.state=()=>({...stateBeforeFlight(),profile:BIP_PARENT_TEST?'parent_test':'child',flight:flight?JSON.parse(JSON.stringify(flight)):null,flightJournal:JSON.parse(JSON.stringify(flightJournal))});window.__bipQA.flight={tasks:BipExpeditions,engine:BipFlight};window.__bipQA.exportData=kind=>exportData(kind);
+
+// Browser adapter: same storage, feedback, voice, episode model and finish overlay.
+let expansion=null,checkpointCap=null;
+Object.assign(skillNames,BipNewContent.skillNames);
+Object.assign(GAME,BipNewContent.skillNames);
+Object.assign(TI,Object.fromEntries(Object.keys(BipNewContent.skillNames).map(k=>[k,I.gear||I.star])));
+TINT.push('green','blue','orange','purple','yellow','red','green');
+const priorArt=art;art=function(kind){if(!kind.startsWith('new:'))return priorArt(kind);const [,family,panel]=kind.split(':');return BipNewVisuals.comic(family,+panel,robotInner(ST.robot),robotInner(RUSTY.cfg,RUSTY.pal));};
+const priorParse=parseLevel;parseLevel=function(d){const L=priorParse(d);if(d.signed)for(const s of d.signed){const i=L.bricks.findIndex(b=>b.x===s.x&&b.y===s.y);if(i>=0)L.bricks[i]={...L.bricks[i],v:s.v};else L.bricks.push({...s});}return L;};
+const priorBoard=boardHTML;boardHTML=function(extra){return priorBoard(extra).replace(/k-undefined/g,'k-purple');};
+const priorSum=updSum;updSum=function(){priorSum();if(S.def?.signed&&$('#sumbox .exp'))$('#sumbox .exp').textContent=S.picked.map((n,i)=>i===0?String(n):n<0?' − '+Math.abs(n):' + '+n).join('')+' = '+S.picked.reduce((a,b)=>a+b,0);};
+const priorMeta=metaLevel;metaLevel=function(id,d){const m=priorMeta(id,d);if(!d?.family||!BipNewTasks.families.includes(d.family))return m;return {...m,primary_skill:d.checkpoint?'spatial_reasoning':d.family,secondary_skills:d.checkpoint?[]:(d.secondary_skills||[]),content_version:'1.4',assumed_grade:d.grade,topics:d.topics,evidence:d.evidence};};
+const priorOpen=openLevel;openLevel=function(i,skip){const lv=LEVELS[i];checkpointCap=null;if(!lv?.def?.checkpoint||!unlocked(i))return priorOpen(i,skip);if(!ST.seen['w'+lv.w]){ST.seen['w'+lv.w]=1;save();return showComic(lv.world.comic,lv.world.title,()=>openLevel(i));}return startExpansion(lv.def.family,lv.def.tier,lv,()=>startPlay(lv));};
+const priorMath=startMath;startMath=function(game,tier,lv){if(BipNewTasks.families.includes(game))return startExpansion(game,tier,lv);return priorMath(game,tier,lv);};
+const priorMission=startMission;startMission=function(c){if(!BipNewTasks.families.includes(c.family))return priorMission(c);return startExpansion(c.family,Math.max(0,(c.nominal_difficulty||1)-1),null,null,c);};
+const priorFinish=finish;finish=function(stars){if(S.lvl?.w>=12&&checkpointCap?.id===S.lvl.id)stars=Math.min(stars,checkpointCap.stars);return priorFinish(stars);};
+const priorExpansionGo=go;go=function(screen){expansion=null;return priorExpansionGo(screen);};
+const priorExpansionParents=parents;parents=function(){priorExpansionParents();const p=document.createElement('p');p.className='fine';p.textContent=BipNewContent.credit;$('.dlg.par')?.append(p);};
+function startExpansion(family,tier,lv=null,then=null,candidate=null){
+ finishEpisode();S.runId++;S.running=false;S.lesson=null;S.studio=false;S.D=null;S.m=null;S.lvl=lv;S.def=lv?.def||null;S.at=null;S.screen=lv?'math':'adaptive';closeOv();mission=null;
+ const primary=BipTasks.catalog.find(c=>c.family===family)?.primary_skill||family;const record=AD.skills[primary];const evidenceBand=record?.observations?Math.max(0,(record.band||1)-1):(Number(tier)||0);
+ expansion={family,tier:Math.min(2,evidenceBand),lv,then,candidate,total:lv&&!then?3:1,round:0,first:0,wrong:0,hint:0,status:'',completed:false,seed:(Date.now()^Math.imul(LAB.generated_count+1,2654435761))>>>0};newExpansionRound();
+}
+function newExpansionRound(){
+ const x=expansion;let t;
+ if(!x.lv){const generated=BipLab.nextChallenge(LAB,x.family,x.tier+1,{generate:BipTasks.generateTask,validate:BipTasks.validateTask,seed:x.seed});if(!generated.task){expansion=null;return showActivity('create');}LAB=generated.state;BipLab.saveLabState(profileStorage,LAB);t=generated.task;}
+ else t=BipNewTasks.generate(x.family,x.seed+x.round,x.tier,x.lv.def.modeKey);
+ x.task=t;x.value='';x.list=[];x.counts=t.family==='fractions'?Array(t.groups).fill(0):[0,0,0];x.removed=[];x.rows=1;x.cols=1;x.hour=0;x.minute=0;x.showRuler=false;x.estimate=null;x.wrong=0;x.hint=0;x.status='';x.done=false;
+ beginTrial({...t,item_id:x.lv?x.lv.id+(x.then?':checkpoint':':'+x.round):t.item_id,replay_key:x.lv?.id||'a:'+t.family,challenge_origin:x.candidate?.mode==='retrieval'?'scheduled_retrieval':x.lv&&ST.stars[x.lv.id]?'story_replay':'new_challenge',assumed_grade:x.lv?.def.grade,topics:x.lv?.def.topics,parameters:{seed:t.seed,tier:t.tier,modeKey:t.modeKey}});renderExpansion();speak(t.prompt);
+}
+const exButton=(act,v,label,on=false)=>`<button class="btn ${on?'yl':''}" ${act==='remove'?`aria-label="Μπαταρία ${Number(v)+1}"`:act==='toggle'?`aria-label="Κομμάτι ${Number(v)+1}"`:''} data-act="ex-${act}" data-v="${esc(String(v))}">${label}</button>`;
+const exCounter=(i,n,max=30,label='')=>`<div class="ex-counter">${label?`<b>${label}</b>`:''}${exButton('count',i+':-1','−')}<output aria-live="polite">${n}</output>${exButton('count',i+':1','+')}</div>`;
+function numberPad(){const x=expansion;return `<div class="ex-number"><output aria-live="polite" aria-label="Η απάντησή μου">${x.value||'?'}</output><div class="ex-pad">${[1,2,3,4,5,6,7,8,9,0].map(n=>exButton('digit',n,n)).join('')}${exButton('erase',0,I.undo)}</div></div>`;}
+function expansionBody(t){const x=expansion,m=t.modeKey,V=BipNewVisuals;
+ if(t.family==='subtraction')return `<div class="ex-equation">${m==='take'?`${t.a} − ${t.b} = ?`:m==='missing'?`${t.a} + ? = ${t.b}`:m==='start'?`${t.a} = ? − ${t.b}`:m==='balance'?`${t.a} + ${t.b} = ${t.c} + ?`:`${t.a+t.b} − ${t.b} = ?`}</div>${m==='take'?`<div class="ex-batteries">${Array.from({length:t.a},(_,i)=>exButton('remove',i,V.battery(1,x.removed.includes(i)),x.removed.includes(i))).join('')}</div><p>Βγάλε ${t.b} μπαταρίες. Μετά γράψε πόσες έμειναν.</p>`:''}${numberPad()}`;
+ if(t.family==='time'){
+  if(m==='events')return `<div class="ex-order">${t.shuffled.map(i=>exButton('order',i,`<span class="ex-event">${['☀','⚙','☾'][i]}</span><small>${t.events[i]}</small>`,x.list.includes(i))).join('')}</div><p>${x.list.map(i=>t.events[i]).join(' → ')||'Πάτα πρώτα ό,τι γίνεται πρώτο.'}</p>`;
+  if(m==='days'){const days=['Δευτέρα','Τρίτη','Τετάρτη','Πέμπτη','Παρασκευή','Σάββατο','Κυριακή'];return `<div class="ex-order">${[...Array(7)].map((_,i)=>(i+t.day)%7).map(i=>exButton('order',i,days[i],x.list.includes(i))).join('')}</div><p>${x.list.map(i=>days[i]).join(' → ')}</p>`;}
+  const setting=m==='set'||m==='set-half';return V.clock(setting?x.hour/2:t.hour,setting?x.minute:t.minute,setting?x.hour:null)+(setting?`<div class="ex-controls">${exButton('hand','hour','Μικρός δείκτης ↻')}${exButton('hand','minute','Μεγάλος δείκτης ↻')}</div><p>Κόκκινος: ώρα · Μπλε: λεπτά</p>`:`<div class="ex-choices">${[t.hour,(t.hour%12)+1,((t.hour+10)%12)+1].flatMap(h=>[0,30].map(min=>exButton('value',`${h}:${min?'30':'00'}`,`${h}${min?' και μισή':' ακριβώς'}`,x.value===`${h}:${min?'30':'00'}`))).join('')}</div>`);
+ }
+ if(t.family==='length'){
+  if(m==='compare')return `<div class="ex-lengths">${t.lengths.map((n,i)=>exButton('order',i,`<span style="width:${n*12}px">${V.block(V.colors[i])}</span>`,x.list.includes(i))).join('')}</div><p>${x.list.map(i=>['Α','Β','Γ'][i]).join(' → ')}</p>`;
+  if(m==='unit')return `<div class="ex-object">${t.object==='βίδα'?'⚙':'⌂'}</div><div class="ex-choices">${['εκ.','μ.'].map(u=>exButton('value',u,u==='εκ.'?'Εκατοστά':'Μέτρα',x.value===u)).join('')}</div>`;
+  return V.ruler(t.length,m!=='estimate'||x.showRuler,m==='bricks')+(m==='bricks'?`<div class="ex-build-row">${Array.from({length:x.rows},()=>V.block('#ff8a1f')).join('')}</div><div class="ex-controls">${exButton('size','rows:-1','− τουβλάκι')}${exButton('size','rows:1','+ τουβλάκι')}</div>`:m==='estimate'&&!x.showRuler?numberPad()+exButton('measure',0,'Άνοιξε τον χάρακα'):numberPad());
+ }
+ if(t.family==='money'){
+  const u=t.unit==='euro'?'€':'λ.';
+  const coin=v=>`<span class="ex-coin">${v}<small>${u}</small></span>`;
+  if(m==='coin')return coin(t.coin)+numberPad();
+  if(m==='pay')return `<div class="ex-price">${V.block('#8b3fe0')}<b>${t.price} ${u}</b></div><div class="ex-wallet">${(t.unit==='euro'?[1,2]:[1,2,5,10,20,50]).map(v=>exButton('coin',v,coin(v))).join('')}</div><div class="ex-coins">${x.list.map((v,i)=>exButton('uncoin',i,coin(v))).join('')}</div><p>Πάτα ένα κέρμα για να το βγάλεις.</p>`;
+  return `<div class="ex-equation">${m==='total'?`${t.price} ${u} + ${t.price2} ${u}`:m==='change'?`${t.paid} ${u} − ${t.price} ${u}`:`${t.have} ${u} → ${t.price} ${u}`}</div>${numberPad()}`;
+ }
+ if(t.family==='fractions'){
+  if(m==='share')return `<div class="ex-batteries">${Array.from({length:Math.max(0,t.total-x.counts.reduce((a,b)=>a+b,0))},()=>V.battery()).join('')}</div><div class="ex-sharing">${x.counts.map((n,i)=>exCounter(i,n,t.total,`Ρομπότ ${i+1}`)).join('')}</div>`;
+  if(m==='half'||m==='quarter')return `<div class="ex-partitions">${t.shapes.map(s=>exButton('value',s,V.partition(s,m==='quarter'),x.value===s)).join('')}</div>`;
+  if(m==='shade')return `<div class="ex-shade">${[0,1,2,3].map(i=>exButton('toggle',i,'',x.list.includes(i))).join('')}</div>`;
+  return V.partition('equal',true)+numberPad();
+ }
+ if(t.family==='multiplication'){
+  if(m==='even')return `<div class="ex-pairs">${Array.from({length:t.n},()=>V.battery()).join('')}</div><div class="ex-choices">${['ζυγός','μονός'].map(v=>exButton('value',v,v==='ζυγός'?'Ζυγός · ζευγάρια':'Μονός · ένα μόνο',x.value===v)).join('')}</div>`;
+  const rows=m==='build'?x.rows:t.rows,cols=m==='build'?x.cols:t.cols;
+  return `<div class="ex-array" style="--cols:${cols}">${Array.from({length:rows*cols},()=>V.block('#17b26a')).join('')}</div><p class="ex-equation">${m==='repeat'?`ΞΑΝΑ ${t.rows}: ${t.cols} + `+Array(t.rows-1).fill(t.cols).join(' + ')+` = ${t.rows} × ${t.cols}`:m==='build'?`${rows} σειρές · ${cols} σε κάθε σειρά`:Array(t.rows).fill(t.cols).join(' + ')}</p>`+(m==='build'?`<div class="ex-controls">${exButton('size','rows:-1','− σειρά')}${exButton('size','rows:1','+ σειρά')}${exButton('size','cols:-1','− κομμάτι')}${exButton('size','cols:1','+ κομμάτι')}</div>`:numberPad());
+ }
+ if(t.family==='data'){
+  const source=['sort','tally'].includes(m)?`<div class="ex-robots">${t.robots.map(c=>`<span style="color:${V.colors[c]}">${V.block(V.colors[c])}</span>`).join('')}</div>`:V.chart(t.counts,t.labels,m==='read'?'picture':'bar');
+  if(['sort','tally','build'].includes(m))return source+(m==='build'?V.chart(x.counts,t.labels):'')+`<div class="ex-sharing">${x.counts.map((n,i)=>exCounter(i,n,10,t.labels[i])+(m==='tally'?`<div class="ex-tally">${'卌'.repeat(Math.floor(n/5))}${'│'.repeat(n%5)}</div>`:'')).join('')}</div>`;
+  if(m==='order')return source+`<div class="ex-choices">${t.labels.map((s,i)=>exButton('order',i,s,x.list.includes(i))).join('')}</div><p>${x.list.map(i=>t.labels[i]).join(' → ')}</p>`;
+  return source+numberPad();
+ }
+ return '';
+}
+function renderExpansion(){if(!expansion)return;const x=expansion,t=x.task;
+ const sc=$('.screen.expansion')?.scrollTop||0,focus=document.activeElement?.closest('[data-act]')?.dataset;const restoreFocus=focus?{act:focus.act,v:focus.v}:null;
+ app.innerHTML=`<div class="screen math expansion"><header class="bar"><button class="btn sq" data-act="map" aria-label="Τα επεισόδια">${I.back}</button><div class="ttl">${esc(t.title)}</div><span class="ex-round">${x.round+1}/${x.total}</span><button class="btn sq yl" data-act="ex-hint" aria-label="Βοήθεια">${I.bulb}</button><button class="btn sq" data-act="resay" aria-label="Πες το ξανά">${I.speaker}</button></header>${talkHTML(t.prompt)}<div class="ex-workbench"><div class="ex-guide">${robotSVG(ST.robot)}</div><div class="ex-game">${expansionBody(t)}</div><p class="ex-status" role="status">${esc(x.status)}</p><div class="ex-controls">${x.done?`<button class="btn go" data-act="ex-next">${I.play}Συνέχεια</button>`:`<button class="btn sq" data-act="ex-reset" aria-label="Από την αρχή">${I.undo}</button><button class="btn go" data-act="ex-run">${I.play}ΠΑΜΕ!</button>`}</div></div></div>`;
+ $('.screen.expansion').scrollTop=sc;
+ if(restoreFocus){const button=[...$$('[data-act]',app)].find(b=>b.dataset.act===restoreFocus.act&&b.dataset.v===restoreFocus.v);button?.focus({preventScroll:true});}
+ if(x.done||x.running)$$('.ex-game button').forEach(b=>b.disabled=true);
+}
+function expansionAnswer(){const x=expansion,t=x.task,m=t.modeKey;
+ if(t.family==='subtraction')return Number(x.value);
+ if(t.family==='time')return ['events','days'].includes(m)?x.list:m==='set'||m==='set-half'?{hour:x.hour,minute:x.minute}:x.value;
+ if(t.family==='length')return m==='compare'?x.list:m==='unit'?x.value:m==='bricks'?x.rows:m==='estimate'?{estimate:x.estimate,measurement:Number(x.value)}:Number(x.value);
+ if(t.family==='money')return m==='pay'?x.list:Number(x.value);
+ if(t.family==='fractions')return m==='share'?x.counts:m==='shade'?x.list:m==='whole'?Number(x.value):x.value;
+ if(t.family==='multiplication')return m==='build'?[x.rows,x.cols]:m==='even'?x.value:Number(x.value);
+ if(t.family==='data')return ['sort','tally','build'].includes(m)?x.counts:m==='order'?x.list:Number(x.value);
+ return null;
+}
+Object.assign(ACT,{
+ 'ex-digit':d=>{if(!expansion||expansion.done)return;const x=expansion;if(x.value.length<3)x.value+=d.v;rawInteraction('edit');renderExpansion();},
+ 'ex-erase':()=>{if(!expansion||expansion.done)return;expansion.value=String(expansion.value).slice(0,-1);rawInteraction('edit');renderExpansion();},
+ 'ex-value':d=>{if(!expansion||expansion.done)return;expansion.value=d.v;rawInteraction('select');renderExpansion();},
+ 'ex-order':d=>{const x=expansion;if(!x||x.done)return;const v=+d.v;if(x.list.includes(v))x.list=x.list.slice(0,x.list.indexOf(v));else x.list.push(v);rawInteraction('edit');renderExpansion();},
+ 'ex-toggle':d=>{const x=expansion;if(!x||x.done)return;const v=+d.v;x.list=x.list.includes(v)?x.list.filter(n=>n!==v):[...x.list,v];rawInteraction('edit');renderExpansion();},
+ 'ex-remove':d=>{const x=expansion;if(!x||x.done)return;const v=+d.v;x.removed=x.removed.includes(v)?x.removed.filter(n=>n!==v):[...x.removed,v];rawInteraction('edit');renderExpansion();},
+ 'ex-count':d=>{const x=expansion;if(!x||x.done)return;const [i,v]=d.v.split(':').map(Number),n=x.counts[i]+v;if(n<0||n>30)return;if(x.family==='fractions'&&x.counts.reduce((a,b)=>a+b,0)+v>x.task.total)return;x.counts[i]=n;rawInteraction('edit');renderExpansion();},
+ 'ex-size':d=>{const x=expansion;if(!x||x.done)return;const [k,v]=d.v.split(':');x[k]=Math.min(x.family==='length'?20:5,Math.max(1,x[k]+Number(v)));rawInteraction('edit');renderExpansion();},
+ 'ex-hand':d=>{const x=expansion;if(!x||x.done)return;if(d.v==='hour')x.hour=(x.hour+1)%24;else x.minute=x.minute===0?30:0;rawInteraction('edit');renderExpansion();},
+ 'ex-coin':d=>{const x=expansion;if(!x||x.done||x.list.length>=50)return;x.list.push(+d.v);rawInteraction('edit');renderExpansion();},
+ 'ex-uncoin':d=>{if(!expansion||expansion.done)return;expansion.list.splice(+d.v,1);rawInteraction('edit');renderExpansion();},
+ 'ex-measure':()=>{const x=expansion;if(!x||x.done||!x.value)return;x.estimate=Number(x.value);x.value='';x.showRuler=true;rawInteraction('edit');renderExpansion();},
+ 'ex-reset':()=>{const x=expansion;if(!x||x.done)return;rawInteraction('reset');const h=x.hint,w=x.wrong;newExpansionInputs();x.hint=h;x.wrong=w;renderExpansion();},
+ 'ex-hint':()=>{const x=expansion;if(!x||x.done)return;x.hint=Math.min(5,x.hint+1);rawInteraction('hint',{level:x.hint});x.status=x.task.hints[x.hint-1];renderExpansion();speak(x.status,true);},
+ 'ex-run':()=>{const x=expansion;if(!x||x.done)return;const t=x.task,a=expansionAnswer(),hasNumber=x.value!==''||['fractions','multiplication','data'].includes(t.family)||['events','days','set','set-half'].includes(t.modeKey)||['bricks','compare','pay'].includes(t.modeKey);
+ const ok=hasNumber&&BipTasks.checkTask(t,a)&&(!(t.family==='subtraction'&&t.modeKey==='take')||x.removed.length===t.b);
+ applyExpansionResult(x,t,ok);},
+ 'ex-next':()=>{const x=expansion;if(!x?.done)return;x.round++;if(x.round<x.total)return newExpansionRound();const stars=x.first===x.total?3:x.first>0&&x.first>=x.total-2?2:1;
+  if(x.then){checkpointCap={id:x.lv.id,stars};expansion=null;return x.then();}
+  x.completed=true;if(x.lv){const old=ST.skill[x.family]||0;ST.skill[x.family]=x.first===x.total?Math.min(2,Math.max(old,x.tier+1)):x.first===0?Math.max(0,Math.min(old,x.tier-1)):old;save();return finish(stars);}
+  ST.stars['a:'+x.family]=Math.max(ST.stars['a:'+x.family]||0,stars);save();claimRewards();overlay(`<div class="burst">${burstSVG()}<span>ΜΠΡΑΒΟ!</span></div><div class="smallbot">${robotSVG(ST.robot)}</div><p>${stars} ⭐</p><div class="row"><button class="btn go" data-act="adaptive-next">Άλλη αποστολή</button><button class="btn" data-act="ex-return">${missionReturn?'Συνέχεια ιστορίας':'Τα επεισόδια'}</button></div>`);sfx.win();}
+});
+function newExpansionInputs(){const x=expansion;x.value='';x.list=[];x.counts=x.family==='fractions'?Array(x.task.groups).fill(0):[0,0,0];x.removed=[];x.rows=1;x.cols=1;x.hour=0;x.minute=0;x.showRuler=false;x.estimate=null;x.status='';}
+ACT['ex-return']=()=>{const f=missionReturn;missionReturn=null;expansion=null;closeOv();f?f():go('map');};
+document.addEventListener('keydown',e=>{if(!expansion||!$('.screen.expansion')||$('.ov'))return;if(/^\d$/.test(e.key)){e.preventDefault();ACT['ex-digit']({v:e.key});}else if(e.key==='Backspace'){e.preventDefault();ACT['ex-erase']();}else if(e.key==='Enter'&&e.target===document.body){e.preventDefault();ACT[expansion.done?'ex-next':'ex-run']();}});
+const priorExpansionState=window.__bipQA.state;window.__bipQA.state=()=>({...priorExpansionState(),expansion:expansion?JSON.parse(JSON.stringify(expansion,(k,v)=>k==='then'?undefined:v)):null});
+window.__bipQA.expansion={worlds:BipNewContent.worlds,tasks:BipNewTasks,levels:LEVELS.filter(l=>l.w>=12).map(l=>({id:l.id,def:l.def}))};
+
+const expansionPriorNext=ACT.nextlevel;ACT.nextlevel=()=>{if(S.lvl?.id==='11-8'&&!ST.seen.end4){ST.seen.end4=1;save();return showComic(END4_COMIC,'Το κύπελλο της αρένας',()=>go('map'));}if(S.lvl?.w>=12&&S.lvl.id===LEVELS.at(-1).id)return go('map');return expansionPriorNext();};
+
+function applyExpansionResult(x,t,ok){emitTrial(ok,ok?[]:[t.family+'_construction'],t.cognitive_demand==='debug'&&ok?{debug_repaired:true}:{});if(ok){x.done=true;if(!x.wrong&&!x.hint)x.first++;x.status='Μπιπ μπιπ! Ταίριαξε!';sfx.pick();}else{x.wrong++;x.status='Κάτι δεν ταιριάζει ακόμα. Δοκίμασε άλλη ιδέα!';sfx.no();}renderExpansion();speak(x.status);}
+
+// The legacy renderer calls these parts too: builder, duels, comic panels and endings.
+Object.assign(RC,{amber:'#d79912',silver:'#a8b4cc',lime:'#9ad52a',midnight:'#343e78'});
+Object.assign(SEC,{amber:'#1f5fe0',silver:'#8b3fe0',lime:'#343e78',midnight:'#ffd21f'});
+RCOL.push('amber','silver','lime','midnight');GLOW.push('#ff944d','#ab9cff','#a9ff35');FXC.push('#ab9cff','#a9ff35','#ffffff');
+CATS.push(['emblem','Σήμα στο στήθος'],['back','Στην πλάτη'],['pattern','Σχέδιο βαφής'],['voice','Το μπιπ μου']);
+Object.assign(RNAME,{veh:['ΝΕΟ ΟΧΗΜΑ!','νέο όχημα'],emblem:['ΝΕΟ ΣΗΜΑ!','νέο σήμα'],back:['ΝΕΟ ΕΡΓΑΛΕΙΟ!','νέο εργαλείο πλάτης'],pattern:['ΝΕΑ ΒΑΦΗ!','νέο σχέδιο βαφής'],voice:['ΝΕΟ ΜΠΙΠ!','νέο μπιπ']});
+const oldRobotNeed=needStars;needStars=function(k,i){return BipNewRobots.requiredStars(k,i,oldRobotNeed);};
+const originalOptions=optHTML;optHTML=function(k,i){
+ if(k==='voice')return `<span class="ex-voice">${['Μπιπ!','Μπουπ!','Πιπ πιπ!','Μπλιπ!'][i]}</span>`;
+ if(['emblem','back','pattern'].includes(k))return robotSVG({...ST.robot,[k]:i});return originalOptions(k,i);
+};
+function bipVoice(){const n=ST.robot.voice||0,f=[880,440,1174,659][n];tone(f,.1,n===1?'sine':n===3?'square':'triangle',.06);tone(f*1.5,.13,'triangle',.05,.1);}
+const originalPickSound=sfx.pick;sfx.pick=()=>ST.robot.voice?bipVoice():originalPickSound();
+const originalRobotPart=ACT.part;ACT.part=(d,b)=>{originalRobotPart(d,b);if(d.k==='voice'&&owned('voice',+d.i))bipVoice();};
+teaserHTML=function(){if(ST.all)return '';const r=REWARDS.find(r=>!owned(r.k,r.i));if(!r)return '<p class="tip">Όλα είναι δικά σου!</p>';const more=Math.max(0,r.n-totalStars()),w=BipNewRobots.requiredWorld(r.k,r.i);return `<div class="teaser"><span class="sil">${optHTML(r.k,r.i)}</span><span>${more?`Άλλα <b>${more}</b> ${I.star}`:'Έτοιμα τα αστέρια!'}${w&&!BipNewRobots.worldComplete(ST,w)?` · Τέλος επεισοδίου ${w}`:''} για ${RNAME[r.k][1]}!</span></div>`;};
+const originalRobotShop=renderShop;renderShop=function(){originalRobotShop();const cur=CHASSIS[ST.robot.ch||0];if(cur.personality){const p=document.createElement('p');p.className='tip';p.textContent=cur.personality;$('.plate')?.after(p);}
+ for(const b of $$('.card.lock,.opt.lock')){const k=b.dataset.k||'ch',i=+(b.dataset.i||0),w=BipNewRobots.requiredWorld(k,i);if(w&&!BipNewRobots.worldComplete(ST,w)){const n=document.createElement('small');n.className='world-lock';n.textContent='Επεισόδιο '+w;b.append(n);}}
+ const section=document.createElement('section');section.className='ex-garage';const slots=ST.garage?.schema_version===1?ST.garage.slots:[];section.innerHTML=`<h2>Το γκαράζ μου</h2><p>Κράτησε τα σχέδιά σου. Διάλεξε όποιο θέλεις!</p><div class="garage-slots">${Array.from({length:6},(_,i)=>{const c=slots?.[i];return `<div class="garage-slot"><b>Θέση ${i+1}</b>${c?robotSVG(c):'<span class="garage-empty">+</span>'}<button class="btn yl" data-act="garage-save" data-i="${i}">${c?'Άλλαξε το σχέδιο':'Κράτησε εδώ'}</button>${c?`<button class="btn bl" data-act="garage-load" data-i="${i}">Διάλεξέ το</button>`:''}</div>`;}).join('')}</div>`;$('.screen.shop').append(section);
+};
+ACT['garage-save']=d=>{BipNewRobots.saveDesign(ST,+d.i);save();logE('garage-save',null,{slot:+d.i});sfx.pick();renderShop();};
+ACT['garage-load']=d=>{if(BipNewRobots.loadDesign(ST,+d.i,(k,i)=>owned(k,i))){save();logE('garage-load',null,{slot:+d.i});sfx.morph();renderShop();}};
+const originalRobotRestore=ACT['ad-restore'];ACT['ad-restore']=()=>{try{if(pendingRestore){const g=JSON.parse(pendingRestore).progress?.garage;if(g!==undefined&&(g?.schema_version!==1||!Array.isArray(g.slots)||g.slots.length!==6||g.slots.some(c=>c!==null&&(!c||typeof c!=='object'||Array.isArray(c)||!Number.isInteger(c.ch)||!Object.entries(c).every(([k,i])=>!Object.hasOwn(PARTS,k)||(Number.isInteger(i)&&i>=0&&i<PARTS[k]))))))throw Error('Μη έγκυρο γκαράζ.');}return originalRobotRestore();}catch(e){if($('#expbox'))$('#expbox').textContent='Δεν ολοκληρώθηκε η επαναφορά: '+e.message;}};
+window.__bipQA.robots={stats:BipNewRobots.robotStats,chassis:BipNewRobots.chassis,unlocks:BipNewRobots.unlockTable};
+
+TINT.push('orange','blue','purple','green');
+Object.assign(GAME,Object.fromEntries(BipRobotics.roboticsCatalog.map(c=>[c.family,c.title])));
+Object.assign(TI,{gears:I.wrench,booklet:I.book,sensors:I.eye||I.star,'robot-cards':I.star});
+const statNames={speed:'Ταχύτητα',strength:'Δύναμη',energy:'Ενέργεια'};
+const commandNames={F:'Μπροστά',R:'Δεξιά ↻',L:'Αριστερά ↺',S:'Σταμάτα'};
+function actualCards(t){
+ const player=[{id:'mine',name:'Το ρομπότ μου',cfg:{...ST.robot}}];
+ for(const c of CHASSIS)if(owned('ch',c.id))player.push({id:'ch-'+c.id,name:c.name,cfg:{...botLook(c.id)}});
+ for(const [i,c] of (ST.garage?.slots||[]).entries())if(c)player.push({id:'garage-'+i,name:'Σχέδιο '+(i+1),cfg:{...c}});
+ const foes=Object.entries(FOES).map(([id,f])=>({id:'foe-'+id,name:f.name,cfg:{...f.cfg},pal:f.pal}));
+ const index=(Number(t.seed)>>>0)%foes.length,foe=foes[index];
+ // Order a genuine hand; duels compare current design against a known character.
+ return BipRobotics.withCards(t,t.modeKey==='order'?[player[0],player[1]||foe,player[2]||foes[(index+1)%foes.length]].map((c,i)=>({...c,id:'card-'+i})):[player[0],foe]);
+}
+function robotUIState(x){
+ const tag=x.task.item_id+':'+x.round;if(x.robotTag===tag)return;
+ x.robotTag=tag;x.gears=[];x.gearSize=1;x.outputRadius=x.task.output?.r||1;x.motion=null;x.playback=null;x.frame=0;x.running=false;
+ x.bookSteps=x.family==='booklet'&&x.task.modeKey==='debug'?x.task.broken.map(b=>({...b})):[];x.blockChoice=0;x.position={x:0,y:0,z:0};x.cells=[];x.rules=Object.fromEntries((x.task.conditions||[]).map(k=>[k,'F']));x.loop=false;x.until='blue';if(x.task.modeKey==='debug'&&x.family==='sensors'){x.rules={'red|white':'L','red|black':'R'};x.loop=true;x.until='green';}x.chosenStat=x.task.stat||'strength';x.winner='';
+ if(x.family==='robot-cards'){x.task=actualCards(x.task);if(TR)TR.meta.parameters={...TR.meta.parameters,cards:x.task.cards,stat:x.task.stat,statsPair:x.task.statsPair};}
+}
+function gearPicture(r,speed=0,animate=false){return `<span class="ex-gear ${animate&&speed?'turning':''}" style="--speed:${Math.max(.2,1/Math.abs(speed||1))}s;--direction:${speed<0?'reverse':'normal'};transform:scale(${r===2?4.6:2.3})">${r===2?`<svg class="gear" viewBox="-52 -52 104 104" aria-hidden="true"><path d="${gearPath(0,0,46,40,16)}"/><circle r="13"/></svg>`:gearSVG()}</span>`;}
+function gearsBody(x,t){const moving=x.motion?.motion||[],nodes=[{...t.driver,kind:'driver'},...x.gears,{...t.output,r:x.outputRadius,kind:'output'}];
+ return `<p class="ex-equation">Στόχος: ${t.direction===1?'↻':'↺'} · ${t.ratio===2?'δύο στροφές':'μία στροφή'}</p><div class="ex-controls">${exButton('gear-size',1,'Μικρό γρανάζι',x.gearSize===1)}${exButton('gear-size',2,'Μεγάλο γρανάζι',x.gearSize===2)}${t.modeKey==='ratio'?exButton('output-size',0,'Άλλαξε το τελευταίο') :''}</div><div class="ex-grid-scroll"><div class="ex-gear-grid" role="grid" aria-label="Θέσεις γραναζιών" style="--gridw:${t.width};--gridh:${t.height};--gear-pad:${t.driver.r===2?88:44}px">${Array.from({length:t.width*t.height},(_,i)=>{const pos={x:i%t.width,y:Math.floor(i/t.width)},n=nodes.find(n=>n.x===pos.x&&n.y===pos.y),j=nodes.indexOf(n),blocked=(t.blocked||[]).includes(pos.x+','+pos.y);return `<button class="ex-gear-cell ${n?.kind||''} ${blocked?'blocked':''}" data-act="ex-gear-cell" data-v="${pos.x},${pos.y}" role="gridcell" aria-label="Θέση ${pos.x}, ${pos.y}${n?', γρανάζι':''}" ${blocked||n?.kind?'disabled':''}>${blocked?WALL:n?gearPicture(n.r,moving[j]?.speed,x.motion!==null)+(n.kind==='output'?`<span class="ex-output-arm ${x.motion&&moving[j]?.speed?'turning':''}" style="--speed:${Math.max(.2,1/Math.abs(moving[j]?.speed||1))}s;--direction:${moving[j]?.speed<0?'reverse':'normal'}"><svg viewBox="0 0 80 80"><path d="M40 40h28v15" fill="none" stroke="#0e0c22" stroke-width="9" stroke-linecap="round"/><path d="M40 40h28v15" fill="none" stroke="#d5dbea" stroke-width="5"/><circle cx="40" cy="40" r="6" fill="#ffd21f" stroke="#0e0c22" stroke-width="3"/></svg></span>`:''):'<i></i>'}</button>`;}).join('')}</div></div><p>Το πρώτο κινεί το τελευταίο. Πάτα θέση για να βάλεις ή να βγάλεις γρανάζι.</p>`;
+}
+function solid(b,ghost=false){const col=BipNewVisuals.colors[b.color%4],cx=105+(b.x-b.y)*30,cy=160+(b.x+b.y)*14-b.z*27;
+ const O='stroke="#0e0c22" stroke-width="2.5" stroke-linejoin="round"';
+ if(b.shape==='cone')return `<g opacity="${ghost ? .35 : 1}"><path d="M${cx-18} ${cy}Q${cx} ${cy+12} ${cx+18} ${cy}L${cx} ${cy-34}Z" fill="${col}" ${O}/><path d="M${cx-11} ${cy-3}l9-24" stroke="white" stroke-width="3" opacity=".4"/></g>`;
+ if(b.shape==='prism')return `<g opacity="${ghost ? .35 : 1}"><path d="M${cx-26} ${cy-17}l26-12 26 12v17l-26 12-26-12z" fill="${col}" ${O}/><path d="M${cx-26} ${cy-17}l26 12 26-12M${cx} ${cy-5}v17" fill="none" ${O}/><path d="M${cx-22} ${cy-14}l17 8v12l-17-8z" fill="white" opacity=".32"/></g>`;
+ if(b.shape==='cylinder')return `<g opacity="${ghost ? .35 : 1}"><path d="M${cx-18} ${cy-25}v25a18 7 0 0 0 36 0v-25" fill="${col}" ${O}/><ellipse cx="${cx}" cy="${cy-25}" rx="18" ry="7" fill="${col}" ${O}/><path d="M${cx-11} ${cy-22}v18" stroke="white" stroke-width="4" opacity=".35"/></g>`;
+ return `<g opacity="${ghost ? .35 : 1}"><path d="M${cx-20} ${cy-25}l20-10 20 10v25l-20 10-20-10z" fill="${col}" ${O}/><path d="M${cx-20} ${cy-25}l20 10 20-10M${cx} ${cy-15}v25" fill="none" ${O}/><path d="M${cx-17} ${cy-23}l14 7v20l-14-7z" fill="white" opacity=".3"/>${b.floating?`<path d="M${cx-18} ${cy+17}h36" stroke="#e8292c" stroke-width="4" stroke-dasharray="4 3"/>`:''}</g>`;
+}
+function assembly(blocks,ghost=false){const xs=blocks.map(b=>105+(b.x-b.y)*30),ys=blocks.map(b=>160+(b.x+b.y)*14-b.z*27);const left=Math.min(70,...xs)-32,top=Math.min(100,...ys)-42,right=Math.max(130,...xs)+32,bottom=Math.max(180,...ys)+12;return `<svg class="ex-assembly" viewBox="${left} ${top} ${right-left} ${bottom-top}" role="img" aria-label="Κατασκευή με στερεά"><path d="M10 182h220" stroke="#7c86a8" stroke-width="3"/>${blocks.slice().sort((a,b)=>a.z-b.z||a.y-b.y||a.x-b.x).map(b=>solid(b,ghost)).join('')}</svg>`;}
+function blockButton(b,i,act='book-choice'){return `<button class="btn ex-block-card ${expansion.blockChoice===i&&act==='book-choice'?'yl':''}" data-act="ex-${act}" data-v="${i}">${assembly([{...b,x:0,y:0,z:0}])}<small>${{cube:'Κύβος',prism:'Τουβλάκι',cylinder:'Κύλινδρος',cone:'Κώνος'}[b.shape]}</small></button>`;}
+function bookletBody(x,t){
+ if(t.modeKey==='faces')return assembly([{x:0,y:0,z:0,shape:t.property==='circle'?'cylinder':'cube',color:1}])+(t.property==='circle'?`<div class="ex-choices">${['κύκλος','τρίγωνο','τετράγωνο'].map(v=>exButton('value',v,v,x.value===v)).join('')}</div>`:numberPad());
+ if(t.modeKey==='views')return assembly(t.target)+`<p>${t.view==='top'?'Από πάνω':t.view==='front'?'Από μπροστά':'Από το πλάι'}</p><div class="ex-view-grid" role="grid">${Array.from({length:18},(_,i)=>{const a=i%3,b=5-Math.floor(i/3),key=a+','+b;return `<button class="btn ${x.cells.includes(key)?'yl':''}" data-act="ex-view-cell" data-v="${key}" aria-label="Κουτάκι ${a}, ${b}">${x.cells.includes(key)?'■':'·'}</button>`;}).join('')}</div>`;
+ const result=x.playback?.built||x.bookSteps;
+ const page=Math.min(x.bookSteps.length,t.target.length-1),reference=t.modeKey==='follow'?t.target.slice(0,page+1):t.target;
+ const program=['order','debug'].includes(t.modeKey);
+ return `<div class="ex-book-spread"><figure><figcaption>${program?'Στόχος':'Βήμα '+(page+1)}</figcaption>${assembly(reference)}</figure><figure><figcaption>Η κατασκευή μου</figcaption>${assembly(result)}</figure></div><div class="ex-program">${x.bookSteps.map((b,i)=>`<button class="btn" data-act="ex-book-remove" data-v="${i}">${i+1}. ${BipNewVisuals.block(BipNewVisuals.colors[b.color%4],b.z)}</button>`).join('')}</div>${program?`<p>Πάτα τις εικόνες με τη σωστή σειρά.</p><div class="ex-block-palette">${t.order.map(i=>blockButton(t.target[i],i,'book-step')).join('')}</div>`:`<div class="ex-block-palette">${t.target.map((b,i)=>blockButton(b,i)).join('')}</div><p>Θέση στο πάτωμα · ύψος: ${x.position.z}</p><div class="ex-position-grid">${Array.from({length:6},(_,i)=>{const a=i%3,b=Math.floor(i/3);return exButton('book-position',a+','+b,'<span class="ex-position-dot"></span>',x.position.x===a&&x.position.y===b);}).join('')}</div><div class="ex-controls">${exButton('book-height',-1,'− ύψος')}${exButton('book-height',1,'+ ύψος')}${exButton('book-add',0,'Βάλε το κομμάτι')}</div>`}`;
+}
+function sensorsBody(x,t){const frame=x.playback?.trail?.[Math.min(x.frame,(x.playback.trail.length||1)-1)]||t.start;
+ return `<div class="ex-track" style="--trackw:${t.width}">${Array.from({length:t.width*t.height},(_,i)=>{const px=i%t.width,py=Math.floor(i/t.width),tile=t.tiles[px+','+py];return `<div class="ex-track-cell ${tile?'road':''}" style="--tile:${tile?{white:'#fff7e2',red:'#e8292c',blue:'#1f5fe0',green:'#17b26a'}[tile.color]:'#7c86a8'}">${t.two&&tile?`<i class="second-sensor ${tile.second}"></i>`:''}${frame.x===px&&frame.y===py?`<span class="sensor-robot" style="transform:rotate(${frame.dir*90}deg)">${robotSVG(ST.robot)}<i>➤</i></span>`:''}${px===t.goal.x&&py===t.goal.y?'⚙':''}</div>`;}).join('')}</div><div class="ex-rules">${t.conditions.map(k=>{const [c,s]=k.split('|');return `<div class="ex-rule"><b>ΑΝ <i class="sensor-color ${c}"></i>${s?` + <i class="sensor-color ${s}"></i>`:''}</b><button class="btn bl" data-act="ex-rule" data-v="${k}">${commandNames[x.rules[k]]}</button></div>`;}).join('')}</div>${t.until?`<div class="ex-controls">${exButton('sensor-loop',0,'ΞΑΝΑ',x.loop)}${exButton('sensor-until',0,'ΩΣΠΟΥ: '+({green:'πράσινο',blue:'μπλε',red:'κόκκινο'}[x.until]),x.until==='green')}</div>`:''}<p>Στρίβω και προχωρώ ένα πλακάκι. Αλλιώς πάω μπροστά.</p>`;
+}
+function cardsBody(x,t){
+ const m=t.modeKey,stat=m==='duel'?x.chosenStat:t.stat;
+ return `${m==='duel'?`<div class="ex-controls">${['speed','strength','energy'].map(k=>exButton('card-stat',k,statNames[k],stat===k)).join('')}</div>`:`<p><b>${statNames[stat]}</b></p>`}<div class="ex-robot-cards">${t.cards.map((c,i)=>{const score=BipNewRobots.robotStats(c.cfg);return `<div class="ex-robot-card ${x.winner===c.id||x.list.includes(c.id)?'chosen':''}"><b>${esc(c.name)}</b>${cardArtwork(c)}${Object.entries(score).map(([k,n])=>`<div class="ex-stat ${(m==='sum'?t.statsPair.includes(k):k===stat)?'lit':''}"><span>${statNames[k]}</span><b>${n}</b></div>`).join('')}${['duel','compare','order'].includes(m)?`<button class="btn yl" data-act="${m==='order'?'ex-card-order':'ex-card-win'}" data-v="${c.id}">${m==='order'?'Βάλε στη σειρά':'Αυτή κερδίζει'}</button>`:''}</div>`;}).join('')}</div>${['duel','compare'].includes(m)?exButton('card-win','tie','Ίδιος αριθμός',x.winner==='tie'):m==='order'?`<p>${x.list.map(id=>t.cards.find(c=>c.id===id)?.name).join(' → ')}</p>`:`<p class="ex-equation">${m==='sum'?t.statsPair.map(k=>statNames[k]).join(' + '):statNames[t.stat]+': μεγαλύτερος − μικρότερος'}</p>`+numberPad()}`;
+}
+const mathsExpansionBody=expansionBody;expansionBody=function(t){if(!BipRobotics.roboticsFamilies.includes(t.family))return mathsExpansionBody(t);const x=expansion;robotUIState(x);t=x.task;return t.family==='gears'?gearsBody(x,t):t.family==='booklet'?bookletBody(x,t):t.family==='sensors'?sensorsBody(x,t):cardsBody(x,t);};
+const mathsExpansionAnswer=expansionAnswer;expansionAnswer=function(){const x=expansion,t=x.task;if(!BipRobotics.roboticsFamilies.includes(t.family))return mathsExpansionAnswer();
+ if(t.family==='gears')return {gears:x.gears,outputRadius:x.outputRadius};
+ if(t.family==='booklet')return t.modeKey==='views'?x.cells:t.modeKey==='faces'?t.property==='circle'?x.value:Number(x.value):x.bookSteps;
+ if(t.family==='sensors')return {rules:x.rules,loop:x.loop,until:x.until};
+ return t.modeKey==='duel'?{stat:x.chosenStat,winner:x.winner}:t.modeKey==='compare'?x.winner:t.modeKey==='order'?x.list:Number(x.value);
+};
+const mathsExpansionRun=ACT['ex-run'];ACT['ex-run']=async()=>{const x=expansion;if(!x||x.done||x.running)return;if(!BipRobotics.roboticsFamilies.includes(x.family))return mathsExpansionRun();
+ const t=x.task,answer=expansionAnswer();let result=null;
+ if(t.family==='gears')result=BipRobotics.gearMotion(t,answer);
+ else if(t.family==='sensors')result=BipRobotics.runSensors(t,answer);
+ else if(t.family==='booklet'&&!['views','faces'].includes(t.modeKey))result=BipRobotics.runBooklet(t,answer);
+ const hasInput=!(t.family==='robot-cards'&&['sum','difference'].includes(t.modeKey)&&x.value==='')&&!(t.family==='booklet'&&t.modeKey==='faces'&&x.value==='');
+ const ok=hasInput&&BipRobotics.checkRobotics(t,answer);x.running=true;x.playback=result;x.motion=t.family==='gears'?result:null;x.frame=0;renderExpansion();
+ if(t.family==='sensors')for(let i=1;i<(result.trail?.length||0);i++){await sleep(160);if(expansion!==x)return;x.frame=i;renderExpansion();}
+ else if(t.family==='booklet'&&result?.built){const built=result.built;for(let i=1;i<=built.length;i++){x.playback={...result,built:built.slice(0,i)};renderExpansion();await sleep(150);if(expansion!==x)return;}}
+ else if(t.family==='gears'){await sleep(550);if(expansion!==x)return;}
+ x.running=false;applyExpansionResult(x,t,ok);
+};
+const mathsExpansionReset=ACT['ex-reset'];ACT['ex-reset']=()=>{if(expansion?.running)return;mathsExpansionReset();if(expansion&&BipRobotics.roboticsFamilies.includes(expansion.family)){expansion.robotTag=null;robotUIState(expansion);renderExpansion();}};
+const mathsExpansionHint=ACT['ex-hint'];ACT['ex-hint']=()=>{if(expansion?.running)return;mathsExpansionHint();const x=expansion;if(!x||!BipRobotics.roboticsFamilies.includes(x.family)||x.hint<5)return;const a=BipRobotics.solveRobotics(x.task);let illustration='';
+ if(x.family==='gears')illustration=`<p>Ένα σχέδιο. Μπορείς να βρεις και άλλο!</p>${gearExample(x.task,a)}<p>Τελευταίο γρανάζι: ${a.outputRadius===1?'μικρό':'μεγάλο'}.</p>`;
+ else if(x.family==='booklet')illustration=Array.isArray(a)&&typeof a[0]==='object'?assembly(a):`<p>${Array.isArray(a)?a.join(' · '):a}</p>`;
+ else if(x.family==='sensors')illustration=`${Object.entries(a.rules).map(([c,op])=>`<p>ΑΝ ${c.split('|').map(v=>({red:'κόκκινο',white:'άσπρο',black:'μαύρο',blue:'μπλε',green:'πράσινο'}[v]||v)).join(' + ')} → ${commandNames[op]}</p>`).join('')}${a.loop?'<p>ΞΑΝΑ ώσπου πράσινο.</p>':''}`;
+ else illustration=`<p>${tCardHint(x.task,a)}</p>`;
+ overlay(`<h2>Ένα σωστό σχέδιο</h2>${illustration}<button class="btn yl" data-act="closeov">Θα το δοκιμάσω!</button>`);
+};
+function robotEdit(fn){return d=>{const x=expansion;if(!x||x.done||x.running)return;fn(x,x.task,d);x.playback=null;x.motion=null;rawInteraction('edit');renderExpansion();};}
+Object.assign(ACT,{
+ 'ex-gear-size':robotEdit((x,t,d)=>x.gearSize=+d.v),
+ 'ex-output-size':robotEdit(x=>x.outputRadius=x.outputRadius===1?2:1),
+ 'ex-gear-cell':robotEdit((x,t,d)=>{const [a,b]=d.v.split(',').map(Number);if(keyXY(t.driver)===d.v||keyXY(t.output)===d.v)return;const i=x.gears.findIndex(g=>g.x===a&&g.y===b);if(i>=0)x.gears.splice(i,1);else if(x.gears.length<12)x.gears.push({x:a,y:b,r:x.gearSize});}),
+ 'ex-view-cell':robotEdit((x,t,d)=>x.cells=x.cells.includes(d.v)?x.cells.filter(c=>c!==d.v):[...x.cells,d.v]),
+ 'ex-book-choice':robotEdit((x,t,d)=>x.blockChoice=+d.v),
+ 'ex-book-position':robotEdit((x,t,d)=>{const [a,b]=d.v.split(',').map(Number);x.position={...x.position,x:a,y:b};}),
+ 'ex-book-height':robotEdit((x,t,d)=>x.position.z=Math.max(0,Math.min(5,x.position.z+Number(d.v)))),
+ 'ex-book-add':robotEdit((x,t)=>{if(x.bookSteps.length<8)x.bookSteps.push({...t.target[x.blockChoice],...x.position});}),
+ 'ex-book-step':robotEdit((x,t,d)=>{if(x.bookSteps.length<8)x.bookSteps.push({...t.target[+d.v]});}),
+ 'ex-book-remove':robotEdit((x,t,d)=>x.bookSteps.splice(+d.v,1)),
+ 'ex-rule':robotEdit((x,t,d)=>{const ops=['F','R','L','S'];x.rules[d.v]=ops[(ops.indexOf(x.rules[d.v])+1)%4];}),
+ 'ex-sensor-loop':robotEdit(x=>x.loop=!x.loop),
+ 'ex-sensor-until':robotEdit(x=>x.until={blue:'red',red:'green',green:'blue'}[x.until]),
+ 'ex-card-stat':robotEdit((x,t,d)=>{if(t.modeKey==='duel')x.chosenStat=d.v;}),
+ 'ex-card-win':robotEdit((x,t,d)=>x.winner=d.v),
+ 'ex-card-order':robotEdit((x,t,d)=>{if(x.list.includes(d.v))x.list=x.list.slice(0,x.list.indexOf(d.v));else x.list.push(d.v);})
+});
+function keyXY(g){return g.x+','+g.y;}
+const priorRoboticsArt=art;art=function(kind){if(!/^new:(gears|booklet|sensors|robot-cards):/.test(kind))return priorRoboticsArt(kind);const [,f,p]=kind.split(':');const scene=f==='gears'?`<g transform="translate(126 48) scale(.46)">${gearSVG()}</g><g transform="translate(160 76) scale(.34)">${gearSVG()}</g>`:f==='booklet'?`<svg x="84" y="2" width="110" height="118" viewBox="0 0 240 205">${[{x:0,y:0,z:0,shape:'cube',color:+p%3},{x:0,y:0,z:1,shape:'cone',color:(+p+1)%3}].map(b=>solid(b)).join('')}</svg>`:f==='sensors'?`<path d="M93 90h70V25" fill="none" stroke="#d5dbea" stroke-width="25"/>${['#e8292c','#1f5fe0','#17b26a'].map((c,i)=>`<rect x="${96+i*25}" y="75" width="20" height="22" fill="${c}" stroke="#0e0c22" stroke-width="3"/>`).join('')}`:`<rect x="100" y="18" width="82" height="96" rx="7" fill="#ffd21f" stroke="#0e0c22" stroke-width="3"/><svg x="110" y="21" width="60" height="73" viewBox="0 0 100 108">${robotInner(ST.robot)}</svg><text x="140" y="108" text-anchor="middle" font-size="14" font-weight="900">${[24,38,52][+p]}</text>`;
+ return `<svg class="art" viewBox="0 0 200 124" role="img" aria-label="Η ρομποτική περιπέτεια του ΜΠΙΠ"><path d="M0 121h200" stroke="#0e0c22" stroke-width="3"/><svg x="6" y="18" width="78" height="105" viewBox="0 0 100 108">${robotInner(+p===1?RUSTY.cfg:ST.robot,+p===1?RUSTY.pal:undefined)}</svg>${scene}</svg>`;
+};
+const mathWorldData=window.__bipQA.expansion;window.__bipQA.expansion={...mathWorldData,worlds:[...BipNewContent.worlds,...BipRoboticsContent.roboticsWorlds],levels:LEVELS.filter(l=>l.w>=12).map(l=>({id:l.id,def:l.def}))};window.__bipQA.robotics=BipRobotics;
+function collectibleCards(){const cards=CHASSIS.filter(c=>owned('ch',c.id)).map(c=>({id:'ch-'+c.id,name:c.name,cfg:{...botLook(c.id)}}));for(const [i,c] of (ST.garage?.slots||[]).entries())if(c)cards.push({id:'garage-'+i,name:'Σχέδιο '+(i+1),cfg:{...c}});return cards;}
+const beforeCardShop=renderShop;renderShop=function(){beforeCardShop();const b=document.createElement('button');b.className='btn yl card-library';b.dataset.act='card-library';b.textContent='Οι κάρτες μου';$('.screen.shop').append(b);};
+ACT['card-library']=()=>overlay(`<h2>Οι κάρτες μου</h2><p>Τα εξαρτήματα δίνουν τους αριθμούς. Άλλαξε σχέδιο και δες τι αλλάζει!</p><div class="ex-robot-cards">${collectibleCards().map(c=>`<div class="ex-robot-card"><b>${esc(c.name)}</b>${robotSVG(c.cfg)}${Object.entries(BipNewRobots.robotStats(c.cfg)).map(([k,n])=>`<div class="ex-stat"><span>${statNames[k]}</span><b>${n}</b></div>`).join('')}</div>`).join('')}</div><button class="btn yl" data-act="closeov">Κλείσιμο</button>`,'par');
+
+function tCardHint(t,a){if(typeof a==='number')return String(a);if(Array.isArray(a))return a.map(id=>t.cards.find(c=>c.id===id)?.name).join(' → ');const winner=typeof a==='object'?a.winner:a;return (typeof a==='object'?statNames[a.stat]+': ':'')+(winner==='tie'?'Ίδιος αριθμός!':t.cards.find(c=>c.id===winner)?.name||'Σύγκρινε τις δύο τιμές.');}
+
+function cardArtwork(c){return c.pal?`<svg class="robot" viewBox="0 0 100 108" aria-hidden="true">${robotInner(c.cfg,c.pal)}</svg>`:robotSVG(c.cfg);}
+
+function gearExample(t,a){const nodes=[t.driver,...a.gears,{...t.output,r:a.outputRadius}];return `<svg style="width:100%;max-height:300px" viewBox="0 0 ${t.width*32+96} ${t.height*32+96}" role="img" aria-label="Ένα σωστό σχέδιο μετάδοσης">${nodes.map((g,i)=>`<g transform="translate(${64+g.x*32} ${64+g.y*32}) scale(${g.r*32/46})"><path d="${gearPath(0,0,46,g.r===2?40:33,g.r===2?16:8)}" fill="${i===nodes.length-1?'#17b26a':'#ffd21f'}" stroke="#0e0c22" stroke-width="3"/><circle r="10" fill="#fff7e2" stroke="#0e0c22" stroke-width="3"/></g>`).join('')}</svg>`;}
 
 /* ---------- boot ---------- */
 try{if('speechSynthesis' in window)window.speechSynthesis.getVoices();}catch(e){}
